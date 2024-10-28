@@ -69,8 +69,8 @@
 		?></a>
 		<?php
 		if ($topline_website !== 'none'):
-			?><div class="item customwebsite <?= $topline_website ?>">
-			<a href="<?= _url('index', 'index', 'get', 'f_' . $this->feed->id()) ?>" class="item-element" title="<?= _t('gen.action.filter') ?>: <?= $this->feed->name() ?>">
+			?><div class="item website <?= $topline_website ?>">
+			<a href="<?= _url('index', 'index', 'get', 'f_' . $this->feed->id()) ?>" class="item-element customitem" title="<?= _t('gen.action.filter') ?>: <?= $this->feed->name() ?>">
 			<?php if (FreshRSS_Context::userConf()->show_favicons && 'name' !== $topline_website): ?><img class="favicon" src="<?= $this->feed->favicon() ?>" alt="✇" loading="lazy" /><?php endif; ?><?php if ('icon' !== $topline_website): ?><span class="websiteName"><?= $this->feed->name() ?></span><?php endif; ?>
 		</a><br />
 		</div><?php
