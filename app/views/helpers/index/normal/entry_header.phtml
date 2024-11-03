@@ -44,12 +44,10 @@
 	endif;  */?> 
 
 	<?php
-	if ($topline_thumbnail !== 'none'):
+	$thumbnail = $this->entry->thumbnail();
+	if ($topline_thumbnail !== 'none' && $thumbnail != null):
 	?><li class="item thumbnail <?= $topline_thumbnail ?> <?= $topline_summary ? '' : 'small' ?>"><?php
-		$thumbnail = $this->entry->thumbnail();
-		if ($thumbnail != null):
 			?><img src="<?= $thumbnail['url'] ?>" class="item-element "<?= $lazyload ? ' loading="lazy"' : '' ?> alt="" /><?php
-		endif;
 	?></li><?php
 	endif; ?>
 	<li class="item titleAuthorSummaryDate">
