@@ -122,10 +122,6 @@
 
 		~ a.dropdown-toggle {
 			&:not(.btn) {
-				~ .dropdown-menu {
-					margin-top: 0;
-				}
-
 				&::after {
 					bottom: -17px;
 				}

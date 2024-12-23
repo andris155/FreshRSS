@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => 'Разрешить анонимное чтение статей пользователя по умолчанию (%s)',
 		'allow_anonymous_refresh' => 'Разрешить анонимное обновление статей',
-		'api_enabled' => 'Позволить <abbr>API</abbr> доступ <small>(необходимо для мобильных приложений)</small>',
+		'api_enabled' => 'Позволить <abbr>API</abbr> доступ <small>(необходимо для мобильных приложений and sharing user queries)</small>',
 		'form' => 'Веб-форма (традиционный, необходим JavaScript)',
 		'http' => 'HTTP (для опытных пользователей с HTTPS)',
 		'none' => 'Без аутентификации (небезопасно)',
@@ -116,6 +116,7 @@ return array(
 		'description' => 'Описание',
 		'disabled' => 'Отключены',
 		'empty_list' => 'Нет установленных расширений',
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => 'Включены',
 		'latest' => 'Установлено',
 		'name' => 'Название',

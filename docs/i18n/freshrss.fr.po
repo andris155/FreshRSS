@@ -5215,7 +5215,7 @@ msgstr ""
 #. type: Bullet: '* '
 #: en/./developers/OPML.md:54
 msgid ""
-"`frss:cssFullContentFilter`: [CSS Selector](https://developer.mozilla.org/en-"
+"`frss:cssContentFilter`: [CSS Selector](https://developer.mozilla.org/en-"
 "US/docs/Web/CSS/CSS_Selectors) to remove the matching HTML elements from the "
 "full content retrieved by `frss:cssFullContent`."
 msgstr ""

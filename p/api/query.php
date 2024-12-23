@@ -93,7 +93,7 @@ foreach (FreshRSS_Context::userConf()->queries as $raw_query) {
 
 		$search = $query->getSearch()->getRawInput();
 		// Note: we disallow references to user queries in public user search to avoid sniffing internal user queries
-		$userSearch = new FreshRSS_BooleanSearch(Minz_Request::paramString('search'), 0, 'AND', false);
+		$userSearch = new FreshRSS_BooleanSearch(Minz_Request::paramString('search'), 0, 'AND', allowUserQueries: false);
 		if ($userSearch->getRawInput() !== '') {
 			if ($search === '') {
 				$search = $userSearch->getRawInput();
@@ -118,7 +118,7 @@ try {
 	FreshRSS_Context::updateUsingRequest(false);
 	Minz_Request::_param('search', $userSearch->getRawInput());	// Restore user search
 	$view->entries = FreshRSS_index_Controller::listEntriesByContext();
-} catch (Minz_Exception $e) {
+} catch (Minz_Exception) {
 	Minz_Error::error(400, 'Bad user query!');
 	die();
 }

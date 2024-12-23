@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => 'Allow anonymous reading of the default user’s articles (%s)',	// IGNORE
 		'allow_anonymous_refresh' => 'Allow anonymous refresh of the articles',	// IGNORE
-		'api_enabled' => 'Allow <abbr>API</abbr> access <small>(required for mobile apps)</small>',	// IGNORE
+		'api_enabled' => 'Allow <abbr>API</abbr> access <small>(required for mobile apps and sharing user queries)</small>',	// IGNORE
 		'form' => 'Web form (traditional, requires JavaScript)',	// IGNORE
 		'http' => 'HTTP (for advanced users with HTTPS)',	// IGNORE
 		'none' => 'None (dangerous)',	// IGNORE
@@ -116,6 +116,7 @@ return array(
 		'description' => 'Description',	// IGNORE
 		'disabled' => 'Disabled',	// IGNORE
 		'empty_list' => 'There are no installed extensions',	// IGNORE
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => 'Enabled',	// IGNORE
 		'latest' => 'Installed',	// IGNORE
 		'name' => 'Name',	// IGNORE

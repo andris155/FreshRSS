@@ -39,7 +39,7 @@ function debugInfo(): string {
 	} else {	//nginx	http://php.net/getallheaders#84262
 		$ALL_HEADERS = [];
 		foreach ($_SERVER as $name => $value) {
-			if (substr($name, 0, 5) === 'HTTP_') {
+			if (str_starts_with($name, 'HTTP_')) {
 				$ALL_HEADERS[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
 			}
 		}
@@ -69,9 +69,9 @@ final class FeverDAO extends Minz_ModelPdo
 	 */
 	private function bindParamArray(string $prefix, array $values, array &$bindArray): string {
 		$str = '';
-		for ($i = 0; $i < count($values); $i++) {
+		foreach ($values as $i => $iValue) {
 			$str .= ':' . $prefix . $i . ',';
-			$bindArray[$prefix . $i] = $values[$i];
+			$bindArray[$prefix . $i] = $iValue;
 		}
 		return rtrim($str, ',');
 	}
@@ -426,33 +426,29 @@ final class FeverAPI
 
 	/**
 	 * @param numeric-string $id
-	 * @return int|false
 	 */
-	private function setItemAsRead(string $id) {
+	private function setItemAsRead(string $id): int|false {
 		return $this->entryDAO->markRead($id, true);
 	}
 
 	/**
 	 * @param numeric-string $id
-	 * @return int|false
 	 */
-	private function setItemAsUnread(string $id) {
+	private function setItemAsUnread(string $id): int|false {
 		return $this->entryDAO->markRead($id, false);
 	}
 
 	/**
 	 * @param numeric-string $id
-	 * @return int|false
 	 */
-	private function setItemAsSaved(string $id) {
+	private function setItemAsSaved(string $id): int|false {
 		return $this->entryDAO->markFavorite($id, true);
 	}
 
 	/**
 	 * @param numeric-string $id
-	 * @return int|false
 	 */
-	private function setItemAsUnsaved(string $id) {
+	private function setItemAsUnsaved(string $id): int|false {
 		return $this->entryDAO->markFavorite($id, false);
 	}
 
@@ -538,18 +534,12 @@ final class FeverAPI
 		return $beforeTimestamp == 0 ? '0' : $beforeTimestamp . '000000';
 	}
 
-	/**
-	 * @return int|false
-	 */
-	private function setFeedAsRead(int $id, int $before) {
+	private function setFeedAsRead(int $id, int $before): int|false {
 		$before = $this->convertBeforeToId($before);
 		return $this->entryDAO->markReadFeed($id, $before);
 	}
 
-	/**
-	 * @return int|false
-	 */
-	private function setGroupAsRead(int $id, int $before) {
+	private function setGroupAsRead(int $id, int $before): int|false {
 		$before = $this->convertBeforeToId($before);
 
 		// special case to mark all items as read

@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => 'Povoliť čítanie článkov prednastaveného používateľa (%s) bez prihlásenia.',
 		'allow_anonymous_refresh' => 'Povoliť obnovenie článkov bez prihlásenia',
-		'api_enabled' => 'Povoliť prístup cez <abbr>API</abbr> <small>(vyžadujú mobilné aplikácie)</small>',
+		'api_enabled' => 'Povoliť prístup cez <abbr>API</abbr> <small>(vyžadujú mobilné aplikácie and sharing user queries)</small>',	// DIRTY
 		'form' => 'Webový formulár (traditičný, vyžaduje JavaScript)',
 		'http' => 'HTTP (pre pokročilých používateľov s HTTPS)',
 		'none' => 'Žiadny (nebezpečné)',
@@ -116,6 +116,7 @@ return array(
 		'description' => 'Popis',
 		'disabled' => 'Zakázané',
 		'empty_list' => 'Žiadne nainštalované rozšírenia',
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => 'Povolené',
 		'latest' => 'Nainštalované',
 		'name' => 'Názov',

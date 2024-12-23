@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => 'Consenti la lettura agli utenti anonimi degli articoli dell utente predefinito (%s)',
 		'allow_anonymous_refresh' => 'Consenti agli utenti anonimi di aggiornare gli articoli',
-		'api_enabled' => 'Consenti le <abbr>API</abbr> di accesso <small>(richiesto per le app mobili)</small>',
+		'api_enabled' => 'Consentire l’accesso all’<abbr>API</abbr> <small>(necessario per le app e per la condivisione delle query degli utenti)</small>',
 		'form' => 'Web form (tradizionale, richiede JavaScript)',
 		'http' => 'HTTP (per gli utenti avanzati con HTTPS)',
 		'none' => 'Nessuno (pericoloso)',
@@ -116,6 +116,7 @@ return array(
 		'description' => 'Descrizione',
 		'disabled' => 'Disabilitata',
 		'empty_list' => 'Non ci sono estensioni installate',
+		'empty_list_help' => 'Controllare i log per determinare il motivo della lista estensioni vuota.',
 		'enabled' => 'Abilitata',
 		'latest' => 'Installato',
 		'name' => 'Nome',
@@ -205,7 +206,7 @@ return array(
 		'copiedFromURL' => 'update.php copiato da %s a ./data',
 		'current_version' => 'Versione',
 		'last' => 'Ultima verifica',
-		'loading' => 'Aggiornamentose…',
+		'loading' => 'Aggiornamento…',
 		'none' => 'Nessun aggiornamento da applicare',
 		'releaseChannel' => array(
 			'_' => 'Canale di rilascio',

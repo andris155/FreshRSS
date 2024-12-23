@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => '允許匿名閱讀預設使用者（%s）的文章',
 		'allow_anonymous_refresh' => '允許匿名刷新文章',
-		'api_enabled' => '允許 <abbr>API</abbr> 訪問 <small>（用於手機應用）</small>',
+		'api_enabled' => '允許 <abbr>API</abbr> 訪問 <small>（用於手機應用 and sharing user queries）</small>',	// DIRTY
 		'form' => '網頁表單（傳統方式, 需要 JavaScript)',
 		'http' => 'HTTP (對於HTTPS的進階使用者)',
 		'none' => '無認證（危險）',
@@ -116,6 +116,7 @@ return array(
 		'description' => '描述',
 		'disabled' => '已禁用',
 		'empty_list' => '沒有已安裝的擴充功能',
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => '已啟用',
 		'latest' => '已安裝',
 		'name' => '名稱',

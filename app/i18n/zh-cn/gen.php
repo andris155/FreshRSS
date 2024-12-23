@@ -18,9 +18,12 @@ return array(
 		'back_to_rss_feeds' => '← 返回订阅源',
 		'cancel' => '取消',
 		'create' => '创建',
+		'delete_all_feeds' => 'Delete all feeds',	// TODO
+		'delete_errored_feeds' => 'Delete feeds with errors',	// TODO
 		'delete_muted_feeds' => '删除已暂停的订阅源',
 		'demote' => '撤销管理员',
 		'disable' => '禁用',
+		'download' => 'Download',	// TODO
 		'empty' => '清空',
 		'enable' => '启用',
 		'export' => '导出',
@@ -154,6 +157,7 @@ return array(
 		'en-us' => 'English (United States)',	// IGNORE
 		'es' => 'Español',	// IGNORE
 		'fa' => 'فارسی',	// IGNORE
+		'fi' => 'Suomi',	// IGNORE
 		'fr' => 'Français',	// IGNORE
 		'he' => 'עברית',	// IGNORE
 		'hu' => 'Magyar',	// IGNORE
@@ -183,6 +187,7 @@ return array(
 		'display' => '显示',
 		'extensions' => '扩展',
 		'logs' => '日志',
+		'privacy' => 'Privacy',	// TODO
 		'queries' => '自定义查询',
 		'reading' => '阅读',
 		'search' => '搜索内容或#文章标签',
@@ -207,6 +212,7 @@ return array(
 		'archiveIS' => 'archive.is',	// IGNORE
 		'archiveORG' => 'archive.org',	// IGNORE
 		'archivePH' => 'archive.ph',	// IGNORE
+		'bluesky' => 'Bluesky',	// TODO
 		'buffer' => 'Buffer',	// IGNORE
 		'clipboard' => '剪贴板',
 		'diaspora' => 'Diaspora*',	// IGNORE
@@ -228,6 +234,7 @@ return array(
 		'raindrop' => 'Raindrop.io',	// IGNORE
 		'reddit' => 'Reddit',	// IGNORE
 		'shaarli' => 'Shaarli',	// IGNORE
+		'telegram' => 'Telegram',	// IGNORE
 		'twitter' => 'Twitter',	// IGNORE
 		'wallabag' => 'Wallabag v1',	// IGNORE
 		'wallabagv2' => 'Wallabag v2',	// IGNORE

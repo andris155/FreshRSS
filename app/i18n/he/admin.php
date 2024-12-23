@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => 'הרשאה לאנונימיים לקרוא את מאמרי משתמש ברירת המחדל (%s)',
 		'allow_anonymous_refresh' => 'הרשאה לאנונימיים לרענן את רשימת המאמרים',
-		'api_enabled' => 'הרשאת גישה ל <abbr>API</abbr> <small>(נדרש ליישומים סלולריים)</small>',
+		'api_enabled' => 'הרשאת גישה ל <abbr>API</abbr> <small>(נדרש ליישומים סלולריים and sharing user queries)</small>',	// DIRTY
 		'form' => 'טופס אינטרנטי (מסורתי, דורש JavaScript)',
 		'http' => 'HTTP (למשתמשים מתקדמים עם HTTPS)',
 		'none' => 'ללא (מסוכן)',
@@ -116,6 +116,7 @@ return array(
 		'description' => 'Description',	// TODO
 		'disabled' => 'Disabled',	// TODO
 		'empty_list' => 'There is no installed extension',
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => 'Enabled',	// TODO
 		'latest' => 'Installed',	// TODO
 		'name' => 'Name',	// TODO

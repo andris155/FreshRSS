@@ -40,7 +40,7 @@ return array(
 	'feed' => array(
 		'accept_cookies' => 'Cookies accepteren',
 		'accept_cookies_help' => 'De feed-server toestaan cookies te plaatsen (die alleen voor de duur van de aanvraag in het geheugen worden opgeslagen)',
-		'add' => 'Voeg een RSS-feed toe',
+		'add' => 'Voeg een feed toe',
 		'advanced' => 'Geavanceerd',
 		'archiving' => 'Archiveren',
 		'auth' => array(
@@ -57,17 +57,18 @@ return array(
 			'prepend' => 'Voor huidige inhoud toevoegen',
 			'replace' => 'Huidige inhoud vervangen',
 		),
+		'content_retrieval' => 'Content retrieval',	// TODO
 		'css_cookie' => 'Cookies gebruiken bij het ophalen van artikelinhoud',
 		'css_cookie_help' => 'Voorbeeld: <kbd>foo=bar; gdpr_consent=true; cookie=value</kbd>',
 		'css_help' => 'Haalt onvolledige RSS-feeds op (attentie, heeft meer tijd nodig!)',
 		'css_path' => 'CSS-pad van artikelen op originele website',
 		'css_path_filter' => array(
 			'_' => 'CSS selector van de elementen om te verwijderen',
-			'help' => 'Een CSS selector kan een lijst zijn, zoals: <kbd>.footer, .aside</kbd>',
+			'help' => 'Een CSS selector kan een lijst zijn, zoals: <kbd>footer, aside, p[data-sanitized-class~="menu"]</kbd>',
 		),
 		'description' => 'Omschrijving',
 		'empty' => 'Deze feed is leeg. Controleer of deze nog actueel is.',
-		'error' => 'Deze feed heeft problemen. Verifieer a.u.b het doeladres en actualiseer het.',
+		'error' => 'Deze feed heeft een probleem ondervonden. Als deze situatie aanhoudt, controleer dan of de feed nog steeds bereikbaar is.',
 		'export-as-opml' => array(
 			'download' => 'Downloaden',
 			'help' => 'XML-bestand (data subset. <a href="https://freshrss.github.io/FreshRSS/en/developers/OPML.html" target="_blank">See documentation</a>)',	// DIRTY
@@ -77,10 +78,19 @@ return array(
 			'_' => 'Filteracties',
 			'help' => 'Voer één zoekfilter per lijn in. Operators <a href="https://freshrss.github.io/FreshRSS/en/users/10_filter.html#with-the-search-field" target="_blank">see documentation</a>.',	// DIRTY
 		),
+		'http_headers' => 'HTTP Headers',	// TODO
+		'http_headers_help' => 'Headers are separated by a newline, and the name and value of a header are separated by a colon (e.g: <kbd><code>Accept: application/atom+xml<br />Authorization: Bearer some-token</code></kbd>).',	// TODO
 		'information' => 'Informatie',
 		'keep_min' => 'Minimum aantal artikelen om te houden',
 		'kind' => array(
 			'_' => 'Feedbron-type',
+			'html_json' => array(
+				'_' => 'HTML + XPath + JSON dot notation (JSON in HTML)',	// TODO
+				'xpath' => array(
+					'_' => 'XPath for JSON in HTML',	// TODO
+					'help' => 'Example: <code>//script[@type="application/json"]</code>',	// TODO
+				),
+			),
 			'html_xpath' => array(
 				'_' => 'HTML + XPath (Web scraping)',	// IGNORE
 				'feed_title' => array(
@@ -192,6 +202,7 @@ return array(
 		'no_selected' => 'Geen feed geselecteerd.',
 		'number_entries' => '%d artikelen',
 		'open_feed' => 'Open feed %s',	// TODO
+		'path_entries_conditions' => 'Conditions for content retrieval',	// TODO
 		'priority' => array(
 			'_' => 'Zichtbaarheid',
 			'archived' => 'Niet weergeven (gearchiveerd)',
@@ -219,6 +230,16 @@ return array(
 		'title' => 'Titel',
 		'title_add' => 'Voeg een RSS-feed toe',
 		'ttl' => 'Vernieuw automatisch niet vaker dan',
+		'unicityCriteria' => array(
+			'_' => 'Article unicity criteria',	// TODO
+			'forced' => '<span title="Block the unicity criteria, even when the feed has duplicate articles">forced</span>',	// TODO
+			'help' => 'Relevant for invalid feeds.<br />⚠️ Changing the policy will create duplicates.',	// TODO
+			'id' => 'Standard ID (default)',	// TODO
+			'link' => 'Link',	// TODO
+			'sha1:link_published' => 'Link + Date',	// TODO
+			'sha1:link_published_title' => 'Link + Date + Title',	// TODO
+			'sha1:link_published_title_content' => 'Link + Date + Title + Content',	// TODO
+		),
 		'url' => 'Feed-url',
 		'useragent' => 'Stelt de useragent in om deze feed op te halen',
 		'useragent_help' => 'Voorbeeld: <kbd>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0)</kbd>',
@@ -227,7 +248,10 @@ return array(
 		'websub' => 'Directe notificaties met WebSub',
 	),
 	'import_export' => array(
-		'export' => 'Exporteer',
+		'export' => array(
+			'_' => 'Exporteer',
+			'sqlite' => 'Download user database as SQLite',	// TODO
+		),
 		'export_labelled' => 'Exporteer gelabelde artikels',
 		'export_opml' => 'Exporteer lijst van feeds (OPML)',
 		'export_starred' => 'Exporteer je favorieten',
@@ -263,6 +287,7 @@ return array(
 		'add_dynamic_opml' => 'Dynamische OPML toevoegen',
 		'add_feed' => 'Feed toevoegen',
 		'add_label' => 'Label toevoegen',
+		'add_opml_category' => 'OPML categorienaam',
 		'delete_label' => 'Label verwijderen',
 		'feed_management' => 'RSS-feedbeheer',
 		'rename_label' => 'Label hernoemen',

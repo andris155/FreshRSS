@@ -75,8 +75,9 @@
 		</div>
 	</form>
 
+
+	<h2><?= _t('conf.profile.api') ?></h2>
 	<?php if (FreshRSS_Context::systemConf()->api_enabled) { ?>
-		<h2><?= _t('conf.profile.api') ?></h2>
 		<form method="post" action="<?= _url('api', 'updatePassword') ?>">
 			<input type="hidden" name="_csrf" value="<?= FreshRSS_Auth::csrfToken() ?>" />
 
@@ -88,7 +89,8 @@
 							pattern=".{7,}" <?= cryptAvailable() ? '' : 'disabled="disabled" ' ?>/>
 						<button type="button" class="btn toggle-password" data-toggle="apiPasswordPlain"><?= _i('key') ?></button>
 					</div>
-					<p class="help"><?= _i('help') ?> <kbd><a href="../api/"><?= Minz_Url::display('/api/', 'html', true) ?></a></kbd></p>
+					<p class="help"><?= _i('help') ?> <?= _t('conf.profile.api.check_link', Minz_Url::display('/api/', 'html', true)) ?></p>
+					<p class="help"><?= _i('help') ?> <?= _t('conf.profile.api.documentation_link') ?></p>
 				</div>
 			</div>
 
@@ -98,6 +100,14 @@
 				</div>
 			</div>
 		</form>
+	<?php } else { ?>
+		<div class="form-group">
+			<label class="group-name"></label>
+			<div class="group-controls">
+				<?= _t('conf.profile.api.disabled') ?>
+				<p class="help"><?= _i('help') ?> <?= _t('conf.profile.api.help') ?></p>
+			</div>
+		</div>
 	<?php } ?>
 
 	<?php if (!FreshRSS_Auth::hasAccess('admin')) { ?>
@@ -124,7 +134,7 @@
 			<div class="group-controls">
 				<?php
 					$redirect_url = urlencode(Minz_Url::display(
-						array('c' => 'user', 'a' => 'profile'),
+						['c' => 'user', 'a' => 'profile'],
 						'php', true
 					));
 				?>

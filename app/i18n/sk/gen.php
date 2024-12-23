@@ -18,9 +18,12 @@ return array(
 		'back_to_rss_feeds' => '← Späť na vaše RSS kanály',
 		'cancel' => 'Zrušiť',
 		'create' => 'Vytvoriť',
+		'delete_all_feeds' => 'Delete all feeds',	// TODO
+		'delete_errored_feeds' => 'Delete feeds with errors',	// TODO
 		'delete_muted_feeds' => 'Vymazať stíšené kanály',
 		'demote' => 'Degradovať',
 		'disable' => 'Zakázať',
+		'download' => 'Download',	// TODO
 		'empty' => 'Vyprázdniť',
 		'enable' => 'Povoliť',
 		'export' => 'Exportovať',
@@ -154,6 +157,7 @@ return array(
 		'en-us' => 'English (United States)',	// IGNORE
 		'es' => 'Español',	// IGNORE
 		'fa' => 'فارسی',	// IGNORE
+		'fi' => 'Suomi',	// IGNORE
 		'fr' => 'Français',	// IGNORE
 		'he' => 'עברית',	// IGNORE
 		'hu' => 'Magyar',	// IGNORE
@@ -183,6 +187,7 @@ return array(
 		'display' => 'Zobrazenie',
 		'extensions' => 'Rozšírenia',
 		'logs' => 'Záznamy',
+		'privacy' => 'Privacy',	// TODO
 		'queries' => 'Používateľské dopyty',
 		'reading' => 'Čítanie',
 		'search' => 'Hľadajte slová alebo #značky',
@@ -207,6 +212,7 @@ return array(
 		'archiveIS' => 'archive.is',	// IGNORE
 		'archiveORG' => 'archive.org',	// IGNORE
 		'archivePH' => 'archive.ph',	// IGNORE
+		'bluesky' => 'Bluesky',	// TODO
 		'buffer' => 'Buffer',	// IGNORE
 		'clipboard' => 'Schránka',
 		'diaspora' => 'Diaspora*',	// IGNORE
@@ -228,6 +234,7 @@ return array(
 		'raindrop' => 'Raindrop.io',	// IGNORE
 		'reddit' => 'Reddit',	// IGNORE
 		'shaarli' => 'Shaarli',	// IGNORE
+		'telegram' => 'Telegram',	// IGNORE
 		'twitter' => 'Twitter',	// IGNORE
 		'wallabag' => 'wallabag v1',	// IGNORE
 		'wallabagv2' => 'wallabag v2',	// IGNORE

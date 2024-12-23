@@ -99,9 +99,19 @@ return array(
 			'previous' => '前へ',
 		),
 	),
+	'privacy' => array(
+		'_' => 'Privacy',	// TODO
+		'retrieve_extension_list' => 'Retrieve extension list',	// TODO
+	),
 	'profile' => array(
 		'_' => 'プロフィール',
-		'api' => 'API管理',
+		'api' => array(
+			'_' => 'API管理',
+			'check_link' => 'Check API status via: <kbd><a href="../api/" target="_blank">%s</a></kbd>',	// TODO
+			'disabled' => 'The API access is disabled.',	// TODO
+			'documentation_link' => 'See the <a href="https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target="_blank">documentation and list of known apps</a>',	// TODO
+			'help' => 'See <a href="http://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target=_blank>documentation</a>',	// TODO
+		),
 		'delete' => array(
 			'_' => 'アカウント消去',
 			'warn' => 'あなたのアカウントとそれに関連したデータが消去されます。',
@@ -139,12 +149,20 @@ return array(
 		'image_url' => '画像のURL',
 		'name' => '名前',
 		'no_filter' => 'フィルターはありません',
+		'no_queries' => array(
+			'_' => 'No user queries are saved yet.',	// TODO
+			'help' => 'See <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">documentation</a>',	// TODO
+		),
 		'number' => 'クエリ n°%d',
 		'order_asc' => '古い記事を最初に表示する',
 		'order_desc' => '新しい記事を最初に表示する',
 		'search' => '“%s”で検索する',
 		'share' => array(
 			'_' => 'このクエリをリンクで共有する',
+			'disabled' => array(
+				'_' => 'disabled',	// TODO
+				'title' => 'Sharing',	// TODO
+			),
 			'greader' => 'Shareable link to the GReader JSON',	// TODO
 			'help' => 'このクエリを誰かと共有したい場合は、このリンクを提供してください',
 			'html' => 'HTMLページへの共有リンク',
@@ -173,6 +191,7 @@ return array(
 		'_' => 'リーディング',
 		'after_onread' => '“すべてに既読を付ける”を押した後,',
 		'always_show_favorites' => 'デフォルトですべてのお気に入りの記事を表示する',
+		'apply_to_individual_feed' => 'Applies to feeds individually',	// TODO
 		'article' => array(
 			'authors_date' => array(
 				'_' => '著者と日付',
@@ -220,7 +239,7 @@ return array(
 		),
 		'hide_read_feeds' => 'カテゴリを非表示 & 未読の記事がないフィード ("すべてに既読を付ける”では適用しません)',
 		'img_with_lazyload' => '<em>lazy load</em>を写真の読み込み時に使う',
-		'jump_next' => '次の未読の姉妹記事へ移る (フィードやカテゴリ)',
+		'jump_next' => '次の未読の姉妹記事へ移る',
 		'mark_updated_article_unread' => '更新された記事を未読とする',
 		'number_divided_when_reader' => 'リーディングビューを2分割する',
 		'read' => array(
@@ -232,17 +251,19 @@ return array(
 			'upon_gone' => 'ニュースフィードの提供元がなくなったとき',
 			'upon_reception' => '記事を受け取ったとき',
 			'when' => '記事を既読にする…',
-			'when_same_title' => 'すでに同一タイトルが上位n件の最新記事に存在するとき',
+			'when_same_title_in_category' => 'if an identical title already exists in the top <i>n</i> newest articles of the category',	// TODO
+			'when_same_title_in_feed' => 'すでに同一タイトルが上位n件の最新記事に存在するとき (of the feed)',	// DIRTY
 		),
 		'show' => array(
 			'_' => '記事を表示する',
 			'active_category' => 'アクティブなカテゴリ',
-			'adaptive' => '表示を調整する',
+			'adaptive' => 'Show unreads if any, all articles otherwise',	// TODO
 			'all_articles' => 'すべての記事を表示する',
 			'all_categories' => 'すべてのカテゴリ',
 			'no_category' => '未分類',
 			'remember_categories' => '前回開いたカテゴリ',
 			'unread' => '未読のみ表示する',
+			'unread_or_favorite' => 'Show unreads and favourites',	// TODO
 		),
 		'show_fav_unread_help' => 'ラベルも適用する',
 		'sides_close_article' => '記事の外をクリックすると記事を閉じるようにする',
@@ -266,6 +287,7 @@ return array(
 	'sharing' => array(
 		'_' => '共有',
 		'add' => '共有方法を追加する',
+		'bluesky' => 'Bluesky',	// TODO
 		'deprecated' => 'このサービスは非推奨でFreshRSSの<a href="https://freshrss.github.io/FreshRSS/en/users/08_sharing_services.html" title="Open documentation for more information" target="_blank">将来のリリース</a>から削除される予定です。',
 		'diaspora' => 'Diaspora*',	// IGNORE
 		'email' => 'Eメール',

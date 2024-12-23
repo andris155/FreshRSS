@@ -12,13 +12,13 @@ class FreshRSS_View extends Minz_View {
 	public $callbackBeforePagination;
 	/** @var array<int,FreshRSS_Category> */
 	public array $categories;
-	public ?FreshRSS_Category $category;
-	public ?FreshRSS_Tag $tag;
+	public ?FreshRSS_Category $category = null;
+	public ?FreshRSS_Tag $tag = null;
 	public string $current_user;
 	/** @var iterable<FreshRSS_Entry> */
 	public $entries;
-	public FreshRSS_Entry $entry;
-	public FreshRSS_Feed $feed;
+	public ?FreshRSS_Entry $entry = null;
+	public ?FreshRSS_Feed $feed = null;
 	/** @var array<int,FreshRSS_Feed> */
 	public array $feeds;
 	public int $nbUnreadTags;
@@ -30,7 +30,7 @@ class FreshRSS_View extends Minz_View {
 	public array $tagsForEntries;
 	public bool $excludeMutedFeeds;
 
-	// Substriptions
+	// Subscriptions
 	public bool $displaySlider = false;
 	public bool $load_ok;
 	public bool $onlyFeedsWithError;
@@ -82,6 +82,9 @@ class FreshRSS_View extends Minz_View {
 	public string $list_title;
 	public int $queryId;
 	public string $type;
+	/** @var null|array<array{name:string,size:int,mtime:int}> */
+	public ?array $sqliteArchives = null;
+	public string $sqlitePath;
 
 	// Form login
 	public int $cookie_days;
@@ -117,10 +120,10 @@ class FreshRSS_View extends Minz_View {
 	// Extensions
 	/** @var array<array{'name':string,'author':string,'description':string,'version':string,'entrypoint':string,'type':'system'|'user','url':string,'method':string,'directory':string}> */
 	public array $available_extensions;
-	public ?Minz_Extension $ext_details;
+	public ?Minz_Extension $ext_details = null;
 	/** @var array{'system':array<Minz_Extension>,'user':array<Minz_Extension>} */
 	public array $extension_list;
-	public ?Minz_Extension $extension;
+	public ?Minz_Extension $extension = null;
 	/** @var array<string,string> */
 	public array $extensions_installed;
 

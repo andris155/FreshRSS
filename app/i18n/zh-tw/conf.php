@@ -99,9 +99,19 @@ return array(
 			'previous' => '上一頁',
 		),
 	),
+	'privacy' => array(
+		'_' => 'Privacy',	// TODO
+		'retrieve_extension_list' => 'Retrieve extension list',	// TODO
+	),
 	'profile' => array(
 		'_' => '個人資料管理',
-		'api' => 'API 管理',
+		'api' => array(
+			'_' => 'API 管理',
+			'check_link' => 'Check API status via: <kbd><a href="../api/" target="_blank">%s</a></kbd>',	// TODO
+			'disabled' => 'The API access is disabled.',	// TODO
+			'documentation_link' => 'See the <a href="https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target="_blank">documentation and list of known apps</a>',	// TODO
+			'help' => 'See <a href="http://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target=_blank>documentation</a>',	// TODO
+		),
 		'delete' => array(
 			'_' => '帳號刪除',
 			'warn' => '你的帳號及所有相關資料將被刪除。',
@@ -139,12 +149,20 @@ return array(
 		'image_url' => '影像網址',
 		'name' => '名稱',
 		'no_filter' => '無過濾器',
+		'no_queries' => array(
+			'_' => 'No user queries are saved yet.',	// TODO
+			'help' => 'See <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">documentation</a>',	// TODO
+		),
 		'number' => '查詢 n°%d',
 		'order_asc' => '由舊至新顯示文章',
 		'order_desc' => '由新至舊顯示文章',
 		'search' => '搜尋 “%s”',
 		'share' => array(
 			'_' => '透過連結分享此查詢',
+			'disabled' => array(
+				'_' => 'disabled',	// TODO
+				'title' => 'Sharing',	// TODO
+			),
 			'greader' => 'GReader JSON的可共享連結',
 			'help' => '如果您想與任何人分享此查詢，請提供此連結',
 			'html' => 'HTML頁面的可共享連結',
@@ -173,6 +191,7 @@ return array(
 		'_' => '閱讀',
 		'after_onread' => '「全部標記為已讀」後',
 		'always_show_favorites' => '預設顯示收藏夾中所有的文章',
+		'apply_to_individual_feed' => 'Applies to feeds individually',	// TODO
 		'article' => array(
 			'authors_date' => array(
 				'_' => '作者和日期',
@@ -220,7 +239,7 @@ return array(
 		),
 		'hide_read_feeds' => '隱藏沒有未讀文章的分類和訂閱源 (啟用「顯示所有文章」後不生效)',
 		'img_with_lazyload' => '延遲加載圖片',
-		'jump_next' => '跳轉到下一未讀項（訂閱源或分類）',
+		'jump_next' => '跳轉到下一未讀項',
 		'mark_updated_article_unread' => '將更新的文章設為未讀',
 		'number_divided_when_reader' => '閱讀視圖中顯示一半',
 		'read' => array(
@@ -232,17 +251,19 @@ return array(
 			'upon_gone' => '在被原訂閱源移除後',
 			'upon_reception' => '在接收文章後',
 			'when' => '何時將文章標記為已讀',
-			'when_same_title' => '已存在 n 條相同標題文章',
+			'when_same_title_in_category' => 'if an identical title already exists in the top <i>n</i> newest articles of the category',	// TODO
+			'when_same_title_in_feed' => '已存在 n 條相同標題文章 (of the feed)',	// DIRTY
 		),
 		'show' => array(
 			'_' => '文章顯示',
 			'active_category' => '啟用的分類',
-			'adaptive' => '智能顯示',
+			'adaptive' => 'Show unreads if any, all articles otherwise',	// TODO
 			'all_articles' => '顯示所有',
 			'all_categories' => '所有分類',
 			'no_category' => '無分類',
 			'remember_categories' => '記住打開的分類',
 			'unread' => '只顯示未讀',
+			'unread_or_favorite' => 'Show unreads and favourites',	// TODO
 		),
 		'show_fav_unread_help' => '同樣適用於標籤',
 		'sides_close_article' => '點擊文章區域外以關閉',
@@ -266,6 +287,7 @@ return array(
 	'sharing' => array(
 		'_' => '分享',
 		'add' => '新增分享方式',
+		'bluesky' => 'Bluesky',	// TODO
 		'deprecated' => '這項功能已廢棄並在將來版本的 FreshRSS 中移除，詳情請見 <a href="https://freshrss.github.io/FreshRSS/en/users/08_sharing_services.html" title="Open documentation for more information" target="_blank">說明文檔</a>.',
 		'diaspora' => 'Diaspora*',	// IGNORE
 		'email' => '郵箱',	// IGNORE

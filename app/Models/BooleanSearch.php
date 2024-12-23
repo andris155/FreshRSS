@@ -4,20 +4,24 @@ declare(strict_types=1);
 /**
  * Contains Boolean search from the search form.
  */
-class FreshRSS_BooleanSearch {
+class FreshRSS_BooleanSearch implements \Stringable {
 
 	private string $raw_input = '';
 	/** @var array<FreshRSS_BooleanSearch|FreshRSS_Search> */
 	private array $searches = [];
 
 	/**
-	 * @phpstan-var 'AND'|'OR'|'AND NOT'|'OR NOT'
+	 * @param string $input
+	 * @param int $level
+	 * @param 'AND'|'OR'|'AND NOT'|'OR NOT' $operator
+	 * @param bool $allowUserQueries
 	 */
-	private string $operator;
-
-	/** @param 'AND'|'OR'|'AND NOT'|'OR NOT' $operator */
-	public function __construct(string $input, int $level = 0, string $operator = 'AND', bool $allowUserQueries = true) {
-		$this->operator = $operator;
+	public function __construct(
+		string $input,
+		int $level = 0,
+		private readonly string $operator = 'AND',
+		bool $allowUserQueries = true
+	) {
 		$input = trim($input);
 		if ($input === '') {
 			return;
@@ -27,16 +31,19 @@ class FreshRSS_BooleanSearch {
 			if (!is_string($input)) {
 				return;
 			}
-			$input = preg_replace('/(?<=[\s!-]|^)&quot;(.*?)&quot;/', '"\1"', $input);
+			$input = preg_replace('/(?<=[\s(!-]|^)&quot;(.*?)&quot;/', '"\1"', $input);
 			if (!is_string($input)) {
 				return;
 			}
+		}
+		$this->raw_input = $input;
 
+		if ($level === 0) {
+			$input = self::escapeLiteralParentheses($input);
 			$input = $this->parseUserQueryNames($input, $allowUserQueries);
 			$input = $this->parseUserQueryIds($input, $allowUserQueries);
 			$input = trim($input);
 		}
-		$this->raw_input = $input;
 
 		$input = self::consistentOrParentheses($input);
 
@@ -58,11 +65,11 @@ class FreshRSS_BooleanSearch {
 		}
 
 		if (!empty($all_matches)) {
-			/** @var array<string,FreshRSS_UserQuery> */
 			$queries = [];
 			foreach (FreshRSS_Context::userConf()->queries as $raw_query) {
-				$query = new FreshRSS_UserQuery($raw_query, FreshRSS_Context::categories(), FreshRSS_Context::labels());
-				$queries[$query->getName()] = $query;
+				if (($raw_query['name'] ?? '') !== '' && ($raw_query['search'] ?? '') !== '') {
+					$queries[$raw_query['name']] = trim($raw_query['search']);
+				}
 			}
 
 			$fromS = [];
@@ -76,7 +83,7 @@ class FreshRSS_BooleanSearch {
 					if (!empty($queries[$name])) {
 						$fromS[] = $matches[0][$i];
 						if ($allowUserQueries) {
-							$toS[] = '(' . trim($queries[$name]->getSearch()->getRawInput()) . ')';
+							$toS[] = '(' . self::escapeLiteralParentheses($queries[$name]) . ')';
 						} else {
 							$toS[] = '';
 						}
@@ -100,11 +107,9 @@ class FreshRSS_BooleanSearch {
 		}
 
 		if (!empty($all_matches)) {
-			/** @var array<string,FreshRSS_UserQuery> */
 			$queries = [];
 			foreach (FreshRSS_Context::userConf()->queries as $raw_query) {
-				$query = new FreshRSS_UserQuery($raw_query, FreshRSS_Context::categories(), FreshRSS_Context::labels());
-				$queries[] = $query;
+				$queries[] = trim($raw_query['search'] ?? '');
 			}
 
 			$fromS = [];
@@ -119,7 +124,7 @@ class FreshRSS_BooleanSearch {
 					if (!empty($queries[$id])) {
 						$fromS[] = $matches[0][$i];
 						if ($allowUserQueries) {
-							$toS[] = '(' . trim($queries[$id]->getSearch()->getRawInput()) . ')';
+							$toS[] = '(' . self::escapeLiteralParentheses($queries[$id]) . ')';
 						} else {
 							$toS[] = '';
 						}
@@ -130,6 +135,20 @@ class FreshRSS_BooleanSearch {
 			$input = str_replace($fromS, $toS, $input);
 		}
 		return $input;
+	}
+
+	/**
+	 * Temporarily escape parentheses used in regex expressions or inside quoted strings.
+	 */
+	public static function escapeLiteralParentheses(string $input): string {
+		return preg_replace_callback('%(?<=[\\s(:#!-]|^)(?<![\\\\])(?P<delim>[\'"/]).+?(?<!\\\\)(?P=delim)[im]*%',
+			fn(array $matches): string => str_replace(['(', ')'], ['\\u0028', '\\u0029'], $matches[0]),
+			$input
+		) ?? '';
+	}
+
+	public static function unescapeLiteralParentheses(string $input): string {
+		return str_replace(['\\u0028', '\\u0029'], ['(', ')'], $input);
 	}
 
 	/**
@@ -402,6 +421,7 @@ class FreshRSS_BooleanSearch {
 		return $this->getRawInput();
 	}
 
+	/** @return string Plain text search query. Must be XML-encoded or URL-encoded depending on the situation */
 	public function getRawInput(): string {
 		return $this->raw_input;
 	}

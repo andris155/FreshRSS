@@ -40,7 +40,7 @@ return array(
 	'feed' => array(
 		'accept_cookies' => 'Sütik elfogadása',
 		'accept_cookies_help' => 'Engedélyezze hogy a hírforrás szerver beállíthasson sütiket (memóriában lesznek tárolva a kapcsolat idejére)',
-		'add' => 'RSS hírforrás hozzáadása',
+		'add' => 'hírforrás hozzáadása',
 		'advanced' => 'Haladó',
 		'archiving' => 'Archiválás',
 		'auth' => array(
@@ -57,17 +57,18 @@ return array(
 			'prepend' => 'Hozzáadás a létező tartalom elé',
 			'replace' => 'Cserélje ki a létező tartalmat',
 		),
+		'content_retrieval' => 'Content retrieval',	// TODO
 		'css_cookie' => 'Használjon sütiket a cikkek letöltésénél',
 		'css_cookie_help' => 'Példa: <kbd>foo=bar; gdpr_consent=true; cookie=value</kbd>',
 		'css_help' => 'Csonkított RSS hírforrások beszerzése (vigyázz, több időt igényel!)',
 		'css_path' => 'Cikk CSS selector az eredeti weblapon',
 		'css_path_filter' => array(
 			'_' => 'A törlendő elemek CSS selectora',
-			'help' => 'Egy CSS selector lehet egy lista például: <kbd>.footer, .aside</kbd>',
+			'help' => 'Egy CSS selector lehet egy lista például: <kbd>footer, aside, p[data-sanitized-class~="menu"]</kbd>',
 		),
 		'description' => 'Leírás',
 		'empty' => 'Ez a hírforrás üres. Ellenőrizd hogy van e tartalom rajta.',
-		'error' => 'Ez a hírforrás nem működik. Ellenőrizd az elérhetőségét és frissítsd.',
+		'error' => 'Ez a hírforrás nem működik. Ellenőrizd az elérhetőségét.',	// DIRTY
 		'export-as-opml' => array(
 			'download' => 'Letöltés',
 			'help' => 'XML fájl (data subset. <a href="https://freshrss.github.io/FreshRSS/en/developers/OPML.html" target="_blank">See documentation</a>)',	// DIRTY
@@ -77,10 +78,19 @@ return array(
 			'_' => 'Szűrő műveletek',
 			'help' => 'Írj egy szűrőt soronként. Műveletek <a href="https://freshrss.github.io/FreshRSS/en/users/10_filter.html#with-the-search-field" target="_blank">a dokumentációban</a>.',
 		),
+		'http_headers' => 'HTTP Headers',	// TODO
+		'http_headers_help' => 'Headers are separated by a newline, and the name and value of a header are separated by a colon (e.g: <kbd><code>Accept: application/atom+xml<br />Authorization: Bearer some-token</code></kbd>).',	// TODO
 		'information' => 'Információ',
 		'keep_min' => 'Megtartandó cikkek minimális száma',
 		'kind' => array(
 			'_' => 'Hírforrás típusa',
+			'html_json' => array(
+				'_' => 'HTML + XPath + JSON dot notation (JSON in HTML)',	// TODO
+				'xpath' => array(
+					'_' => 'XPath for JSON in HTML',	// TODO
+					'help' => 'Example: <code>//script[@type="application/json"]</code>',	// TODO
+				),
+			),
 			'html_xpath' => array(
 				'_' => 'HTML + XPath (Web scraping)',	// IGNORE
 				'feed_title' => array(
@@ -137,7 +147,7 @@ return array(
 				'help' => 'A JSON pontjelölés pontokat használ az objektumok között és zárójeleket a tömbökhöz (pl. <code>data.items[0].title</code>)',
 				'item' => array(
 					'_' => 'hírek keresése <strong>elemek</strong><br /><small>(legfontosabb)</small>',
-					'help' => 'JSON útvonal az elemeket tartalmazó tömbhöz, pl. <code>newsItems</code>',
+					'help' => 'JSON útvonal az elemeket tartalmazó tömbhöz, pl. <code>$</code> or <code>newsItems</code>',	// DIRTY
 				),
 				'item_author' => 'elem szerző',
 				'item_categories' => 'elem címkék',
@@ -192,6 +202,7 @@ return array(
 		'no_selected' => 'Nincsen hírforrás kiválasztva.',
 		'number_entries' => '%d cikkek',
 		'open_feed' => 'Open feed %s',	// TODO
+		'path_entries_conditions' => 'Conditions for content retrieval',	// TODO
 		'priority' => array(
 			'_' => 'Láthatóság',
 			'archived' => 'Ne jelenjen meg (archivált)',
@@ -219,6 +230,16 @@ return array(
 		'title' => 'Cím',
 		'title_add' => 'RSS hírforrás hozzáadása',
 		'ttl' => 'Ne frissítsd automatikusan többször mint',
+		'unicityCriteria' => array(
+			'_' => 'Article unicity criteria',	// TODO
+			'forced' => '<span title="Block the unicity criteria, even when the feed has duplicate articles">forced</span>',	// TODO
+			'help' => 'Relevant for invalid feeds.<br />⚠️ Changing the policy will create duplicates.',	// TODO
+			'id' => 'Standard ID (default)',	// TODO
+			'link' => 'Link',	// TODO
+			'sha1:link_published' => 'Link + Date',	// TODO
+			'sha1:link_published_title' => 'Link + Date + Title',	// TODO
+			'sha1:link_published_title_content' => 'Link + Date + Title + Content',	// TODO
+		),
 		'url' => 'Hírforrás URL',
 		'useragent' => 'Állíts be egy user agent-et ehhez a hírforráshoz',
 		'useragent_help' => 'Példa: <kbd>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0)</kbd>',
@@ -227,7 +248,10 @@ return array(
 		'websub' => 'Azonnali értesítés WebSub-al',
 	),
 	'import_export' => array(
-		'export' => 'Exportálás',
+		'export' => array(
+			'_' => 'Exportálás',
+			'sqlite' => 'Download user database as SQLite',	// TODO
+		),
 		'export_labelled' => 'Címkézett cikkek exportálása',
 		'export_opml' => 'Hírforrások listájának exportálása (OPML)',
 		'export_starred' => 'Kedvencek exportálása',
@@ -263,6 +287,7 @@ return array(
 		'add_dynamic_opml' => 'Dinamikus OPML hozzáadása',
 		'add_feed' => 'Hírforrás hozzáadása',
 		'add_label' => 'Címke hozzáadása',
+		'add_opml_category' => 'OPML category name',	// TODO
 		'delete_label' => 'Címke törlése',
 		'feed_management' => 'RSS hírforrások kezelése',
 		'rename_label' => 'Címke átnevezése',

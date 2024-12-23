@@ -25,10 +25,11 @@ function isImgMime(string $content): bool {
 /** @param array<int,int|bool> $curlOptions */
 function downloadHttp(string &$url, array $curlOptions = []): string {
 	syslog(LOG_INFO, 'FreshRSS Favicon GET ' . $url);
-	$url = checkUrl($url);
-	if ($url == false) {
+	$url2 = checkUrl($url);
+	if ($url2 == false) {
 		return '';
 	}
+	$url = $url2;
 	/** @var CurlHandle $ch */
 	$ch = curl_init($url);
 	curl_setopt_array($ch, [
@@ -56,7 +57,7 @@ function downloadHttp(string &$url, array $curlOptions = []): string {
 	curl_close($ch);
 	if (!empty($info['url'])) {
 		$url2 = checkUrl($info['url']);
-		if ($url2 != '') {
+		if ($url2 != false) {
 			$url = $url2;	//Possible redirect
 		}
 	}
@@ -96,13 +97,13 @@ function searchFavicon(string &$url): string {
 			$href = ($urlParts['scheme'] ?? 'https') . ':' . $href;
 		}
 
-		$href = SimplePie_IRI::absolutize($baseUrl, $href);
+		$href = \SimplePie\IRI::absolutize($baseUrl, $href);
 		if ($href == false) {
 			return '';
 		}
 
 		$iri = $href->get_iri();
-		$favicon = downloadHttp($iri, array(CURLOPT_REFERER => $url));
+		$favicon = downloadHttp($iri, [CURLOPT_REFERER => $url]);
 		if (isImgMime($favicon)) {
 			return $favicon;
 		}
@@ -121,9 +122,7 @@ function download_favicon(string $url, string $dest): bool {
 		}
 		if ($favicon == '') {
 			$link = $rootUrl . 'favicon.ico';
-			$favicon = downloadHttp($link, array(
-					CURLOPT_REFERER => $url,
-				));
+			$favicon = downloadHttp($link, [CURLOPT_REFERER => $url]);
 			if (!isImgMime($favicon)) {
 				$favicon = '';
 			}

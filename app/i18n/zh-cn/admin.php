@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => '允许匿名阅读默认用户（%s）的文章',
 		'allow_anonymous_refresh' => '允许匿名刷新文章',
-		'api_enabled' => '允许 <abbr>API</abbr> 访问 <small>（用于手机应用）</small>',
+		'api_enabled' => '允许 <abbr>API</abbr> 访问 <small>（用于手机应用 and sharing user queries）</small>',	// DIRTY
 		'form' => '网页表单（传统方式, 需要 JavaScript)',
 		'http' => 'HTTP（面向启用 HTTPS 的高级用户)',
 		'none' => '无（危险）',
@@ -116,6 +116,7 @@ return array(
 		'description' => '描述',
 		'disabled' => '已禁用',
 		'empty_list' => '没有已安装的扩展',
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => '已启用',
 		'latest' => '已安装',
 		'name' => '名称',
@@ -205,7 +206,7 @@ return array(
 		'copiedFromURL' => '从 %s 复制 update.php 到 ./data',
 		'current_version' => '当前 版本为',
 		'last' => '上次检查',
-		'loading' => '更新中...',
+		'loading' => '更新中…',
 		'none' => '没有可用更新',
 		'releaseChannel' => array(
 			'_' => '发布通道',

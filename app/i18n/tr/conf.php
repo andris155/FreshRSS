@@ -22,12 +22,12 @@ return array(
 		'keep_period' => 'Bellekte tutulacak en eski makale tarihi',
 		'keep_unreads' => 'Okunmamaış makaleleri asla silme',
 		'maintenance' => 'Bakım',
-		'optimize' => 'Veritabanı optimize et',
+		'optimize' => 'Veritabanını optimize et',
 		'optimize_help' => 'Bu işlem bazen veritabanı boyutunu düşürmeye yardımcı olur',
 		'policy' => 'Teimzleme politikası',
 		'policy_warning' => 'Eğer temizleme politikası seçilmezse her makale bellekte tutulacaktır.',
 		'purge_now' => 'Şimdi temizle',
-		'title' => 'Arşiv',
+		'title' => 'Arşivleme',
 		'ttl' => 'Şu süreden sık otomatik yenileme yapma',
 	),
 	'display' => array(
@@ -35,7 +35,7 @@ return array(
 		'darkMode' => array(
 			'_' => 'Otomatik karanlık mod',
 			'auto' => 'Otomatik',
-			'help' => 'For compatible themes only',	// TODO
+			'help' => 'Yalnızca uyumlu temalar için',
 			'no' => 'Kapalı',
 		),
 		'icon' => array(
@@ -99,9 +99,19 @@ return array(
 			'previous' => 'Önceki',
 		),
 	),
+	'privacy' => array(
+		'_' => 'Gizlilik',
+		'retrieve_extension_list' => 'Uzantı listesini al',
+	),
 	'profile' => array(
 		'_' => 'Profil yönetimi',
-		'api' => 'API yönetimi',
+		'api' => array(
+			'_' => 'API yönetimi',
+			'check_link' => 'Check API status via: <kbd><a href="../api/" target="_blank">%s</a></kbd>',	// TODO
+			'disabled' => 'The API access is disabled.',	// TODO
+			'documentation_link' => 'See the <a href="https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target="_blank">documentation and list of known apps</a>',	// TODO
+			'help' => 'See <a href="http://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target=_blank>documentation</a>',	// TODO
+		),
 		'delete' => array(
 			'_' => 'Hesap silme',
 			'warn' => 'Hesabınız ve tüm verileriniz silinecek.',
@@ -115,7 +125,7 @@ return array(
 	'query' => array(
 		'_' => 'Kullanıcı sorguları',
 		'deprecated' => 'Bu sorgu artık geçerli değil. İlgili akış veya kategori silinmiş.',
-		'description' => 'Description',	// TODO
+		'description' => 'Açıklama',
 		'filter' => array(
 			'_' => 'Filtre uygulandı:',
 			'categories' => 'Kategoriye göre göster',
@@ -136,16 +146,24 @@ return array(
 		'get_important' => 'Önemli akışındaki makaleleri göster',
 		'get_label' => '“%s” etiketine sahip makaleleri göster',
 		'help' => '<a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">Kullanıcı aramaları ve HTML / RSS / OPML ile paylaşım hakkında dökümantasyonu</a> görüntüleyin.',
-		'image_url' => 'Image URL',	// TODO
+		'image_url' => 'Resim Bağlantısı (URL)',
 		'name' => 'İsim',
 		'no_filter' => 'Filtre yok',
+		'no_queries' => array(
+			'_' => 'No user queries are saved yet.',	// TODO
+			'help' => 'See <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">documentation</a>',	// TODO
+		),
 		'number' => 'Sorgu n°%d',
 		'order_asc' => 'Önce eski makaleleri göster',
 		'order_desc' => 'Önce yeni makaleleri göster',
 		'search' => '“%s” için arama',
 		'share' => array(
 			'_' => 'Bu aramayı linkle paylaşın',
-			'greader' => 'Shareable link to the GReader JSON',	// TODO
+			'disabled' => array(
+				'_' => 'disabled',	// TODO
+				'title' => 'Sharing',	// TODO
+			),
+			'greader' => 'GReader JSON için paylaşılabilir bağlantı',
 			'help' => 'Bu aramayı herhangi biriyle paylaşmak istiyorsanız bu bağlantıyı verin',
 			'html' => 'HTML sayfasına paylaşılabilir bağlantı',
 			'opml' => 'OMPL listesine paylaşılabilir bağlantı',
@@ -173,6 +191,7 @@ return array(
 		'_' => 'Okuma',
 		'after_onread' => '“Hepsini okundu say” dedinten sonra,',
 		'always_show_favorites' => 'Öntanımlı olarak favori tüm makaleleri göster',
+		'apply_to_individual_feed' => 'Tek tek akışlara uygulanır',
 		'article' => array(
 			'authors_date' => array(
 				'_' => 'Yazarlar ve Tarih',
@@ -188,9 +207,9 @@ return array(
 			),
 			'feed_title' => 'Akış Başlığı',
 			'icons' => array(
-				'_' => 'Article icons position<br /><small>(Reading view only)</small>',	// TODO
-				'above_title' => 'Above title',	// TODO
-				'with_authors' => 'In authors and date row',	// TODO
+				'_' => 'Makale simgeleri konumu<br /><small>(Yalnızca okuma görünümü)</small>',
+				'above_title' => 'Başlığın üstünde',
+				'with_authors' => 'Yazarlar ve tarih satırında',
 			),
 			'tags' => array(
 				'_' => 'Etiketler',
@@ -220,7 +239,7 @@ return array(
 		),
 		'hide_read_feeds' => 'Okunmamış makalesi olmayan kategori veya akışı gizle (“Tüm makaleleri göster” komutunda çalışmaz)',
 		'img_with_lazyload' => 'Resimleri yüklemek için “tembel modu” kullan',
-		'jump_next' => 'Bir sonraki benzer okunmamışa geç (akış veya kategori)',
+		'jump_next' => 'Bir sonraki benzer okunmamışa geç',
 		'mark_updated_article_unread' => 'Güncellenen makaleleri okundu olarak işaretle',
 		'number_divided_when_reader' => 'Okuma modunda ikiye bölünecek.',
 		'read' => array(
@@ -232,17 +251,19 @@ return array(
 			'upon_gone' => 'Yeni akışta üst sıralarda değilken',
 			'upon_reception' => 'makale üzerinde gelince',
 			'when' => 'Makaleyi okundu olarak işaretle…',
-			'when_same_title' => 'Aynı başlığa sahip daha yeni bir makale en popüler <i>n</i> yeni metinlerdeyse',
+			'when_same_title_in_category' => 'Eğer kategorinin en yeni <i>n</i> makalesinde aynı başlık zaten mevcutsa',
+			'when_same_title_in_feed' => 'Eğer aynı başlık akışın en yeni <i>n</i> makalesinde zaten mevcutsa',
 		),
 		'show' => array(
 			'_' => 'Gösterilecek makaleler',
 			'active_category' => 'Mevcut kategori',
-			'adaptive' => 'Ayarlanmış gösterim',
+			'adaptive' => 'Show unreads if any, all articles otherwise',	// TODO
 			'all_articles' => 'Tüm makaleleri göster',
 			'all_categories' => 'Tüm kategoriler',
 			'no_category' => 'Hiçbir kategori',
 			'remember_categories' => 'Açık kategorileri hatırla',
 			'unread' => 'Sadece okunmamış makaleleri göster',
+			'unread_or_favorite' => 'Show unreads and favourites',	// TODO
 		),
 		'show_fav_unread_help' => 'Etiketlerde de uygula',
 		'sides_close_article' => 'Makale dışında bir alana tıklamak makaleyi kapatır',
@@ -252,7 +273,7 @@ return array(
 			'older_first' => 'Önce eskiler',
 		),
 		'star' => array(
-			'when' => 'Mark an article as favourite…',	// TODO
+			'when' => 'Bir makaleyi favori olarak işaretle…',
 		),
 		'sticky_post' => 'Makale açıldığında yukarı getir',
 		'title' => 'Okuma',
@@ -266,6 +287,7 @@ return array(
 	'sharing' => array(
 		'_' => 'Paylaşım',
 		'add' => 'Bir paylaşım türü ekle',
+		'bluesky' => 'Bluesky',	// TODO
 		'deprecated' => 'Bu servis kullanımdan kaldırılmıştır ve gelecekteki bir FreshRSS dağıtımında kaldırılacaktır. Daha fazla bilgi için <a href="https://freshrss.github.io/FreshRSS/en/users/08_sharing_services.html" title="Daha fazla bilgi için belgeyi açın" target="_blank">buraya</a> tıklayın.',
 		'diaspora' => 'Diaspora*',	// IGNORE
 		'email' => 'Email',	// IGNORE
@@ -307,7 +329,7 @@ return array(
 		'other_action' => 'Diğer eylemler',
 		'previous_article' => 'Önceki makaleye geç',
 		'reading_view' => 'Okuma görünümüne geç',
-		'rss_view' => 'RSS beslemesi olarak aç',
+		'rss_view' => 'RSS akışı olarak aç',
 		'see_on_website' => 'Orijinal sitede göster',
 		'shift_for_all_read' => 'Önceki makaleyi okundu olarak işaretlemek için + <kbd>Alt ⎇</kbd> kısayolu<br />Tüm makaleleri okundu işaretlemek için + <kbd>⇧ Shift</kbd>kısayolu',
 		'skip_next_article' => 'Açmadan bir sonraki makaleye geç',

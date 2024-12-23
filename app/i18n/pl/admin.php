@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => 'Pozwól na anonimowy odczyt wiadomości domyślnego użytkownika (%s)',
 		'allow_anonymous_refresh' => 'Pozwól na anonimowe odświeżanie wiadomości',
-		'api_enabled' => 'Pozwól na dostęp przez <abbr>API</abbr> <small>(wymagane dla aplikacji na telefon)</small>',
+		'api_enabled' => 'Pozwól na dostęp przez <abbr>API</abbr> <small>(wymagane dla aplikacji na telefon and sharing user queries)</small>',	// DIRTY
 		'form' => 'Formularz na stronie (tradycyjna, wymagany JavaScript)',
 		'http' => 'HTTP (dla zaawansowanych użytkowników, z wykorzystaniem HTTPS)',
 		'none' => 'Brak (niebezpieczna)',
@@ -116,6 +116,7 @@ return array(
 		'description' => 'Opis',
 		'disabled' => 'Wyłączone',
 		'empty_list' => 'Brak zainstalowanych rozszerzeń',
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => 'Włączone',
 		'latest' => 'Zainstalowane',
 		'name' => 'Nazwa',

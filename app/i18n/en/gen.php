@@ -18,9 +18,12 @@ return array(
 		'back_to_rss_feeds' => '← Go back to your RSS feeds',
 		'cancel' => 'Cancel',
 		'create' => 'Create',
+		'delete_all_feeds' => 'Delete all feeds',
+		'delete_errored_feeds' => 'Delete feeds with errors',
 		'delete_muted_feeds' => 'Delete muted feeds',
 		'demote' => 'Demote',
 		'disable' => 'Disable',
+		'download' => 'Download',
 		'empty' => 'Empty',
 		'enable' => 'Enable',
 		'export' => 'Export',
@@ -33,9 +36,9 @@ return array(
 			'open' => 'Open menu',
 		),
 		'nav_buttons' => array(
-			'next' => 'Next article',	// TODO
-			'prev' => 'Previous article',	// TODO
-			'up' => 'Go up',	// TODO
+			'next' => 'Next article',
+			'prev' => 'Previous article',
+			'up' => 'Go up',
 		),
 		'open_url' => 'Open URL',
 		'promote' => 'Promote',
@@ -154,6 +157,7 @@ return array(
 		'en-us' => 'English (United States)',
 		'es' => 'Español',
 		'fa' => 'فارسی',
+		'fi' => 'Suomi',
 		'fr' => 'Français',
 		'he' => 'עברית',
 		'hu' => 'Magyar',
@@ -183,6 +187,7 @@ return array(
 		'display' => 'Display',
 		'extensions' => 'Extensions',
 		'logs' => 'Logs',
+		'privacy' => 'Privacy',
 		'queries' => 'User queries',
 		'reading' => 'Reading',
 		'search' => 'Search words or #tags',
@@ -207,6 +212,7 @@ return array(
 		'archiveIS' => 'archive.is',
 		'archiveORG' => 'archive.org',
 		'archivePH' => 'archive.ph',
+		'bluesky' => 'Bluesky',
 		'buffer' => 'Buffer',
 		'clipboard' => 'Clipboard',
 		'diaspora' => 'Diaspora*',
@@ -228,6 +234,7 @@ return array(
 		'raindrop' => 'Raindrop.io',
 		'reddit' => 'Reddit',
 		'shaarli' => 'Shaarli',
+		'telegram' => 'Telegram',	// IGNORE
 		'twitter' => 'Twitter',
 		'wallabag' => 'wallabag v1',
 		'wallabagv2' => 'wallabag v2',

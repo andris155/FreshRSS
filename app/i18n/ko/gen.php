@@ -18,9 +18,12 @@ return array(
 		'back_to_rss_feeds' => '← RSS 피드로 돌아가기',
 		'cancel' => '취소',
 		'create' => '생성',
+		'delete_all_feeds' => 'Delete all feeds',	// TODO
+		'delete_errored_feeds' => 'Delete feeds with errors',	// TODO
 		'delete_muted_feeds' => '음소거된 피드 삭제',
 		'demote' => '목록 수준 내리기',
 		'disable' => '비활성화',
+		'download' => 'Download',	// TODO
 		'empty' => '비우기',
 		'enable' => '활성화',
 		'export' => '내보내기',
@@ -154,6 +157,7 @@ return array(
 		'en-us' => 'English (United States)',	// IGNORE
 		'es' => 'Español',	// IGNORE
 		'fa' => 'فارسی',	// IGNORE
+		'fi' => 'Suomi',	// IGNORE
 		'fr' => 'Français',	// IGNORE
 		'he' => 'עברית',	// IGNORE
 		'hu' => 'Magyar',	// IGNORE
@@ -183,6 +187,7 @@ return array(
 		'display' => '표시',
 		'extensions' => '확장 기능',
 		'logs' => '로그',
+		'privacy' => 'Privacy',	// TODO
 		'queries' => '사용자 쿼리',
 		'reading' => '읽기',
 		'search' => '단어 또는 #태그 검색',
@@ -207,6 +212,7 @@ return array(
 		'archiveIS' => 'archive.is',	// IGNORE
 		'archiveORG' => 'archive.org',	// IGNORE
 		'archivePH' => 'archive.ph',	// IGNORE
+		'bluesky' => 'Bluesky',	// TODO
 		'buffer' => 'Buffer',	// IGNORE
 		'clipboard' => '클립보드',
 		'diaspora' => 'Diaspora*',	// IGNORE
@@ -228,6 +234,7 @@ return array(
 		'raindrop' => 'Raindrop.io',	// IGNORE
 		'reddit' => 'Reddit',	// IGNORE
 		'shaarli' => 'Shaarli',	// IGNORE
+		'telegram' => 'Telegram',	// IGNORE
 		'twitter' => 'Twitter',	// IGNORE
 		'wallabag' => 'wallabag v1',	// IGNORE
 		'wallabagv2' => 'wallabag v2',	// IGNORE

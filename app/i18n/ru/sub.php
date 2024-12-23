@@ -40,7 +40,7 @@ return array(
 	'feed' => array(
 		'accept_cookies' => 'Разрешить файлы cookies',
 		'accept_cookies_help' => 'Разрешить серверу ленты использовать cookies (файлы будут храниться в памяти лишь в течение запроса)',
-		'add' => 'Добавить RSS-ленту',
+		'add' => 'Добавить ленту',
 		'advanced' => 'Дополнительно',
 		'archiving' => 'Архивирование',
 		'auth' => array(
@@ -57,17 +57,18 @@ return array(
 			'prepend' => 'Добавить перед существующим содержимым',
 			'replace' => 'Заменить существующее содержимое',
 		),
+		'content_retrieval' => 'Content retrieval',	// TODO
 		'css_cookie' => 'Использовать куки при извлечении содержимого статьи',
 		'css_cookie_help' => 'Пример: <kbd>foo=bar; gdpr_consent=true; cookie=value</kbd>',
 		'css_help' => 'Получает усечённые RSS-ленты (осторожно, требует больше времени!)',
 		'css_path' => 'CSS селектор статьи на сайте',
 		'css_path_filter' => array(
 			'_' => 'CSS селектор элемента для удаления',
-			'help' => 'CSS селектор может быть списком как: <kbd>.footer, .aside</kbd>',
+			'help' => 'CSS селектор может быть списком как: <kbd>footer, aside, p[data-sanitized-class~="menu"]</kbd>',
 		),
 		'description' => 'Описание',
 		'empty' => 'Лента пустая. Пожалуйста, убедитесь, что её до сих пор обслуживают.',
-		'error' => 'С этой лентой возникла проблема. Пожалуйста, убедитесь, что она всегда досягаема. Затем снова обновите её.',
+		'error' => 'С этой лентой возникла проблема. Пожалуйста, убедитесь, что она всегда досягаема.',	// DIRTY
 		'export-as-opml' => array(
 			'download' => 'Скачать',
 			'help' => 'XML файл (data subset. <a href="https://freshrss.github.io/FreshRSS/en/developers/OPML.html" target="_blank">See documentation</a>)',	// DIRTY
@@ -77,10 +78,19 @@ return array(
 			'_' => 'Действия фильтрации',
 			'help' => 'Введите по одному поисковому фильтру в строке. См. <a href="https://freshrss.github.io/FreshRSS/en/users/10_filter.html#with-the-search-field" target="_blank">документацию</a>.',
 		),
+		'http_headers' => 'HTTP Headers',	// TODO
+		'http_headers_help' => 'Headers are separated by a newline, and the name and value of a header are separated by a colon (e.g: <kbd><code>Accept: application/atom+xml<br />Authorization: Bearer some-token</code></kbd>).',	// TODO
 		'information' => 'Информация',
 		'keep_min' => 'Оставлять статей не менее',
 		'kind' => array(
 			'_' => 'Тип источника ленты',
+			'html_json' => array(
+				'_' => 'HTML + XPath + JSON dot notation (JSON in HTML)',	// TODO
+				'xpath' => array(
+					'_' => 'XPath for JSON in HTML',	// TODO
+					'help' => 'Example: <code>//script[@type="application/json"]</code>',	// TODO
+				),
+			),
 			'html_xpath' => array(
 				'_' => 'HTML + XPath (парсинг веб-страниц)',
 				'feed_title' => array(
@@ -137,7 +147,7 @@ return array(
 				'help' => 'JSON с точечной нотацией использует точки между объектами и квадратные скобки для массивов (например: <code>data.items[0].title</code>)',
 				'item' => array(
 					'_' => 'Найти новые <strong>элементы</strong><br /><small>(самое важное)</small>',
-					'help' => 'JSON-путь к массиву, содержащему элементы, например: <code>newsItems</code>',
+					'help' => 'JSON-путь к массиву, содержащему элементы, например: <code>$</code> or <code>newsItems</code>',	// DIRTY
 				),
 				'item_author' => 'автор элемента',
 				'item_categories' => 'теги элемента',
@@ -192,6 +202,7 @@ return array(
 		'no_selected' => 'Ленты не выбраны.',
 		'number_entries' => '%d статей',
 		'open_feed' => 'Open feed %s',	// TODO
+		'path_entries_conditions' => 'Conditions for content retrieval',	// TODO
 		'priority' => array(
 			'_' => 'Видимость',
 			'archived' => 'Не показывать (архивировано)',
@@ -219,6 +230,16 @@ return array(
 		'title' => 'Заголовок',
 		'title_add' => 'Добавить RSS-ленту',
 		'ttl' => 'Не обновлять автоматически чаще, чем каждые',
+		'unicityCriteria' => array(
+			'_' => 'Article unicity criteria',	// TODO
+			'forced' => '<span title="Block the unicity criteria, even when the feed has duplicate articles">forced</span>',	// TODO
+			'help' => 'Relevant for invalid feeds.<br />⚠️ Changing the policy will create duplicates.',	// TODO
+			'id' => 'Standard ID (default)',	// TODO
+			'link' => 'Link',	// TODO
+			'sha1:link_published' => 'Link + Date',	// TODO
+			'sha1:link_published_title' => 'Link + Date + Title',	// TODO
+			'sha1:link_published_title_content' => 'Link + Date + Title + Content',	// TODO
+		),
 		'url' => 'URL ленты',
 		'useragent' => 'Указать юзерагент для извлечения лент',
 		'useragent_help' => 'Пример: <kbd>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0)</kbd>',
@@ -227,7 +248,10 @@ return array(
 		'websub' => 'Моментальные оповещения посредством WebSub',
 	),
 	'import_export' => array(
-		'export' => 'Экспорт',
+		'export' => array(
+			'_' => 'Экспорт',
+			'sqlite' => 'Download user database as SQLite',	// TODO
+		),
 		'export_labelled' => 'Экспортировать ваши помеченные статьи',
 		'export_opml' => 'Экспортировать список лент (OPML)',
 		'export_starred' => 'Экспортировать ваше избранное',
@@ -263,6 +287,7 @@ return array(
 		'add_dynamic_opml' => 'Добавить динамичный OPML',
 		'add_feed' => 'Добавить ленту',
 		'add_label' => 'Добавить метку',
+		'add_opml_category' => 'OPML category name',	// TODO
 		'delete_label' => 'Удалить метку',
 		'feed_management' => 'Управление RSS-лентами',
 		'rename_label' => 'Переименовать метку',

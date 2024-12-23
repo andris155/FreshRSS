@@ -78,5 +78,6 @@ class FreshRSS_javascript_Controller extends FreshRSS_ActionController {
 			$this->view->salt1 .= $alphabet[random_int(0, 63)];
 		}
 		$this->view->nonce = sha1('' . mt_rand());
+		Minz_Session::_param('nonce', $this->view->nonce);
 	}
 }

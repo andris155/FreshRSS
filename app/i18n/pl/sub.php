@@ -57,17 +57,18 @@ return array(
 			'prepend' => 'Umieść przed treścią z kanału',
 			'replace' => 'Zastąp treść z kanału',
 		),
+		'content_retrieval' => 'Content retrieval',	// TODO
 		'css_cookie' => 'Użyj plików cookie podczas pobierania wiadomości',
 		'css_cookie_help' => 'Przykład: <kbd>foo=bar; gdpr_consent=true; cookie=value</kbd>',
 		'css_help' => 'Pozwala na ograniczenie zawartości kanałów (uwaga, wymaga więcej czasu!)',
 		'css_path' => 'Selektor CSS dla wiadomości na pierwotnej stronie',
 		'css_path_filter' => array(
 			'_' => 'Selektor CSS elementów do usunięcia',
-			'help' => 'Selector CSS może być listą, na przykład: <kbd>.footer, .aside</kbd>',
+			'help' => 'Selector CSS może być listą, na przykład: <kbd>footer, aside, p[data-sanitized-class~="menu"]</kbd>',
 		),
 		'description' => 'Opis',
 		'empty' => 'Ten kanał jest pusty. Należy sprawdzić czy kanał w dalszym ciągu działa.',
-		'error' => 'Napotkano problem podczas dostępu do tego kanału. Należy sprawdzić czy kanał jest zawsze dostępny, a następnie go odświeżyć.',
+		'error' => 'Napotkano problem podczas dostępu do tego kanału. Należy sprawdzić czy kanał jest zawsze dostępny.',	// DIRTY
 		'export-as-opml' => array(
 			'download' => 'Pobierz',
 			'help' => 'Plik XML (data subset. <a href="https://freshrss.github.io/FreshRSS/en/developers/OPML.html" target="_blank">See documentation</a>)',	// DIRTY
@@ -77,10 +78,19 @@ return array(
 			'_' => 'Akcje filtrowania',
 			'help' => 'Jedno zapytanie na linię. Operatory opisane są w <a href="https://freshrss.github.io/FreshRSS/en/users/10_filter.html#with-the-search-field" target="_blank">dokumentacji</a>.',
 		),
+		'http_headers' => 'HTTP Headers',	// TODO
+		'http_headers_help' => 'Headers are separated by a newline, and the name and value of a header are separated by a colon (e.g: <kbd><code>Accept: application/atom+xml<br />Authorization: Bearer some-token</code></kbd>).',	// TODO
 		'information' => 'Informacja',
 		'keep_min' => 'Minimalna liczba wiadomości do do przechowywania',
 		'kind' => array(
 			'_' => 'Rodzaj źródła kanału',
+			'html_json' => array(
+				'_' => 'HTML + XPath + JSON dot notation (JSON in HTML)',	// TODO
+				'xpath' => array(
+					'_' => 'XPath for JSON in HTML',	// TODO
+					'help' => 'Example: <code>//script[@type="application/json"]</code>',	// TODO
+				),
+			),
 			'html_xpath' => array(
 				'_' => 'HTML + XPath (Web scraping)',	// IGNORE
 				'feed_title' => array(
@@ -137,7 +147,7 @@ return array(
 				'help' => 'JSON oddzielający obiekty kropkami i używający nawiasów kwadratowych dla tablic (na przykład <code>data.items[0].title</code>)',
 				'item' => array(
 					'_' => 'odnajdywanie <strong>wiadomości</strong><br /><small>(najważniejsze)</small>',
-					'help' => 'Ścieżka w JSON-ie do tablicy zawierającej wiadomości, na przykład <code>newsItems</code>',
+					'help' => 'Ścieżka w JSON-ie do tablicy zawierającej wiadomości, na przykład <code>$</code> or <code>newsItems</code>',	// DIRTY
 				),
 				'item_author' => 'autor wiadomości',
 				'item_categories' => 'tagi wiadomości',
@@ -192,6 +202,7 @@ return array(
 		'no_selected' => 'Brak kanałów.',
 		'number_entries' => '%d wiadomości',
 		'open_feed' => 'Open feed %s',	// TODO
+		'path_entries_conditions' => 'Conditions for content retrieval',	// TODO
 		'priority' => array(
 			'_' => 'Widoczność',
 			'archived' => 'Nie pokazuj (zarchiwizowany)',
@@ -219,6 +230,16 @@ return array(
 		'title' => 'Tytuł',
 		'title_add' => 'Dodaj kanał',
 		'ttl' => 'Nie odświeżaj automatycznie częściej niż',
+		'unicityCriteria' => array(
+			'_' => 'Article unicity criteria',	// TODO
+			'forced' => '<span title="Block the unicity criteria, even when the feed has duplicate articles">forced</span>',	// TODO
+			'help' => 'Relevant for invalid feeds.<br />⚠️ Changing the policy will create duplicates.',	// TODO
+			'id' => 'Standard ID (default)',	// TODO
+			'link' => 'Link',	// TODO
+			'sha1:link_published' => 'Link + Date',	// TODO
+			'sha1:link_published_title' => 'Link + Date + Title',	// TODO
+			'sha1:link_published_title_content' => 'Link + Date + Title + Content',	// TODO
+		),
 		'url' => 'Adres kanału',
 		'useragent' => 'Ciąg user agent używany podczas pobierania kanału',
 		'useragent_help' => 'Przykład: <kbd>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0)</kbd>',
@@ -227,7 +248,10 @@ return array(
 		'websub' => 'Natychmiastowe powiadomienia protokołu WebSub',
 	),
 	'import_export' => array(
-		'export' => 'Eksport',
+		'export' => array(
+			'_' => 'Eksport',
+			'sqlite' => 'Download user database as SQLite',	// TODO
+		),
 		'export_labelled' => 'Eksportuj wiadomości z etykietami',
 		'export_opml' => 'Eksportuj listę kanałów (format OPML)',
 		'export_starred' => 'Eksportuj ulubione wiadomości',
@@ -263,6 +287,7 @@ return array(
 		'add_dynamic_opml' => 'Dodaj dynamiczny OPML',
 		'add_feed' => 'Dodaj kanał',
 		'add_label' => 'Dodaj etykietę',
+		'add_opml_category' => 'OPML category name',	// TODO
 		'delete_label' => 'Usuń etykietę',
 		'feed_management' => 'Zarządzanie kanałami RSS',
 		'rename_label' => 'Zmień nazwę etykiety',

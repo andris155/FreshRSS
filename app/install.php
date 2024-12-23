@@ -551,7 +551,7 @@ function printStep2(): void {
 		<div class="form-group">
 			<label class="group-name" for="host"><?= _t('install.bdd.host') ?></label>
 			<div class="group-controls">
-				<input type="text" id="host" name="host" pattern="[0-9A-Z/a-z_.\-]{1,64}(:[0-9]{2,5})?" value="<?=
+				<input type="text" id="host" name="host" pattern="[0-9A-Z\/a-z_.\-]{1,64}(:[0-9]{2,5})?" value="<?=
 					$_SESSION['bd_host'] ?? $system_default_config->db['host'] ?? '' ?>" tabindex="2" />
 			</div>
 		</div>

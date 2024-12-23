@@ -99,9 +99,19 @@ return array(
 			'previous' => 'Anterior',
 		),
 	),
+	'privacy' => array(
+		'_' => 'Privacy',	// TODO
+		'retrieve_extension_list' => 'Retrieve extension list',	// TODO
+	),
 	'profile' => array(
 		'_' => 'Administración de perfiles',
-		'api' => 'Administración de API',
+		'api' => array(
+			'_' => 'Administración de API',
+			'check_link' => 'Check API status via: <kbd><a href="../api/" target="_blank">%s</a></kbd>',	// TODO
+			'disabled' => 'The API access is disabled.',	// TODO
+			'documentation_link' => 'See the <a href="https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target="_blank">documentation and list of known apps</a>',	// TODO
+			'help' => 'See <a href="http://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target=_blank>documentation</a>',	// TODO
+		),
 		'delete' => array(
 			'_' => 'Borrar cuenta',
 			'warn' => 'Tu cuenta y todos los datos asociados serán eliminados.',
@@ -139,13 +149,21 @@ return array(
 		'image_url' => 'URL de la imagen',
 		'name' => 'Nombre',
 		'no_filter' => 'Sin filtro',
+		'no_queries' => array(
+			'_' => 'No user queries are saved yet.',	// TODO
+			'help' => 'See <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">documentation</a>',	// TODO
+		),
 		'number' => 'Consulta n° %d',
 		'order_asc' => 'Mostrar primero los artículos más antiguos',
 		'order_desc' => 'Mostrar primero los artículos más recientes',
 		'search' => 'Buscar “%s”',
 		'share' => array(
 			'_' => 'Comparte esta consulta por enlace',
-			'greader' => 'Shareable link to the GReader JSON',	// TODO
+			'disabled' => array(
+				'_' => 'disabled',	// TODO
+				'title' => 'Sharing',	// TODO
+			),
+			'greader' => 'Enlace para compartir en GReader',
 			'help' => 'Dale este enlace si quieres compartir esta consulta con alguien',
 			'html' => 'Enlace para compartir a la página HTML',
 			'opml' => 'Enlace para compartir a la lista de fuentes de OPML',
@@ -173,6 +191,7 @@ return array(
 		'_' => 'Lectura',
 		'after_onread' => 'Tras “marcar todo como leído”,',
 		'always_show_favorites' => 'Mostrar todos los artículos en favoritos de forma predeterminada',
+		'apply_to_individual_feed' => 'Applies to feeds individually',	// TODO
 		'article' => array(
 			'authors_date' => array(
 				'_' => 'Autores y fecha',
@@ -220,7 +239,7 @@ return array(
 		),
 		'hide_read_feeds' => 'Ocultar categorías & fuentes sin artículos no leídos (no funciona con la configuración “Mostrar todos los artículos”)',
 		'img_with_lazyload' => 'Usar el modo de “carga perezosa” para las imágenes',
-		'jump_next' => 'saltar al siguiente archivo sin leer emparentado (fuente o categoría)',
+		'jump_next' => 'saltar al siguiente archivo sin leer emparentado',
 		'mark_updated_article_unread' => 'Marcar artículos actualizados como no leídos',
 		'number_divided_when_reader' => 'Dividido en 2 en la vista de lectura.',
 		'read' => array(
@@ -232,17 +251,19 @@ return array(
 			'upon_gone' => 'cuando ya no está disponible en la fuente de noticias previa',
 			'upon_reception' => 'al recibir el artículo',
 			'when' => 'Marcar el artículo como leído…',
-			'when_same_title' => 'Si ya existe un título idéntico en la parte superior <i>n</i> artículos más recientes',
+			'when_same_title_in_category' => 'if an identical title already exists in the top <i>n</i> newest articles of the category',	// TODO
+			'when_same_title_in_feed' => 'Si ya existe un título idéntico en la parte superior <i>n</i> artículos más recientes (of the feed)',	// DIRTY
 		),
 		'show' => array(
 			'_' => 'Artículos a mostrar',
 			'active_category' => 'Categoría activa',
-			'adaptive' => 'Ajustar la visualización',
+			'adaptive' => 'Show unreads if any, all articles otherwise',	// TODO
 			'all_articles' => 'Mostrar todos los artículos',
 			'all_categories' => 'Todas las categorías',
 			'no_category' => 'Sin categoría',
 			'remember_categories' => 'Recordar categorías abiertas',
 			'unread' => 'Mostrar solo pendientes',
+			'unread_or_favorite' => 'Show unreads and favourites',	// TODO
 		),
 		'show_fav_unread_help' => 'Se aplica también en las etiquetas',
 		'sides_close_article' => 'Pinchar fuera del área de texto del artículo lo cerrará',
@@ -252,7 +273,7 @@ return array(
 			'older_first' => 'Antiguos primero',
 		),
 		'star' => array(
-			'when' => 'Mark an article as favourite…',	// TODO
+			'when' => 'Marca un árticulo como favorito…',
 		),
 		'sticky_post' => 'Pegar el artículo a la parte superior al abrirlo',
 		'title' => 'Lectura',
@@ -266,6 +287,7 @@ return array(
 	'sharing' => array(
 		'_' => 'Compartir',
 		'add' => 'Agregar un método de uso compartido',
+		'bluesky' => 'Bluesky',	// TODO
 		'deprecated' => 'Este servicio está obsoleto y será removido de FreshRSS en un<a href="https://freshrss.github.io/FreshRSS/en/users/08_sharing_services.html" title="Abrir la documentación para más información" target="_blank">futuro lanzamiento</a>.',
 		'diaspora' => 'Diaspora*',	// IGNORE
 		'email' => 'Correo electrónico',
@@ -279,7 +301,7 @@ return array(
 		'share_url' => 'Compartir URL a usar',
 		'title' => 'Compartir',
 		'twitter' => 'Twitter',	// IGNORE
-		'wallabag' => 'wallabag',	// IGNORE
+		'wallabag' => 'Wallabag',	// IGNORE
 	),
 	'shortcut' => array(
 		'_' => 'Atajos de teclado',

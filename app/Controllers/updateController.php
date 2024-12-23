@@ -89,11 +89,11 @@ class FreshRSS_update_Controller extends FreshRSS_ActionController {
 		chdir($cwd);
 		$line = implode('; ', $output);
 		return $line == '' ||
-			strpos($line, '[behind') !== false || strpos($line, '[ahead') !== false || strpos($line, '[gone') !== false;
+			str_contains($line, '[behind') || str_contains($line, '[ahead') || str_contains($line, '[gone');
 	}
 
 	/** @return string|true */
-	public static function gitPull() {
+	public static function gitPull(): string|bool {
 		Minz_Log::notice(_t('admin.update.viaGit'));
 		$cwd = getcwd();
 		if ($cwd === false) {
@@ -169,8 +169,7 @@ class FreshRSS_update_Controller extends FreshRSS_ActionController {
 	}
 
 	private function is_release_channel_stable(string $currentVersion): bool {
-		return strpos($currentVersion, 'dev') === false &&
-			strpos($currentVersion, 'edge') === false;
+		return !str_contains($currentVersion, 'dev') && !str_contains($currentVersion, 'edge');
 	}
 
 	/*  Check installation if there is a newer version.
@@ -239,7 +238,7 @@ class FreshRSS_update_Controller extends FreshRSS_ActionController {
 
 			$res_array = explode("\n", (string)$result, 2);
 			$status = $res_array[0];
-			if (strpos($status, 'UPDATE') !== 0) {
+			if (!str_starts_with($status, 'UPDATE')) {
 				$this->view->message = [
 					'status' => 'latest',
 					'body' => _t('feedback.update.none'),

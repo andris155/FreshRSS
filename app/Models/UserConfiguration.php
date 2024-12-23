@@ -61,6 +61,7 @@ declare(strict_types=1);
  * @property bool $topline_date
  * @property bool $topline_display_authors
  * @property bool $topline_favorite
+ * @property bool $topline_myLabels
  * @property bool $topline_sharing
  * @property bool $topline_link
  * @property bool $topline_read
@@ -73,6 +74,7 @@ declare(strict_types=1);
  * @property string $view_mode
  * @property array<string,bool|int|string> $volatile
  * @property array<string,array<string,mixed>> $extensions
+ * @property bool $retrieve_extension_list
  */
 final class FreshRSS_UserConfiguration extends Minz_Configuration {
 	use FreshRSS_FilterActionsTrait;

@@ -224,15 +224,15 @@ final class FreshRSS_Context {
 
 		self::$state = Minz_Request::paramInt('state') ?: FreshRSS_Context::userConf()->default_state;
 		$state_forced_by_user = Minz_Request::paramString('state') !== '';
-		if (!$state_forced_by_user && !self::isStateEnabled(FreshRSS_Entry::STATE_READ)) {
-			if (FreshRSS_Context::userConf()->default_view === 'all') {
-				self::$state |= FreshRSS_Entry::STATE_ALL;
+		if (!$state_forced_by_user) {
+			if (FreshRSS_Context::userConf()->show_fav_unread && (self::isCurrentGet('s') || self::isCurrentGet('T') || self::isTag())) {
+				self::$state = FreshRSS_Entry::STATE_NOT_READ | FreshRSS_Entry::STATE_READ;
+			} elseif (FreshRSS_Context::userConf()->default_view === 'all') {
+				self::$state = FreshRSS_Entry::STATE_NOT_READ | FreshRSS_Entry::STATE_READ;
+			} elseif (FreshRSS_Context::userConf()->default_view === 'unread_or_favorite') {
+				self::$state = FreshRSS_Entry::STATE_OR_NOT_READ | FreshRSS_Entry::STATE_OR_FAVORITE;
 			} elseif (FreshRSS_Context::userConf()->default_view === 'adaptive' && self::$get_unread <= 0) {
-				self::$state |= FreshRSS_Entry::STATE_READ;
-			}
-			if (FreshRSS_Context::userConf()->show_fav_unread &&
-					(self::isCurrentGet('s') || self::isCurrentGet('T') || self::isTag())) {
-				self::$state |= FreshRSS_Entry::STATE_READ;
+				self::$state = FreshRSS_Entry::STATE_NOT_READ | FreshRSS_Entry::STATE_READ;
 			}
 		}
 
@@ -274,7 +274,7 @@ final class FreshRSS_Context {
 	 * @phpstan-return ($asArray is true ? array{'a'|'c'|'f'|'i'|'s'|'t'|'T',bool|int} : string)
 	 * @return string|array{string,bool|int}
 	 */
-	public static function currentGet(bool $asArray = false) {
+	public static function currentGet(bool $asArray = false): string|array {
 		if (self::$current_get['all']) {
 			return $asArray ? ['a', true] : 'a';
 		} elseif (self::$current_get['important']) {
@@ -347,24 +347,16 @@ final class FreshRSS_Context {
 		$type = substr($get, 0, 1);
 		$id = substr($get, 2);
 
-		switch ($type) {
-			case 'a':
-				return self::$current_get['all'];
-			case 'i':
-				return self::$current_get['important'];
-			case 's':
-				return self::$current_get['starred'];
-			case 'f':
-				return self::$current_get['feed'] == $id;
-			case 'c':
-				return self::$current_get['category'] == $id;
-			case 't':
-				return self::$current_get['tag'] == $id;
-			case 'T':
-				return self::$current_get['tags'] || self::$current_get['tag'];
-			default:
-				return false;
-		}
+		return match ($type) {
+			'a' => self::$current_get['all'],
+			'i' => self::$current_get['important'],
+			's' => self::$current_get['starred'],
+			'f' => self::$current_get['feed'] == $id,
+			'c' => self::$current_get['category'] == $id,
+			't' => self::$current_get['tag'] == $id,
+			'T' => self::$current_get['tags'] || self::$current_get['tag'],
+			default => false,
+		};
 	}
 
 	/**
@@ -541,6 +533,14 @@ final class FreshRSS_Context {
 					// If there is no more unread category, show main stream
 					self::$next_get = $another_unread_id == '' ? 'a' : 'c_' . $another_unread_id;
 					break;
+				case 't':
+					// We can't know what the next unread tag is because entries can be in multiple tags
+					// so marking all entries in a tag can indirectly mark all entries in multiple tags.
+					// Default is to return to the current tag, so mark it as next_get = 'a' instead when
+					// userconf -> onread_jump_next so the readAction knows to jump to the next unread
+					// tag.
+					self::$next_get = 'a';
+					break;
 			}
 		}
 	}
@@ -553,16 +553,8 @@ final class FreshRSS_Context {
 	 *   - the "unread" state is enable
 	 */
 	public static function isAutoRemoveAvailable(): bool {
-		if (!FreshRSS_Context::userConf()->auto_remove_article) {
-			return false;
-		}
-		if (self::isStateEnabled(FreshRSS_Entry::STATE_READ)) {
-			return false;
-		}
-		if (!self::isStateEnabled(FreshRSS_Entry::STATE_NOT_READ)) {
-			return false;
-		}
-		return true;
+		return FreshRSS_Context::userConf()->auto_remove_article && !self::isStateEnabled(FreshRSS_Entry::STATE_READ) &&
+			(self::isStateEnabled(FreshRSS_Entry::STATE_NOT_READ) || self::isStateEnabled(FreshRSS_Entry::STATE_OR_NOT_READ));
 	}
 
 	/**

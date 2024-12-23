@@ -40,7 +40,7 @@ return array(
 	'feed' => array(
 		'accept_cookies' => 'Aceptar cookies',
 		'accept_cookies_help' => 'Permitir que el servidor de fuentes configure las cookies (guardadas en memoria únicamente para el tiempo de vida de la solicitud)',
-		'add' => 'Añadir fuente RSS',
+		'add' => 'Añadir fuente',
 		'advanced' => 'Avanzado',
 		'archiving' => 'Archivo',
 		'auth' => array(
@@ -57,30 +57,40 @@ return array(
 			'prepend' => 'Añadir antes del contenido existente',
 			'replace' => 'Reemplazar contenido existente',
 		),
+		'content_retrieval' => 'Content retrieval',	// TODO
 		'css_cookie' => 'Usar cookies al obtener el contenido del artículo',
 		'css_cookie_help' => 'Ejemplo: <kbd>foo=bar; gdpr_consent=true; cookie=value</kbd>',
 		'css_help' => 'Recibir fuentes RSS truncadas (aviso, ¡necesita más tiempo!)',
 		'css_path' => 'Ruta a la CSS de los artículos en la web original',
 		'css_path_filter' => array(
 			'_' => 'Selector CSS de los elementos a remover',
-			'help' => 'Un selector CSS puede ser una lista, por ejemplo: <kbd>.footer, .aside</kbd>',
+			'help' => 'Un selector CSS puede ser una lista, por ejemplo: <kbd>footer, aside, p[data-sanitized-class~="menu"]</kbd>',
 		),
 		'description' => 'Descripción',
 		'empty' => 'La fuente está vacía. Por favor, verifica que siga activa.',
-		'error' => 'Hay un problema con esta fuente. Por favor, verifica que esté disponible y prueba de nuevo.',
+		'error' => 'Hay un problema con esta fuente. Por favor, verifica que esté disponible.',	// DIRTY
 		'export-as-opml' => array(
 			'download' => 'Descargar',
-			'help' => 'archivo XML (data subset. <a href="https://freshrss.github.io/FreshRSS/en/developers/OPML.html" target="_blank">See documentation</a>)',	// DIRTY
+			'help' => 'archivo XML (conjunto de datos. <a href="https://freshrss.github.io/FreshRSS/en/developers/OPML.html" target="_blank">Ver la documentación</a>)',
 			'label' => 'Exportar como OPML',
 		),
 		'filteractions' => array(
 			'_' => 'Filtrar acciones',
 			'help' => 'Escribir un filtro de búsqueda por línea. Ver <a href="https://freshrss.github.io/FreshRSS/en/users/10_filter.html#with-the-search-field" target="_blank">documentación de operadores de búsqueda</a>.',
 		),
+		'http_headers' => 'HTTP Headers',	// IGNORE
+		'http_headers_help' => 'Los Headers son separados por un salto de linea, y el nombre y valor de un Header son separados con dos puntos (e.g: <kbd><code>Accept: application/atom+xml<br />Authorization: Bearer some-token</code></kbd>).',
 		'information' => 'Información',
 		'keep_min' => 'Número mínimo de artículos a conservar',
 		'kind' => array(
 			'_' => 'Tipo de origen de la fuente',
+			'html_json' => array(
+				'_' => 'HTML + XPath + JSON dot notation (JSON en HTML)',
+				'xpath' => array(
+					'_' => 'XPath para JSON en HTML',
+					'help' => 'Ejemplo: <code>//script[@type="application/json"]</code>',
+				),
+			),
 			'html_xpath' => array(
 				'_' => 'HTML + XPath (Web scraping)',	// IGNORE
 				'feed_title' => array(
@@ -137,7 +147,7 @@ return array(
 				'help' => 'Un punto JSON anotado utiliza puntos entre objetos y corchetes para matrices (ejemplo: <code>data.items[0].title</code>)',
 				'item' => array(
 					'_' => 'buscando nuevos <strong>items</strong><br /><small>(más importante)</small>',
-					'help' => 'Ruta JSON a la matriz que contiene los elementos, ejemplo: <code>newsItems</code>',
+					'help' => 'Ruta JSON a la matriz que contiene los elementos, ejemplo: <code>$</code> o <code>newsItems</code>',
 				),
 				'item_author' => 'autor del item',
 				'item_categories' => 'etiquetas del item',
@@ -192,6 +202,7 @@ return array(
 		'no_selected' => 'No hay fuentes seleccionadas.',
 		'number_entries' => '%d artículos',
 		'open_feed' => 'Fuente abierta %s',
+		'path_entries_conditions' => 'Conditions for content retrieval',	// TODO
 		'priority' => array(
 			'_' => 'Visibilidad',
 			'archived' => 'No mostrar (archivado)',
@@ -219,6 +230,16 @@ return array(
 		'title' => 'Título',
 		'title_add' => 'Añadir fuente RSS',
 		'ttl' => 'No actualizar de forma automática con una frecuencia mayor a',
+		'unicityCriteria' => array(
+			'_' => 'Criterio de único artículo',
+			'forced' => '<span title="Bloquea el criterio de unicidad, aún cuando la fuente tiene artículos duplicados">forced</span>',
+			'help' => 'Relevante para fuentes inválidas.<br />⚠️ Cambiar la política creara duplicados.',
+			'id' => 'ID Estándar (por defecto)',
+			'link' => 'Link',	// IGNORE
+			'sha1:link_published' => 'Link + Fecha',
+			'sha1:link_published_title' => 'Link + Fecha + Título',
+			'sha1:link_published_title_content' => 'Link + Fecha + Título + Contenido',
+		),
 		'url' => 'URL de la fuente',
 		'useragent' => 'Selecciona el agente de usuario por recuperar la fuente',
 		'useragent_help' => 'Ejemplo: <kbd>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0)</kbd>',
@@ -227,7 +248,10 @@ return array(
 		'websub' => 'Notificación inmediata con WebSub',
 	),
 	'import_export' => array(
-		'export' => 'Exportar',
+		'export' => array(
+			'_' => 'Exportar',
+			'sqlite' => 'Download user database as SQLite',	// TODO
+		),
 		'export_labelled' => 'Exporta tus artículos etiquetados',
 		'export_opml' => 'Exportar la lista de fuentes (OPML)',
 		'export_starred' => 'Exportar tus favoritos',
@@ -263,6 +287,7 @@ return array(
 		'add_dynamic_opml' => 'Agrega un OPML dinámico',
 		'add_feed' => 'Añadir una fuente',
 		'add_label' => 'Añadir una etiqueta',
+		'add_opml_category' => 'OPML category name',	// TODO
 		'delete_label' => 'Eliminar una etiqueta',
 		'feed_management' => 'Administración de fuentes RSS',
 		'rename_label' => 'Cambiar el nombre de una etiqueta',

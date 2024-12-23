@@ -181,7 +181,7 @@ class FreshRSS_Category extends Minz_Model {
 		$opml = httpGet($url, $cachePath, 'opml', $this->attributes(), $this->curlOptions());
 		if ($opml == '') {
 			Minz_Log::warning('Error getting dynamic OPML for category ' . $this->id() . '! ' .
-				SimplePie_Misc::url_remove_credentials($url));
+				\SimplePie\Misc::url_remove_credentials($url));
 			$ok = false;
 		} else {
 			$dryRunCategory = new FreshRSS_Category();
@@ -229,7 +229,7 @@ class FreshRSS_Category extends Minz_Model {
 			} else {
 				$ok = false;
 				Minz_Log::warning('Error loading dynamic OPML for category ' . $this->id() . '! ' .
-					SimplePie_Misc::url_remove_credentials($url));
+					\SimplePie\Misc::url_remove_credentials($url));
 			}
 		}
 
@@ -243,9 +243,7 @@ class FreshRSS_Category extends Minz_Model {
 		if ($this->feeds === null) {
 			return;
 		}
-		uasort($this->feeds, static function (FreshRSS_Feed $a, FreshRSS_Feed $b) {
-			return strnatcasecmp($a->name(), $b->name());
-		});
+		uasort($this->feeds, static fn(FreshRSS_Feed $a, FreshRSS_Feed $b) => strnatcasecmp($a->name(), $b->name()));
 	}
 
 	/**

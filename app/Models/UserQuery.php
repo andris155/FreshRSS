@@ -8,23 +8,20 @@ declare(strict_types=1);
  * easy way.
  */
 class FreshRSS_UserQuery {
-
 	private bool $deprecated = false;
 	private string $get = '';
 	private string $get_name = '';
 	private string $get_type = '';
+	/** XML-encoded name */
 	private string $name = '';
 	private string $order = '';
-	private FreshRSS_BooleanSearch $search;
+	private readonly FreshRSS_BooleanSearch $search;
 	private int $state = 0;
 	private string $url = '';
 	private string $token = '';
 	private bool $shareRss = false;
 	private bool $shareOpml = false;
-	/** @var array<int,FreshRSS_Category> $categories */
-	private array $categories;
-	/** @var array<int,FreshRSS_Tag> $labels */
-	private array $labels;
+	/** XML-encoded description */
 	private string $description = '';
 	private string $imageUrl = '';
 
@@ -46,9 +43,11 @@ class FreshRSS_UserQuery {
 	 * @param array<int,FreshRSS_Category> $categories
 	 * @param array<int,FreshRSS_Tag> $labels
 	 */
-	public function __construct(array $query, array $categories, array $labels) {
-		$this->categories = $categories;
-		$this->labels = $labels;
+	public function __construct(
+		array $query,
+		private array $categories,
+		private array $labels,
+	) {
 		if (isset($query['get'])) {
 			$this->parseGet($query['get']);
 		} else {
@@ -93,7 +92,7 @@ class FreshRSS_UserQuery {
 		}
 
 		// linked too deeply with the search object, need to use dependency injection
-		$this->search = new FreshRSS_BooleanSearch($query['search'], 0, 'AND', false);
+		$this->search = new FreshRSS_BooleanSearch($query['search'], 0, 'AND', allowUserQueries: true);
 		if (!empty($query['state'])) {
 			$this->state = intval($query['state']);
 		}

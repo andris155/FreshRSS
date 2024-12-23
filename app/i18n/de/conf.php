@@ -35,7 +35,7 @@ return array(
 		'darkMode' => array(
 			'_' => 'Automatischer Dunkel-Modus',
 			'auto' => 'Automatisch',
-			'help' => 'For compatible themes only',	// TODO
+			'help' => 'Nur für kompatible Layouts',
 			'no' => 'Nein',
 		),
 		'icon' => array(
@@ -99,9 +99,19 @@ return array(
 			'previous' => 'Vorherige',
 		),
 	),
+	'privacy' => array(
+		'_' => 'Privatsphäre',
+		'retrieve_extension_list' => 'Erweiterungsliste abrufen',
+	),
 	'profile' => array(
 		'_' => 'Profil-Verwaltung',
-		'api' => 'API-Verwaltung',
+		'api' => array(
+			'_' => 'API-Verwaltung',
+			'check_link' => 'API-Status prüfen: <kbd><a href="../api/" target="_blank">%s</a></kbd>',
+			'disabled' => 'Der API-Zugriff ist deaktiviert.',
+			'documentation_link' => 'Siehe die <a href="https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target="_blank">Dokumentation und die Liste der bekannten Apps</a>',
+			'help' => 'Siehe <a href="http://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target=_blank>Dokumentation</a>',
+		),
 		'delete' => array(
 			'_' => 'Accountlöschung',
 			'warn' => 'Dieser Account und alle damit bezogenen Daten werden gelöscht.',
@@ -115,7 +125,7 @@ return array(
 	'query' => array(
 		'_' => 'Benutzerabfragen',
 		'deprecated' => 'Diese Abfrage ist nicht länger gültig. Die referenzierte Kategorie oder der Feed ist gelöscht worden.',
-		'description' => 'Description',	// TODO
+		'description' => 'Beschreibung',
 		'filter' => array(
 			'_' => 'Angewendeter Filter:',
 			'categories' => 'Nach Kategorie filtern',
@@ -136,16 +146,24 @@ return array(
 		'get_important' => 'Alle Artikel von den "Wichtige Feeds" anzeigen',
 		'get_label' => 'Artikel mit dem Label “%s” anzeigen',
 		'help' => 'Siehe die <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">Dokumentation für Benutzerabfragen und Teilen via HTML / RSS / OPML</a>.',
-		'image_url' => 'Image URL',	// TODO
+		'image_url' => 'Bild-URL',
 		'name' => 'Name',	// IGNORE
 		'no_filter' => 'Kein Filter',
+		'no_queries' => array(
+			'_' => 'Keine Benutzerabfrage vorhanden.',
+			'help' => 'Siehe <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">Dokumentation</a>',
+		),
 		'number' => 'Abfrage Nr. %d',
 		'order_asc' => 'Älteste Artikel zuerst anzeigen',
 		'order_desc' => 'Neueste Artikel zuerst anzeigen',
 		'search' => 'Suche nach „%s“',
 		'share' => array(
 			'_' => 'Diese Benutzerabfrage per Link teilen',
-			'greader' => 'Shareable link to the GReader JSON',	// TODO
+			'disabled' => array(
+				'_' => 'deaktiviert',
+				'title' => 'Teilen',
+			),
+			'greader' => 'Verteilbarer Link für GReader JSON',
 			'help' => 'Diesen Link verteilen, um in mit Jedem zu teilen',
 			'html' => 'Verteilbarer Link zur HTML-Seite',
 			'opml' => 'Verteilbarer Link zur OPML Liste der Feeds',
@@ -173,6 +191,7 @@ return array(
 		'_' => 'Lesen',
 		'after_onread' => 'Nach „Alle als gelesen markieren“,',
 		'always_show_favorites' => 'Favoriten immer anzeigen',
+		'apply_to_individual_feed' => 'Betrifft die Feeds einzeln.',
 		'article' => array(
 			'authors_date' => array(
 				'_' => 'Autoren und Datum',
@@ -188,9 +207,9 @@ return array(
 			),
 			'feed_title' => 'Feed Titel',
 			'icons' => array(
-				'_' => 'Article icons position<br /><small>(Reading view only)</small>',	// TODO
-				'above_title' => 'Above title',	// TODO
-				'with_authors' => 'In authors and date row',	// TODO
+				'_' => 'Artikel-Icon-Position<br /><small>(Nur in der Lese-Ansicht)</small>',
+				'above_title' => 'Über dem Titel',
+				'with_authors' => 'In der Autoren- und Datumszeile',
 			),
 			'tags' => array(
 				'_' => 'Hashtags',
@@ -220,7 +239,7 @@ return array(
 		),
 		'hide_read_feeds' => 'Kategorien & Feeds ohne ungelesene Artikel verstecken (funktioniert nicht mit der Einstellung „Alle Artikel zeigen“)',
 		'img_with_lazyload' => 'Verwende die „träges Laden“-Methode zum Laden von Bildern',
-		'jump_next' => 'springe zum nächsten ungelesenen Geschwisterelement (Feed oder Kategorie)',
+		'jump_next' => 'springe zum nächsten ungelesenen Geschwisterelement',
 		'mark_updated_article_unread' => 'Markieren Sie aktualisierte Artikel als ungelesen',
 		'number_divided_when_reader' => 'Geteilt durch 2 in der Lese-Ansicht.',
 		'read' => array(
@@ -232,17 +251,19 @@ return array(
 			'upon_gone' => 'wenn der Artikel nicht mehr im Feed enthalten ist',
 			'upon_reception' => 'beim Empfang des Artikels',
 			'when' => 'Artikel als gelesen markieren…',
-			'when_same_title' => 'falls der identische Titel bereit in den <i>n</i> neusten Artikel vorhanden ist.',
+			'when_same_title_in_category' => 'falls der identische Titel bereits in den <i>n</i> neusten Artikel in der Kategorie vorhanden ist.',
+			'when_same_title_in_feed' => 'falls der identische Titel bereits in den <i>n</i> neusten Artikel (im Feed) vorhanden ist.',
 		),
 		'show' => array(
 			'_' => 'Artikel zum Anzeigen',
 			'active_category' => 'Aktive Kategorie',
-			'adaptive' => 'Anzeige anpassen',
+			'adaptive' => 'Show unreads if any, all articles otherwise',	// TODO
 			'all_articles' => 'Alle Artikel zeigen',
 			'all_categories' => 'Alle Kategorien',
 			'no_category' => 'Keine Kategorie',
 			'remember_categories' => 'Geöffnete Kategorien merken',
 			'unread' => 'Nur ungelesene zeigen',
+			'unread_or_favorite' => 'Show unreads and favourites',	// TODO
 		),
 		'show_fav_unread_help' => 'Auch auf Labels anwenden',
 		'sides_close_article' => 'Klick außerhalb des Artikel-Textes schließt den Artikel',
@@ -252,7 +273,7 @@ return array(
 			'older_first' => 'Ältere zuerst',
 		),
 		'star' => array(
-			'when' => 'Mark an article as favourite…',	// TODO
+			'when' => 'Markiere einen Artikel als Favoriten…',
 		),
 		'sticky_post' => 'Wenn geöffnet, den Artikel ganz oben anheften',
 		'title' => 'Lesen',
@@ -266,6 +287,7 @@ return array(
 	'sharing' => array(
 		'_' => 'Teilen',
 		'add' => 'Füge eine Teilen-Dienst hinzu',
+		'bluesky' => 'Bluesky',	// TODO
 		'deprecated' => 'Dieser Dienst ist veraltet und wir in einer <a href="https://freshrss.github.io/FreshRSS/en/users/08_sharing_services.html" title="Open documentation for more information" target="_blank">zukünftigen FreshRSS-Version</a> entfernt.',
 		'diaspora' => 'Diaspora*',	// IGNORE
 		'email' => 'E-Mail',

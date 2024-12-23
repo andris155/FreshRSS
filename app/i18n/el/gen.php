@@ -18,9 +18,12 @@ return array(
 		'back_to_rss_feeds' => '← Go back to your RSS feeds',	// TODO
 		'cancel' => 'Cancel',	// TODO
 		'create' => 'Create',	// TODO
+		'delete_all_feeds' => 'Delete all feeds',	// TODO
+		'delete_errored_feeds' => 'Delete feeds with errors',	// TODO
 		'delete_muted_feeds' => 'Delete muted feeds',	// TODO
 		'demote' => 'Demote',	// TODO
 		'disable' => 'Disable',	// TODO
+		'download' => 'Download',	// TODO
 		'empty' => 'Empty',	// TODO
 		'enable' => 'Enable',	// TODO
 		'export' => 'Export',	// TODO
@@ -154,6 +157,7 @@ return array(
 		'en-us' => 'English (United States)',	// IGNORE
 		'es' => 'Español',	// IGNORE
 		'fa' => 'فارسی',	// IGNORE
+		'fi' => 'Suomi',	// IGNORE
 		'fr' => 'Français',	// IGNORE
 		'he' => 'עברית',	// IGNORE
 		'hu' => 'Magyar',	// IGNORE
@@ -183,6 +187,7 @@ return array(
 		'display' => 'Display',	// TODO
 		'extensions' => 'Extensions',	// TODO
 		'logs' => 'Logs',	// TODO
+		'privacy' => 'Privacy',	// TODO
 		'queries' => 'User queries',	// TODO
 		'reading' => 'Reading',	// TODO
 		'search' => 'Search words or #tags',	// TODO
@@ -207,6 +212,7 @@ return array(
 		'archiveIS' => 'archive.is',	// IGNORE
 		'archiveORG' => 'archive.org',	// IGNORE
 		'archivePH' => 'archive.ph',	// TODO
+		'bluesky' => 'Bluesky',	// TODO
 		'buffer' => 'Buffer',	// IGNORE
 		'clipboard' => 'Clipboard',	// TODO
 		'diaspora' => 'Diaspora*',	// TODO
@@ -228,6 +234,7 @@ return array(
 		'raindrop' => 'Raindrop.io',	// TODO
 		'reddit' => 'Reddit',	// TODO
 		'shaarli' => 'Shaarli',	// TODO
+		'telegram' => 'Telegram',	// IGNORE
 		'twitter' => 'Twitter',	// TODO
 		'wallabag' => 'wallabag v1',	// TODO
 		'wallabagv2' => 'wallabag v2',	// TODO

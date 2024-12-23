@@ -18,9 +18,12 @@ return array(
 		'back_to_rss_feeds' => '← חזרה להזנות הRSS שלך',
 		'cancel' => 'ביטול',
 		'create' => 'יצירה',
+		'delete_all_feeds' => 'Delete all feeds',	// TODO
+		'delete_errored_feeds' => 'Delete feeds with errors',	// TODO
 		'delete_muted_feeds' => 'Delete muted feeds',	// TODO
 		'demote' => 'Demote',	// TODO
 		'disable' => 'Disable',	// TODO
+		'download' => 'Download',	// TODO
 		'empty' => 'Empty',	// TODO
 		'enable' => 'Enable',	// TODO
 		'export' => 'ייצוא',
@@ -154,6 +157,7 @@ return array(
 		'en-us' => 'English (United States)',	// IGNORE
 		'es' => 'Español',	// IGNORE
 		'fa' => 'فارسی',	// IGNORE
+		'fi' => 'Suomi',	// IGNORE
 		'fr' => 'Français',	// IGNORE
 		'he' => 'עברית',	// IGNORE
 		'hu' => 'Magyar',	// IGNORE
@@ -183,6 +187,7 @@ return array(
 		'display' => 'תצוגה',
 		'extensions' => 'Extensions',	// TODO
 		'logs' => 'לוגים',
+		'privacy' => 'Privacy',	// TODO
 		'queries' => 'שאילתות',
 		'reading' => 'קריאה',
 		'search' => 'חיפוש מילים או #תגים',
@@ -207,6 +212,7 @@ return array(
 		'archiveIS' => 'archive.is',	// IGNORE
 		'archiveORG' => 'archive.org',	// IGNORE
 		'archivePH' => 'archive.ph',	// IGNORE
+		'bluesky' => 'Bluesky',	// TODO
 		'buffer' => 'Buffer',	// IGNORE
 		'clipboard' => 'Clipboard',	// TODO
 		'diaspora' => 'Diaspora*',	// IGNORE
@@ -228,6 +234,7 @@ return array(
 		'raindrop' => 'Raindrop.io',	// IGNORE
 		'reddit' => 'Reddit',	// IGNORE
 		'shaarli' => 'Shaarli',	// IGNORE
+		'telegram' => 'Telegram',	// IGNORE
 		'twitter' => 'Twitter',	// IGNORE
 		'wallabag' => 'wallabag v1',	// IGNORE
 		'wallabagv2' => 'wallabag v2',	// IGNORE

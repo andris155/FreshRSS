@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => 'Povolit anonymní čtení článků výchozího uživatele (%s)',
 		'allow_anonymous_refresh' => 'Povolit anonymní obnovení článků',
-		'api_enabled' => 'Povolit přístup k <abbr>API</abbr> <small>(vyžadováno pro mobilní aplikace)</small>',
+		'api_enabled' => 'Povolit přístup k <abbr>API</abbr> <small>(vyžadováno pro mobilní aplikace and sharing user queries)</small>',	// DIRTY
 		'form' => 'Webový formulář (tradiční, vyžaduje JavaScript)',
 		'http' => 'HTTP (pro pokročilé uživatele s HTTPS)',
 		'none' => 'Žádný (nebezpečné)',
@@ -116,6 +116,7 @@ return array(
 		'description' => 'Popis',
 		'disabled' => 'Zakázáno',
 		'empty_list' => 'Nejsou naistalována žádná rozšíření',
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => 'Povoleno',
 		'latest' => 'Nainstalováno',
 		'name' => 'Název',
@@ -205,7 +206,7 @@ return array(
 		'copiedFromURL' => 'update.php zkopírováno z %s do ./data',
 		'current_version' => 'Vaše aktuální verze',
 		'last' => 'Poslední kontrola',
-		'loading' => 'Aktualizuje se...',
+		'loading' => 'Aktualizuje se…',
 		'none' => 'Žádné nové aktualizace',
 		'releaseChannel' => array(
 			'_' => 'Kanál pro vydání',

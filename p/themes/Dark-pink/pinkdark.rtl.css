@@ -106,6 +106,7 @@ input:focus {
 .icon[src*="/all"],
 .icon[src*="/down"],
 .icon[src*="/help"],
+.icon[src*="/label"],
 .icon[src*="/link"],
 .icon[src*="/login"],
 .icon[src*="/logout"],

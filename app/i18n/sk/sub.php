@@ -40,7 +40,7 @@ return array(
 	'feed' => array(
 		'accept_cookies' => 'Prijať cookies',
 		'accept_cookies_help' => 'Povoliť serveru kanála nastaviť cookies (uložené v pamäti iba počas dopytu)',
-		'add' => 'Pridať RSS kanál',
+		'add' => 'Pridať kanál',
 		'advanced' => 'Pokročilé',
 		'archiving' => 'Archivovanie',
 		'auth' => array(
@@ -57,17 +57,18 @@ return array(
 			'prepend' => 'Pridať pred existujúci obsah',
 			'replace' => 'Nahradiť existujúci obsh',
 		),
+		'content_retrieval' => 'Content retrieval',	// TODO
 		'css_cookie' => 'Pri sťahovaní obsahu článku použiť cookies',
 		'css_cookie_help' => 'Príklad: <kbd>foo=bar; gdpr_consent=true; cookie=value</kbd>',
 		'css_help' => 'Stiahnuť skrátenú verziu RSS kanála (pozor, vyžaduje viac času!)',
 		'css_path' => 'Pôvodný CSS súbor článku z webovej stránky',
 		'css_path_filter' => array(
 			'_' => 'CSS selektor elementu na odstránenie',
-			'help' => 'CSS selektor môže byť zoznam ako: <kbd>.footer, .aside</kbd>',
+			'help' => 'CSS selektor môže byť zoznam ako: <kbd>footer, aside, p[data-sanitized-class~="menu"]</kbd>',
 		),
 		'description' => 'Popis',
 		'empty' => 'Tento kanál je prázdny. Overte, prosím, či je ešte spravovaný autorom.',
-		'error' => 'Vyskytol sa problém s týmto kanálom. Overte, prosím, či kanál stále existuje, potom ho obnovte.',
+		'error' => 'Vyskytol sa problém s týmto kanálom. Overte, prosím, či kanál stále existuje.',	// DIRTY
 		'export-as-opml' => array(
 			'download' => 'Stiahnuť',
 			'help' => 'XML súbor (data subset. <a href="https://freshrss.github.io/FreshRSS/en/developers/OPML.html" target="_blank">See documentation</a>)',	// DIRTY
@@ -77,10 +78,19 @@ return array(
 			'_' => 'Filtrovať akcie',
 			'help' => 'Napíšte jeden výraz hľadania na riadok. Operators <a href="https://freshrss.github.io/FreshRSS/en/users/10_filter.html#with-the-search-field" target="_blank">see documentation</a>.',	// DIRTY
 		),
+		'http_headers' => 'HTTP Headers',	// TODO
+		'http_headers_help' => 'Headers are separated by a newline, and the name and value of a header are separated by a colon (e.g: <kbd><code>Accept: application/atom+xml<br />Authorization: Bearer some-token</code></kbd>).',	// TODO
 		'information' => 'Informácia',
 		'keep_min' => 'Minimálny počet článkov na uchovanie',
 		'kind' => array(
 			'_' => 'Typ zdroja kanála',
+			'html_json' => array(
+				'_' => 'HTML + XPath + JSON dot notation (JSON in HTML)',	// TODO
+				'xpath' => array(
+					'_' => 'XPath for JSON in HTML',	// TODO
+					'help' => 'Example: <code>//script[@type="application/json"]</code>',	// TODO
+				),
+			),
 			'html_xpath' => array(
 				'_' => 'HTML + XPath (Web scraping)',	// IGNORE
 				'feed_title' => array(
@@ -137,7 +147,7 @@ return array(
 				'help' => 'JSON so zápisom s bodkou používa bodky na oddelenie objekov a zložené zátvorky pre polia (príklad: <code>data.items[0].title</code>)',
 				'item' => array(
 					'_' => 'hľadajú sa <strong>položky</strong> noviniek<br /><small>(najdôležitejšie)</small>',
-					'help' => 'JSON cesta k polu obsahujúce položky, príklad: <code>newsItems</code>',
+					'help' => 'JSON cesta k polu obsahujúce položky, príklad: <code>$</code> or <code>newsItems</code>',	// DIRTY
 				),
 				'item_author' => 'autor položky',
 				'item_categories' => 'značky položky',
@@ -192,6 +202,7 @@ return array(
 		'no_selected' => 'Nevybrali ste kanál.',
 		'number_entries' => 'Počet článkov: %d',
 		'open_feed' => 'Open feed %s',	// TODO
+		'path_entries_conditions' => 'Conditions for content retrieval',	// TODO
 		'priority' => array(
 			'_' => 'Viditeľnosť',
 			'archived' => 'Nezobrazovať (archivované)',
@@ -219,6 +230,16 @@ return array(
 		'title' => 'Nadpis',
 		'title_add' => 'Pridať kanál RSS',
 		'ttl' => 'Automaticky neaktualizovať častejšie ako',
+		'unicityCriteria' => array(
+			'_' => 'Article unicity criteria',	// TODO
+			'forced' => '<span title="Block the unicity criteria, even when the feed has duplicate articles">forced</span>',	// TODO
+			'help' => 'Relevant for invalid feeds.<br />⚠️ Changing the policy will create duplicates.',	// TODO
+			'id' => 'Standard ID (default)',	// TODO
+			'link' => 'Link',	// TODO
+			'sha1:link_published' => 'Link + Date',	// TODO
+			'sha1:link_published_title' => 'Link + Date + Title',	// TODO
+			'sha1:link_published_title_content' => 'Link + Date + Title + Content',	// TODO
+		),
 		'url' => 'Odkaz kanála',
 		'useragent' => 'Nastaviť používateľského agenta na sťahovanie tohto kanála',
 		'useragent_help' => 'Príklad: <kbd>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0)</kbd>',
@@ -227,7 +248,10 @@ return array(
 		'websub' => 'Okamžité oznámenia cez WebSub',
 	),
 	'import_export' => array(
-		'export' => 'Exportovať',
+		'export' => array(
+			'_' => 'Exportovať',
+			'sqlite' => 'Download user database as SQLite',	// TODO
+		),
 		'export_labelled' => 'Exportovať vaše označené články',
 		'export_opml' => 'Exportovať zoznam kanálov (OPML)',
 		'export_starred' => 'Exportovať vaše obľúbené',
@@ -263,6 +287,7 @@ return array(
 		'add_dynamic_opml' => 'Pridať dynamické OPML',
 		'add_feed' => 'Pridať kanál',
 		'add_label' => 'Pridať štítok',
+		'add_opml_category' => 'OPML category name',	// TODO
 		'delete_label' => 'Zmazať štítok',
 		'feed_management' => 'Správa RSS kanálov',
 		'rename_label' => 'Premenovať štítok',

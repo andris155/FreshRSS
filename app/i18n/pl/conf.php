@@ -99,9 +99,19 @@ return array(
 			'previous' => 'Poprzednie',
 		),
 	),
+	'privacy' => array(
+		'_' => 'Privacy',	// TODO
+		'retrieve_extension_list' => 'Retrieve extension list',	// TODO
+	),
 	'profile' => array(
 		'_' => 'Zarządzanie profilem',
-		'api' => 'Zarządzanie API',
+		'api' => array(
+			'_' => 'Zarządzanie API',
+			'check_link' => 'Check API status via: <kbd><a href="../api/" target="_blank">%s</a></kbd>',	// TODO
+			'disabled' => 'The API access is disabled.',	// TODO
+			'documentation_link' => 'See the <a href="https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target="_blank">documentation and list of known apps</a>',	// TODO
+			'help' => 'See <a href="http://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target=_blank>documentation</a>',	// TODO
+		),
 		'delete' => array(
 			'_' => 'Usunięcie konta',
 			'warn' => 'Twoje konto i wszystkie powiązane z nim dane zostaną usunięte.',
@@ -139,12 +149,20 @@ return array(
 		'image_url' => 'Image URL',	// TODO
 		'name' => 'Nazwa',
 		'no_filter' => 'Brak filtrów',
+		'no_queries' => array(
+			'_' => 'No user queries are saved yet.',	// TODO
+			'help' => 'See <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">documentation</a>',	// TODO
+		),
 		'number' => 'Zapytanie nr %d',
 		'order_asc' => 'Wyświetl najpierw najstarsze wiadomości',
 		'order_desc' => 'Wyświetl najpierw najnowsze wiadomości',
 		'search' => 'Szukaj “%s”',
 		'share' => array(
 			'_' => 'Udostępnij to zapytanie',
+			'disabled' => array(
+				'_' => 'disabled',	// TODO
+				'title' => 'Sharing',	// TODO
+			),
 			'greader' => 'Shareable link to the GReader JSON',	// TODO
 			'help' => 'Posłuż się tym odnośnikiem, aby podzielić się zapytaniem',
 			'html' => 'Odnośnik do strony HTML',
@@ -173,6 +191,7 @@ return array(
 		'_' => 'Czytanie',
 		'after_onread' => 'Po oznaczeniu wszystkich jako przeczytane,',
 		'always_show_favorites' => 'Pokaż wszystkie wiadomości po wejściu do ulubionych',
+		'apply_to_individual_feed' => 'Applies to feeds individually',	// TODO
 		'article' => array(
 			'authors_date' => array(
 				'_' => 'Autor i data',
@@ -220,7 +239,7 @@ return array(
 		),
 		'hide_read_feeds' => 'Ukryj kategorie i kanały nie zawierające nieprzeczytanych wiadomości (nie działa gdy włączone jest wyświetlanie wszystkich wiadomości)',
 		'img_with_lazyload' => 'Opóźnij ładowanie obrazów dopóki nie będą widoczne',
-		'jump_next' => 'przejdź do następnego nieprzeczytanego kanału bądź kategorii',
+		'jump_next' => 'przejdź do następnego nieprzeczytanego rodzeństwa',
 		'mark_updated_article_unread' => 'Oznacz zaktualizowane wiadomości jako nieprzeczytane',
 		'number_divided_when_reader' => 'Dzielone przez 2 w widoku czytania.',
 		'read' => array(
@@ -232,17 +251,19 @@ return array(
 			'upon_gone' => 'gdy nie jest już listowana w źródle kanału',
 			'upon_reception' => 'po otrzymaniu wiadomości',
 			'when' => 'Oznacz wiadomość jako przeczytaną…',
-			'when_same_title' => 'gdy identyczny tytuł już istnieje w <i>n</i> najnowszych wiadomościach',
+			'when_same_title_in_category' => 'if an identical title already exists in the top <i>n</i> newest articles of the category',	// TODO
+			'when_same_title_in_feed' => 'gdy identyczny tytuł już istnieje w <i>n</i> najnowszych wiadomościach (of the feed)',	// DIRTY
 		),
 		'show' => array(
 			'_' => 'Wiadomości do wyświetlenia',
 			'active_category' => 'Aktualna',
-			'adaptive' => 'Dopasuj do sytuacji',
+			'adaptive' => 'Pokaż istniejące nieprzeczytane artykuły, w przeciwnym razie wyświetl wszystkie',
 			'all_articles' => 'Wszystkie wiadomości',
 			'all_categories' => 'Wszystkie',
 			'no_category' => 'Żadna',
 			'remember_categories' => 'Pamiętaj otwarte kategorie',
 			'unread' => 'Tylko nieprzeczytane',
+			'unread_or_favorite' => 'Pokaż nieprzeczytane i ulubione',
 		),
 		'show_fav_unread_help' => 'Stosuje się również do etykiet',
 		'sides_close_article' => 'Kliknięcie poza zawartością wiadomości zamyka widok wiadomości',
@@ -266,6 +287,7 @@ return array(
 	'sharing' => array(
 		'_' => 'Podawanie dalej',
 		'add' => 'Dodaj sposób na podanie dalej wiadomości',
+		'bluesky' => 'Bluesky',	// TODO
 		'deprecated' => 'Ta usługa jest przestarzała i zostanie usunięta w <a href="https://freshrss.github.io/FreshRSS/en/users/08_sharing_services.html" title="Dodatkowe informacje znajdują się w dokumentacji" target="_blank">przyszłych wydaniach</a> FreshRSS.',
 		'diaspora' => 'Diaspora*',	// IGNORE
 		'email' => 'E-mail',

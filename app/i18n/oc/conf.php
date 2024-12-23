@@ -99,9 +99,19 @@ return array(
 			'previous' => 'Precedent',
 		),
 	),
+	'privacy' => array(
+		'_' => 'Privacy',	// TODO
+		'retrieve_extension_list' => 'Retrieve extension list',	// TODO
+	),
 	'profile' => array(
 		'_' => 'Gestion del perfil',
-		'api' => 'Gestion API',
+		'api' => array(
+			'_' => 'Gestion API',
+			'check_link' => 'Check API status via: <kbd><a href="../api/" target="_blank">%s</a></kbd>',	// TODO
+			'disabled' => 'The API access is disabled.',	// TODO
+			'documentation_link' => 'See the <a href="https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target="_blank">documentation and list of known apps</a>',	// TODO
+			'help' => 'See <a href="http://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target=_blank>documentation</a>',	// TODO
+		),
 		'delete' => array(
 			'_' => 'Supression del compte',
 			'warn' => 'Lo compte e totas las donadas ligadas seràn suprimits.',
@@ -139,12 +149,20 @@ return array(
 		'image_url' => 'Image URL',	// TODO
 		'name' => 'Nom',
 		'no_filter' => 'Cap de filtre aplicat',
+		'no_queries' => array(
+			'_' => 'No user queries are saved yet.',	// TODO
+			'help' => 'See <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">documentation</a>',	// TODO
+		),
 		'number' => 'Filtre n°%d',
 		'order_asc' => 'Mostrar los articles mai ancians en primièr',
 		'order_desc' => 'Mostrar los articles mai recents en primièr',
 		'search' => 'Recèrca de « %s »',
 		'share' => array(
 			'_' => 'Share this query by link',	// TODO
+			'disabled' => array(
+				'_' => 'disabled',	// TODO
+				'title' => 'Sharing',	// TODO
+			),
 			'greader' => 'Shareable link to the GReader JSON',	// TODO
 			'help' => 'Give this link if you want to share this query with anyone',	// TODO
 			'html' => 'Shareable link to the HTML page',	// TODO
@@ -173,6 +191,7 @@ return array(
 		'_' => 'Lectura',
 		'after_onread' => 'Aprèp « marcar coma legit »,',
 		'always_show_favorites' => 'Mostrar totes los articles dels favorits per defaut',
+		'apply_to_individual_feed' => 'Applies to feeds individually',	// TODO
 		'article' => array(
 			'authors_date' => array(
 				'_' => 'Autors e data',
@@ -220,7 +239,7 @@ return array(
 		),
 		'hide_read_feeds' => 'Rescondre las categorias & fluxes sens articles pas legits (fonciona pas amb la configuracion « Mostrar totes los articles »)',
 		'img_with_lazyload' => 'Utilizar lo mòde “cargament tardiu” pels imatges',
-		'jump_next' => 'sautar al vesin venent pas legit (flux o categoria)',
+		'jump_next' => 'sautar al vesin venent pas legit',
 		'mark_updated_article_unread' => 'Marcar los articles actualizats coma pas legits',
 		'number_divided_when_reader' => 'Devisat per 2 dins la vista de lectura.',
 		'read' => array(
@@ -232,17 +251,19 @@ return array(
 			'upon_gone' => 'quand es pas mai dins lo flux de novèla font',
 			'upon_reception' => 'en recebre un article novèl',
 			'when' => 'Marcar un article coma legit…',
-			'when_same_title' => 'se un títol identic existís ja demest lo <i>n</i> articles mai recents',
+			'when_same_title_in_category' => 'if an identical title already exists in the top <i>n</i> newest articles of the category',	// TODO
+			'when_same_title_in_feed' => 'se un títol identic existís ja demest lo <i>n</i> articles mai recents (of the feed)',	// DIRTY
 		),
 		'show' => array(
 			'_' => 'Articles de mostrar',
 			'active_category' => 'Activar categoria',
-			'adaptive' => 'Adaptar l’afichatge',
+			'adaptive' => 'Show unreads if any, all articles otherwise',	// TODO
 			'all_articles' => 'Mostrar totes los articles',
 			'all_categories' => 'Totas las categorias',
 			'no_category' => 'Cap de categoria',
 			'remember_categories' => 'Se remembrar de las categorias dobèrtas',
 			'unread' => 'Mostrar pas que los pas legits',
+			'unread_or_favorite' => 'Show unreads and favourites',	// TODO
 		),
 		'show_fav_unread_help' => 'Aplicar tanben a las etiquetas',
 		'sides_close_article' => 'Clicar fòra de la zòna de tèxte tampa l’article',
@@ -266,6 +287,7 @@ return array(
 	'sharing' => array(
 		'_' => 'Partatge',
 		'add' => 'Ajustar un metòde de partatge',
+		'bluesky' => 'Bluesky',	// TODO
 		'deprecated' => 'Aqueste servici es obsolèt e serà tirat de la <a href="https://freshrss.github.io/FreshRSS/en/users/08_sharing_services.html" title="Dobrir la documentacion per mai d’informacions" target="_blank">futura version de FreshRSS</a>.',
 		'diaspora' => 'Diaspora*',	// IGNORE
 		'email' => 'Corrièl',

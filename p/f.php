@@ -42,9 +42,9 @@ if ($ico_mtime == false || $ico_mtime < $txt_mtime || ($ico_mtime < time() - (mt
 		if ($ico_mtime == false) {
 			show_default_favicon(86400);
 			exit();
-		} else {
-			touch($ico);
 		}
+
+		touch($ico);
 	}
 }
 

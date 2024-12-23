@@ -102,6 +102,7 @@ return array (
 
 	'topline_read' => true,
 	'topline_favorite' => true,
+	'topline_myLabels' => false,
 	'topline_sharing' => false,
 	'topline_website' => 'full',
 	'topline_thumbnail' => 'none',
@@ -124,6 +125,7 @@ return array (
 	'show_nav_buttons' => true,
 	# List of enabled FreshRSS extensions.
 	'extensions_enabled' => [],
+	'retrieve_extension_list' => true,
 	# Extensions configurations
 	'extensions' => [],
 );

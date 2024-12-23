@@ -99,9 +99,19 @@ return array(
 			'previous' => 'Previous',
 		),
 	),
+	'privacy' => array(
+		'_' => 'Privacy',
+		'retrieve_extension_list' => 'Retrieve extension list',
+	),
 	'profile' => array(
 		'_' => 'Profile management',
-		'api' => 'API management',
+		'api' => array(
+			'_' => 'External access via API',
+			'check_link' => 'Check API status via: <kbd><a href="../api/" target="_blank">%s</a></kbd>',
+			'disabled' => 'The API access is disabled.',
+			'documentation_link' => 'See the <a href="https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target="_blank">documentation and list of known apps</a>',
+			'help' => 'See <a href="http://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target=_blank>documentation</a>',
+		),
 		'delete' => array(
 			'_' => 'Account deletion',
 			'warn' => 'Your account and all related data will be deleted.',
@@ -139,12 +149,20 @@ return array(
 		'image_url' => 'Image URL',
 		'name' => 'Name',
 		'no_filter' => 'No filter',
+		'no_queries' => array(
+			'_' => 'No user queries are saved yet.',
+			'help' => 'See <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">documentation</a>',
+		),
 		'number' => 'Query n°%d',
 		'order_asc' => 'Display oldest articles first',
 		'order_desc' => 'Display newest articles first',
 		'search' => 'Search for “%s”',
 		'share' => array(
 			'_' => 'Share this query by link',
+			'disabled' => array(
+				'_' => 'disabled',
+				'title' => 'Sharing',
+			),
 			'greader' => 'Shareable link to the GReader JSON',
 			'help' => 'Give this link if you want to share this query with anyone',
 			'html' => 'Shareable link to the HTML page',
@@ -173,6 +191,7 @@ return array(
 		'_' => 'Reading',
 		'after_onread' => 'After “mark all as read”,',
 		'always_show_favorites' => 'Show all articles in favourites by default',
+		'apply_to_individual_feed' => 'Applies to feeds individually',
 		'article' => array(
 			'authors_date' => array(
 				'_' => 'Authors and date',
@@ -220,7 +239,7 @@ return array(
 		),
 		'hide_read_feeds' => 'Hide categories & feeds with no unread articles (does not work with “Show all articles” configuration)',
 		'img_with_lazyload' => 'Use <em>lazy load</em> mode to load pictures',
-		'jump_next' => 'jump to next unread sibling (feed or category)',
+		'jump_next' => 'jump to next unread sibling',
 		'mark_updated_article_unread' => 'Mark updated articles as unread',
 		'number_divided_when_reader' => 'Divide by 2 in the reading view.',
 		'read' => array(
@@ -232,17 +251,19 @@ return array(
 			'upon_gone' => 'when it is no longer in the upstream news feed',
 			'upon_reception' => 'upon receiving the article',
 			'when' => 'Mark an article as read…',
-			'when_same_title' => 'if an identical title already exists in the top <i>n</i> newest articles',
+			'when_same_title_in_category' => 'if an identical title already exists in the top <i>n</i> newest articles of the category',
+			'when_same_title_in_feed' => 'if an identical title already exists in the top <i>n</i> newest articles of the feed',
 		),
 		'show' => array(
 			'_' => 'Articles to display',
 			'active_category' => 'Active category',
-			'adaptive' => 'Adjust showing',
+			'adaptive' => 'Show unreads if any, all articles otherwise',
 			'all_articles' => 'Show all articles',
 			'all_categories' => 'All categories',
 			'no_category' => 'No category',
 			'remember_categories' => 'Remember open categories',
-			'unread' => 'Show only unread',
+			'unread' => 'Show unreads',
+			'unread_or_favorite' => 'Show unreads and favourites',
 		),
 		'show_fav_unread_help' => 'Applies also on labels',
 		'sides_close_article' => 'Clicking outside of article text area closes the article',
@@ -266,6 +287,7 @@ return array(
 	'sharing' => array(
 		'_' => 'Sharing',
 		'add' => 'Add a sharing method',
+		'bluesky' => 'Bluesky',
 		'deprecated' => 'This service is deprecated and will be removed from FreshRSS in a <a href="https://freshrss.github.io/FreshRSS/en/users/08_sharing_services.html" title="Open documentation for more information" target="_blank">future release</a>.',
 		'diaspora' => 'Diaspora*',
 		'email' => 'Email',

@@ -67,6 +67,11 @@ The following attributes are using similar naming conventions than [RSS-Bridge](
 
 * `<outline type="JSONFeed" ...`: Uses `JSON+DotNotation` behind the scenes to parse a [JSON Feed](https://www.jsonfeed.org/).
 
+### HTML+XPath+JSON
+
+* `<outline type="HTML+XPath+JSON+DotNotation" frss:xPathToJson="..." ...`: Same as `JSON+DotNotation` but first extracting the JSON string from an HTML document thanks to an XPath expression.
+	* Example: `//script[@type='application/json']`
+
 ### cURL
 
 A number of [cURL options](https://curl.se/libcurl/c/curl_easy_setopt.html) are supported:
@@ -86,8 +91,9 @@ A number of [cURL options](https://curl.se/libcurl/c/curl_easy_setopt.html) are 
 
 * `frss:cssFullContent`: [CSS Selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) to enable the download and extraction of the matching HTML section of each articles’ Web address.
 	* Example: `div.main, .summary`
-* `frss:cssFullContentFilter`: [CSS Selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) to remove the matching HTML elements from the full content retrieved by `frss:cssFullContent`.
+* `frss:cssContentFilter`: [CSS Selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors) to remove the matching HTML elements from the article content or from the full content retrieved by `frss:cssFullContent`.
 	* Example: `.footer, .aside`
+. `frss:cssFullContentConditions`: List (separated by a new line) of search queries to trigger a full content retrieval as defined by `frss:cssFullContent`.
 * `frss:filtersActionRead`: List (separated by a new line) of search queries to automatically mark a new article as read.
 
 ### Dynamic OPML (reading lists)

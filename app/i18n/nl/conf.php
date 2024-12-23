@@ -99,9 +99,19 @@ return array(
 			'previous' => 'Vorige',
 		),
 	),
+	'privacy' => array(
+		'_' => 'Privacy',	// TODO
+		'retrieve_extension_list' => 'Retrieve extension list',	// TODO
+	),
 	'profile' => array(
 		'_' => 'Profielbeheer',
-		'api' => 'API-beheer',
+		'api' => array(
+			'_' => 'API-beheer',
+			'check_link' => 'Check API status via: <kbd><a href="../api/" target="_blank">%s</a></kbd>',	// TODO
+			'disabled' => 'The API access is disabled.',	// TODO
+			'documentation_link' => 'See the <a href="https://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target="_blank">documentation and list of known apps</a>',	// TODO
+			'help' => 'See <a href="http://freshrss.github.io/FreshRSS/en/users/06_Mobile_access.html#access-via-mobile-app" target=_blank>documentation</a>',	// TODO
+		),
 		'delete' => array(
 			'_' => 'Account verwijderen',
 			'warn' => 'Uw account en alle gerelateerde gegvens worden verwijderd.',
@@ -139,12 +149,20 @@ return array(
 		'image_url' => 'Image URL',	// TODO
 		'name' => 'Naam',
 		'no_filter' => 'Geen filter',
+		'no_queries' => array(
+			'_' => 'No user queries are saved yet.',	// TODO
+			'help' => 'See <a href="https://freshrss.github.io/FreshRSS/en/users/user_queries.html" target="_blank">documentation</a>',	// TODO
+		),
 		'number' => 'Query n°%d',	// IGNORE
 		'order_asc' => 'Toon oudste artikelen eerst',
 		'order_desc' => 'Toon nieuwste artikelen eerst',
 		'search' => 'Zoek naar „%s”',
 		'share' => array(
 			'_' => 'Deze query delen via een link',
+			'disabled' => array(
+				'_' => 'disabled',	// TODO
+				'title' => 'Sharing',	// TODO
+			),
 			'greader' => 'Shareable link to the GReader JSON',	// TODO
 			'help' => 'Geef deze link als je deze query met iemand wilt delen',
 			'html' => 'Deelbare link naar de HTML-pagina',
@@ -173,6 +191,7 @@ return array(
 		'_' => 'Lezen',
 		'after_onread' => 'Na „markeer alles als gelezen”,',
 		'always_show_favorites' => 'Toon alle artikelen standaard in favorieten',
+		'apply_to_individual_feed' => 'Applies to feeds individually',	// TODO
 		'article' => array(
 			'authors_date' => array(
 				'_' => 'Auteurs en datum',
@@ -220,7 +239,7 @@ return array(
 		),
 		'hide_read_feeds' => 'Categorieën en feeds zonder ongelezen artikelen verbergen (werkt niet met „Toon alle artikelen” configuratie)',
 		'img_with_lazyload' => 'Gebruik <em>lazy load</em> methode om afbeeldingen te laden',
-		'jump_next' => 'Ga naar volgende ongelezen (feed of categorie)',
+		'jump_next' => 'Ga naar volgende ongelezen',
 		'mark_updated_article_unread' => 'Markeer vernieuwd artikel als ongelezen',
 		'number_divided_when_reader' => 'Gedeeld door 2 in de lees modus.',
 		'read' => array(
@@ -232,17 +251,19 @@ return array(
 			'upon_gone' => 'als het niet langer in de nieuwsfeed staat',
 			'upon_reception' => 'bij ontvangst van het artikel',
 			'when' => 'Markeer artikel als gelezen…',
-			'when_same_title' => 'als een zelfde titel al voorkomt in de top <i>n</i> nieuwste artikelen',
+			'when_same_title_in_category' => 'if an identical title already exists in the top <i>n</i> newest articles of the category',	// TODO
+			'when_same_title_in_feed' => 'als een zelfde titel al voorkomt in de top <i>n</i> nieuwste artikelen (of the feed)',	// DIRTY
 		),
 		'show' => array(
 			'_' => 'Artikelen om te tonen',
 			'active_category' => 'Actieve categorie',
-			'adaptive' => 'Pas weergave aan',
+			'adaptive' => 'Show unreads if any, all articles otherwise',	// TODO
 			'all_articles' => 'Bekijk alle artikelen',
 			'all_categories' => 'Alle categorieën',
 			'no_category' => 'Geen categorie',
 			'remember_categories' => 'Open categorieën herinneren',
 			'unread' => 'Bekijk alleen ongelezen',
+			'unread_or_favorite' => 'Show unreads and favourites',	// TODO
 		),
 		'show_fav_unread_help' => 'Ook toepassen op labels',
 		'sides_close_article' => 'Sluit het artikel door buiten de artikeltekst te klikken',
@@ -266,6 +287,7 @@ return array(
 	'sharing' => array(
 		'_' => 'Delen',
 		'add' => 'Deelmethode toevoegen',
+		'bluesky' => 'Bluesky',	// TODO
 		'deprecated' => 'Deze dienst is afgeschreven en zal uit FreshRSS worden verwijderd in een <a href="https://freshrss.github.io/FreshRSS/en/users/08_sharing_services.html" title="Open documentatie voor meer informatie" target="_blank">toekomstige versie</a>.',
 		'diaspora' => 'Diaspora*',	// IGNORE
 		'email' => 'Email',	// IGNORE

@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => ' اجازه خواندن ناشناس مقالات کاربر پیش‌فرض (%s)',
 		'allow_anonymous_refresh' => ' اجازه بازخوانی ناشناس مقالات را بدهید',
-		'api_enabled' => ' اجازه دسترسی به <abbr>API</abbr> <small>(الزامی برای برنامه های تلفن همراه)</small>',
+		'api_enabled' => ' اجازه دسترسی به <abbr>API</abbr> <small>(الزامی برای برنامه های تلفن همراه and sharing user queries and sharing user queries)</small>',	// DIRTY
 		'form' => ' فرم وب (سنتی',
 		'http' => ' HTTP (برای کاربران پیشرفته با HTTPS)',
 		'none' => ' هیچ (خطرناک)',
@@ -116,6 +116,7 @@ return array(
 		'description' => ' توضیحات',
 		'disabled' => ' معلول',
 		'empty_list' => ' هیچ برنامه افزودنی نصب شده ای وجود ندارد',
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => ' فعال است',
 		'latest' => ' نصب شده است',
 		'name' => ' نام',

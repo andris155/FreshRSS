@@ -14,7 +14,7 @@ return array(
 	'auth' => array(
 		'allow_anonymous' => 'Névtelen felhasználók olvashatják az alapértelmezett felhasználó cikkeit (%s)',
 		'allow_anonymous_refresh' => 'Névtelen felhasználok frissíthetik a cikkeket',
-		'api_enabled' => ' <abbr>API</abbr> elérés engedélyezése <small>(mobilalkalmazásokhoz szükséges)</small>',
+		'api_enabled' => ' <abbr>API</abbr> elérés engedélyezése <small>(mobilalkalmazásokhoz szükséges and sharing user queries)</small>',	// DIRTY
 		'form' => 'Webes űrlap (hagyományos, JavaScript szükséges hozzá)',
 		'http' => 'HTTP (haladó felhasználóknak HTTPS-el)',
 		'none' => 'nincs (veszélyes)',
@@ -116,6 +116,7 @@ return array(
 		'description' => 'Leírás',
 		'disabled' => 'Kikapcsolva',
 		'empty_list' => 'Nincsenek telepített kiegészítők',
+		'empty_list_help' => 'Check the logs to determine the reason behind the empty extension list.',	// TODO
 		'enabled' => 'Bekapcsolva',
 		'latest' => 'Telepítve',
 		'name' => 'Név',

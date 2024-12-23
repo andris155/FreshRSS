@@ -17,7 +17,7 @@
 		if (!empty($feeds)) {
 			echo '<optgroup label="', $category->name(), '">';
 			foreach ($feeds as $feed) {
-				if ($this->feed && $feed->id() == $this->feed->id()) {
+				if ($this->feed !== null && $feed->id() == $this->feed->id()) {
 					echo '<option value="', $feed->id(), '" selected="selected" data-url="',
 						_url('stats', 'repartition', 'id', $feed->id()), '">', $feed->name(), '</option>';
 				} else {
@@ -30,7 +30,7 @@
 	}?>
 	</select>
 
-	<?php if ($this->feed) {?>
+	<?php if ($this->feed !== null) {?>
 		<a class="btn" href="<?= _url('subscription', 'feed', 'id', $this->feed->id()) ?>">
 			<?= _i('configure') ?> <?= _t('gen.action.manage') ?>
 		</a>
@@ -60,13 +60,13 @@
 				<canvas id="statsEntriesPerHour"></canvas>
 				<script class="jsonData-stats" type="application/json">
 				<?php
-				echo json_encode(array(
+				echo json_encode([
 					'canvasID' 		=> 'statsEntriesPerHour',
 					'charttype' 	=> 'bar',
 					'data' 			=> $this->repartitionHour,
 					'label' 		=> _t('admin.stats.entry_count'),
 					'xAxisLabels' 	=> $this->hours24Labels
-				), JSON_UNESCAPED_UNICODE);
+				], JSON_UNESCAPED_UNICODE);
 				?></script>
 			</div>
 		</div>
@@ -77,13 +77,13 @@
 				<canvas id="statsEntriesPerDayOfWeek"></canvas>
 				<script class="jsonData-stats" type="application/json">
 				<?php
-				echo json_encode(array(
+				echo json_encode([
 					'canvasID' 		=> 'statsEntriesPerDayOfWeek',
 					'charttype' 	=> 'bar',
 					'data' 			=> $this->repartitionDayOfWeek,
 					'label' 		=> _t('admin.stats.entry_count'),
 					'xAxisLabels' 	=> $this->days,
-				), JSON_UNESCAPED_UNICODE);
+				], JSON_UNESCAPED_UNICODE);
 				?></script>
 			</div>
 		</div>
@@ -94,13 +94,13 @@
 				<canvas id="statsEntriesPerMonth"></canvas>
 				<script class="jsonData-stats" type="application/json">
 				<?php
-				echo json_encode(array(
+				echo json_encode([
 					'canvasID' 		=> 'statsEntriesPerMonth',
 					'charttype' 	=> 'bar',
 					'data' 			=> $this->repartitionMonth,
 					'label' 		=> _t('admin.stats.entry_count'),
 					'xAxisLabels' 	=> $this->months,
-				), JSON_UNESCAPED_UNICODE);
+				], JSON_UNESCAPED_UNICODE);
 				?></script>
 			</div>
 		</div>

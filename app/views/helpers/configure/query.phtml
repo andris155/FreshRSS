@@ -20,54 +20,68 @@
 				<input type="text" class="w100" name="name" id="name" value="<?= $this->query->getName() ?>" />
 				<input type="hidden" name="query[token]" id="query_token" value="<?= $this->query->getToken() ?>" />
 			</div>
+		</div>
+		<div class="form-group">
 			<label class="group-name" for="description"><?= _t('conf.query.description') ?></label>
 			<div class="group-controls">
 				<input type="text" class="w100" name="query[description]" id="description" value="<?= $this->query->getDescription() ?>" />
 			</div>
+		</div>
+		<div class="form-group">
 			<label class="group-name" for="imageUrl"><?= _t('conf.query.image_url') ?></label>
 			<div class="group-controls">
 				<input type="text" class="w100" name="query[imageUrl]" id="imageUrl" value="<?= $this->query->getImageUrl() ?>" />
 			</div>
 		</div>
 
-		<fieldset>
-			<legend><?= _t('conf.query.share') ?></legend>
-			<div class="form-group">
-				<div class="group-controls">
-					<label class="checkbox" for="shareRss">
-						<input type="checkbox" name="query[shareRss]" id="shareRss" value="1" <?= $this->query->shareRss() ? 'checked="checked"' : ''?> />
-						<?= _t('conf.query.filter.shareRss') ?>
-					</label>
-					<?php if ($this->query->sharedUrlRss() !== ''): ?>
-					<ul>
-						<li><a href="<?= $this->query->sharedUrlHtml() ?>"><?= _i('link') ?> <?= _t('conf.query.share.html') ?></a></li>
-						<li><a href="<?= $this->query->sharedUrlRss() ?>"><?= _i('link') ?> <?= _t('conf.query.share.rss') ?></a></li>
-						<li><a href="<?= $this->query->sharedUrlGreader() ?>"><?= _i('link') ?> <?= _t('conf.query.share.greader') ?></a></li>
-					</ul>
-					<?php endif; ?>
+		<?php if (FreshRSS_Context::systemConf()->api_enabled) { ?>
+			<fieldset>
+				<legend><?= _t('conf.query.share') ?></legend>
+				<div class="form-group">
+					<div class="group-controls">
+						<label class="checkbox" for="shareRss">
+							<input type="checkbox" name="query[shareRss]" id="shareRss" value="1" <?= $this->query->shareRss() ? 'checked="checked"' : ''?> />
+							<?= _t('conf.query.filter.shareRss') ?>
+						</label>
+						<?php if ($this->query->sharedUrlRss() !== ''): ?>
+						<ul>
+							<li><a href="<?= $this->query->sharedUrlHtml() ?>"><?= _i('link') ?> <?= _t('conf.query.share.html') ?></a></li>
+							<li><a href="<?= $this->query->sharedUrlRss() ?>"><?= _i('link') ?> <?= _t('conf.query.share.rss') ?></a></li>
+							<li><a href="<?= $this->query->sharedUrlGreader() ?>"><?= _i('link') ?> <?= _t('conf.query.share.greader') ?></a></li>
+						</ul>
+						<?php endif; ?>
+					</div>
+					<div class="group-controls">
+						<label class="checkbox" for="shareOpml">
+							<input type="checkbox" name="query[shareOpml]" id="shareOpml" value="1" <?= $this->query->shareOpml() && $this->query->safeForOpml() ? 'checked="checked"' : '' ?>
+								<?= $this->query->safeForOpml() ? '' : 'disabled="disabled"' ?> />
+							<?= _t('conf.query.filter.shareOpml') ?>
+						</label>
+						<?php if ($this->query->sharedUrlOpml() !== ''): ?>
+						<ul>
+							<li><a href="<?= $this->query->sharedUrlOpml() ?>"><?= _i('link') ?> <?= _t('conf.query.share.opml') ?></a></li>
+						</ul>
+						<?php endif; ?>
+					</div>
+					<p class="help"><?= _i('help') ?> <?= _t('conf.query.share.help') ?></a></p>
+					<p class="help"><?= _i('help') ?> <?= _t('conf.query.help') ?></a></p>
 				</div>
-				<div class="group-controls">
-					<label class="checkbox" for="shareOpml">
-						<input type="checkbox" name="query[shareOpml]" id="shareOpml" value="1" <?= $this->query->shareOpml() && $this->query->safeForOpml() ? 'checked="checked"' : '' ?>
-							<?= $this->query->safeForOpml() ? '' : 'disabled="disabled"' ?> />
-						<?= _t('conf.query.filter.shareOpml') ?>
-					</label>
-					<?php if ($this->query->sharedUrlOpml() !== ''): ?>
-					<ul>
-						<li><a href="<?= $this->query->sharedUrlOpml() ?>"><?= _i('link') ?> <?= _t('conf.query.share.opml') ?></a></li>
-					</ul>
-					<?php endif; ?>
-				</div>
-				<p class="help"><?= _i('help') ?> <?= _t('conf.query.share.help') ?></a></p>
-				<p class="help"><?= _i('help') ?> <?= _t('conf.query.help') ?></a></p>
-			</div>
 
-			<div class="form-group form-actions">
+				<div class="form-group form-actions">
+					<div class="group-controls">
+						<button type="submit" class="btn btn-important"><?= _t('gen.action.submit') ?></button>
+					</div>
+				</div>
+			</fieldset>
+		<?php } else { ?>
+			<div class="form-group">
+				<label class="group-name"><?= _t('conf.query.share.disabled.title') ?></label>
 				<div class="group-controls">
-					<button type="submit" class="btn btn-important"><?= _t('gen.action.submit') ?></button>
+				<?= _t('conf.query.share.disabled') ?>
+					<p class="help"><?= _i('help') ?> <?= _t('conf.query.help') ?></a></p>
 				</div>
 			</div>
-		</fieldset>
+		<?php } ?>
 
 		<fieldset>
 			<legend><?= _t('conf.query.filter') ?></legend>

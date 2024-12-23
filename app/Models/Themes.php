@@ -21,7 +21,7 @@ class FreshRSS_Themes extends Minz_Model {
 		$list = [];
 		foreach ($themes_list as $theme_dir) {
 			$theme = self::get_infos($theme_dir);
-			if ($theme) {
+			if (is_array($theme)) {
 				$list[$theme_dir] = $theme;
 			}
 		}
@@ -31,7 +31,7 @@ class FreshRSS_Themes extends Minz_Model {
 	/**
 	 * @return false|array{'id':string,'name':string,'author':string,'description':string,'version':float|string,'files':array<string>,'theme-color'?:string|array{'dark'?:string,'light'?:string,'default'?:string}}
 	 */
-	public static function get_infos(string $theme_id) {
+	public static function get_infos(string $theme_id): array|false {
 		$theme_dir = PUBLIC_PATH . self::$themesUrl . $theme_id;
 		if (is_dir($theme_dir)) {
 			$json_filename = $theme_dir . '/metadata.json';
@@ -58,9 +58,9 @@ class FreshRSS_Themes extends Minz_Model {
 	/**
 	 * @return false|array{'id':string,'name':string,'author':string,'description':string,'version':float|string,'files':array<string>,'theme-color'?:string|array{'dark'?:string,'light'?:string,'default'?:string}}
 	 */
-	public static function load(string $theme_id) {
+	public static function load(string $theme_id): array|false {
 		$infos = self::get_infos($theme_id);
-		if (!$infos) {
+		if (empty($infos)) {
 			if ($theme_id !== self::$defaultTheme) {	//Fall-back to default theme
 				return self::load(self::$defaultTheme);
 			}
@@ -165,14 +165,11 @@ class FreshRSS_Themes extends Minz_Model {
 			}
 		}
 
-		switch ($type) {
-			case self::ICON_URL:
-				return Minz_Url::display($url);
-			case self::ICON_IMG:
-				return '<img class="icon" src="' . Minz_Url::display($url) . '" loading="lazy" alt="' . $alt . '"' . $title . ' />';
-			case self::ICON_EMOJI:
-			default:
-				return '<span class="icon"' . $title . '>' . $alt . '</span>';
-		}
+		return match ($type) {
+			self::ICON_URL => Minz_Url::display($url),
+			self::ICON_IMG => '<img class="icon" src="' . Minz_Url::display($url) . '" loading="lazy" alt="' . $alt . '"' . $title . ' />',
+			self::ICON_EMOJI, =>  '<span class="icon"' . $title . '>' . $alt . '</span>',
+			default => '<span class="icon"' . $title . '>' . $alt . '</span>',
+		};
 	}
 }

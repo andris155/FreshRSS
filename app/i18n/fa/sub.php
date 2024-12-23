@@ -40,7 +40,7 @@ return array(
 	'feed' => array(
 		'accept_cookies' => ' کوکی ها را بپذیرید',
 		'accept_cookies_help' => ' به سرور فید اجازه دهید تا کوکی ها را تنظیم کند (فقط برای مدت زمان درخواست در حافظه ذخیره می شود)',
-		'add' => ' یک فید RSS اضافه کنید',
+		'add' => ' یک فید اضافه کنید',
 		'advanced' => ' پیشرفته',
 		'archiving' => ' بایگانی',
 		'auth' => array(
@@ -57,6 +57,7 @@ return array(
 			'prepend' => ' قبل از محتوای موجود اضافه کنید',
 			'replace' => ' محتوای موجود را جایگزین کنید',
 		),
+		'content_retrieval' => 'Content retrieval',	// TODO
 		'css_cookie' => ' هنگام واکشی محتوای مقاله از کوکی ها استفاده کنید',
 		'css_cookie_help' => ' مثال: <kbd>foo=bar; gdpr_consent=true; cookie=value</kbd>',
 		'css_help' => ' فیدهای RSS کوتاه شده را بازیابی می کند (احتیاط',
@@ -67,7 +68,7 @@ return array(
 		),
 		'description' => ' توضیحات',
 		'empty' => ' این فید خالی است. لطفاً بررسی کنید که هنوز نگهداری می شود.',
-		'error' => ' این فید با مشکل مواجه شده است. لطفاً بررسی کنید که همیشه در دسترس است و سپس آن را به روز کنید.',
+		'error' => ' این فید با مشکل مواجه شده است. لطفاً بررسی کنید که همیشه در دسترس است و سپس آن را به روز کنید.',	// DIRTY
 		'export-as-opml' => array(
 			'download' => 'Download',	// TODO
 			'help' => 'XML file (data subset. <a href="https://freshrss.github.io/FreshRSS/en/developers/OPML.html" target="_blank">See documentation</a>)',	// TODO
@@ -77,10 +78,19 @@ return array(
 			'_' => ' اعمال فیلتر',
 			'help' => ' در هر خط یک فیلتر جستجو بنویسید. اپراتورها <a href="https://freshrss.github.io/FreshRSS/en/users/10_filter.html#with-the-search-field" target="_blank">مستندات را ببینید</a>.',
 		),
+		'http_headers' => 'HTTP Headers',	// TODO
+		'http_headers_help' => 'Headers are separated by a newline, and the name and value of a header are separated by a colon (e.g: <kbd><code>Accept: application/atom+xml<br />Authorization: Bearer some-token</code></kbd>).',	// TODO
 		'information' => ' اطلاعات',
 		'keep_min' => ' حداقل تعداد مقالات برای نگهداری',
 		'kind' => array(
 			'_' => ' نوع منبع خوراک',
+			'html_json' => array(
+				'_' => 'HTML + XPath + JSON dot notation (JSON in HTML)',	// TODO
+				'xpath' => array(
+					'_' => 'XPath for JSON in HTML',	// TODO
+					'help' => 'Example: <code>//script[@type="application/json"]</code>',	// TODO
+				),
+			),
 			'html_xpath' => array(
 				'_' => ' HTML + XPath (خراش دادن وب)',
 				'feed_title' => array(
@@ -137,7 +147,7 @@ return array(
 				'help' => 'A JSON dot notated uses dots between objects and brackets for arrays (e.g. <code>data.items[0].title</code>)',	// TODO
 				'item' => array(
 					'_' => 'finding news <strong>items</strong><br /><small>(most important)</small>',	// TODO
-					'help' => 'JSON path to the array containing the items, e.g. <code>newsItems</code>',	// TODO
+					'help' => 'JSON path to the array containing the items, e.g. <code>$</code> or <code>newsItems</code>',	// TODO
 				),
 				'item_author' => 'item author',	// TODO
 				'item_categories' => 'item tags',	// TODO
@@ -192,6 +202,7 @@ return array(
 		'no_selected' => ' هیچ خوراکی انتخاب نشده است.',
 		'number_entries' => ' %d مقاله',
 		'open_feed' => 'Open feed %s',	// TODO
+		'path_entries_conditions' => 'Conditions for content retrieval',	// TODO
 		'priority' => array(
 			'_' => ' دید',
 			'archived' => ' نشان داده نشود (بایگانی شده)',
@@ -219,6 +230,16 @@ return array(
 		'title' => ' عنوان',
 		'title_add' => ' یک فید RSS اضافه کنید',
 		'ttl' => ' به‌طور خودکار بیشتر از آن رفرش نکنید',
+		'unicityCriteria' => array(
+			'_' => 'Article unicity criteria',	// TODO
+			'forced' => '<span title="Block the unicity criteria, even when the feed has duplicate articles">forced</span>',	// TODO
+			'help' => 'Relevant for invalid feeds.<br />⚠️ Changing the policy will create duplicates.',	// TODO
+			'id' => 'Standard ID (default)',	// TODO
+			'link' => 'Link',	// TODO
+			'sha1:link_published' => 'Link + Date',	// TODO
+			'sha1:link_published_title' => 'Link + Date + Title',	// TODO
+			'sha1:link_published_title_content' => 'Link + Date + Title + Content',	// TODO
+		),
 		'url' => ' URL فید',
 		'useragent' => ' عامل کاربر را برای واکشی این فید تنظیم کنید',
 		'useragent_help' => ' مثال: <kbd>Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0)</kbd>',
@@ -227,7 +248,10 @@ return array(
 		'websub' => ' اطلاع رسانی فوری با WebSub',
 	),
 	'import_export' => array(
-		'export' => ' صادرات',
+		'export' => array(
+			'_' => ' صادرات',
+			'sqlite' => 'Download user database as SQLite',	// TODO
+		),
 		'export_labelled' => ' مقالات برچسب دار خود را صادر کنید',
 		'export_opml' => ' لیست صادرات فیدها (OPML)',
 		'export_starred' => ' موارد دلخواه خود را صادر کنید',
@@ -263,6 +287,7 @@ return array(
 		'add_dynamic_opml' => ' OPML پویا را اضافه کنید',
 		'add_feed' => ' یک فید اضافه کنید',
 		'add_label' => ' یک برچسب اضافه کنید',
+		'add_opml_category' => 'OPML category name',	// TODO
 		'delete_label' => ' یک برچسب را حذف کنید',
 		'feed_management' => ' فیدهای RSS را مدیریت می کندment',
 		'rename_label' => ' نام یک برچسب را تغییر دهید',
