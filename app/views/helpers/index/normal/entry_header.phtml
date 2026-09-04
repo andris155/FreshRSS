@@ -49,19 +49,21 @@
 		}
 	}
 
-	if ($topline_website !== 'none'):
+/*	if ($topline_website !== 'none'):
 	?><li class="item website">
 		<a href="<?= _url('index', 'index', 'get', 'f_' . $this->feed->id()) ?>" class="item-element" title="<?= _t('gen.action.filter') ?>: <?= $this->feed->name() ?>">
 			<?php if (FreshRSS_Context::userConf()->show_favicons && 'name' !== $topline_website): ?><img class="favicon" src="<?= $this->feed->favicon() ?>" alt="✇" loading="lazy" /><?php endif; ?><?php if ('icon' !== $topline_website): ?><span class="websiteName"><?= $this->feed->name() ?></span><?php endif; ?>
 		</a>
 		</li><?php
-	endif; ?>
+	endif; */?>
 
 	<?php
 	if ($topline_thumbnail !== 'none'):
+	$thumbnail = $this->entry->thumbnail();
+	if ($thumbnail != null):
 	?><li class="item thumbnail <?= $topline_thumbnail ?> <?= $topline_summary ? '' : 'small' ?>"><?php
-		$thumbnail = $this->entry->thumbnail();
-		if ($thumbnail != null):
+/*		$thumbnail = $this->entry->thumbnail();
+		if ($thumbnail != null):*/
 			?><img src="<?= $thumbnail['url'] ?>" class="item-element "<?= $lazyload ? ' loading="lazy"' : '' ?> alt="" /><?php
 		endif;
 	?></li><?php
@@ -72,6 +74,14 @@
 			?> <span class="author"><?= implode(' · ', $this->entry->authors()) ?></span><?php
 		endif;
 		?></a>
+		<?php
+		if ($topline_website !== 'none'):
+			?><div class="item website">
+			<a href="<?= _url('index', 'index', 'get', 'f_' . $this->feed->id()) ?>" class="item-element" title="<?= _t('gen.action.filter') ?>: <?= $this->feed->name() ?>">
+			<?php if (FreshRSS_Context::userConf()->show_favicons && 'name' !== $topline_website): ?><img class="favicon" src="<?= $this->feed->favicon() ?>" alt="✇" loading="lazy" /><?php endif; ?><?php if ('icon' !== $topline_website): ?><span class="websiteName"><?= $this->feed->name() ?></span><?php endif; ?>
+		</a><br />
+		</div><?php
+	endif; ?>
 	<?php
 	if ($topline_summary):
 		?><div class="summary"><?= trim(mb_substr(strip_tags($this->entry->content(false)), 0, 500, 'UTF-8')) ?></div><?php
