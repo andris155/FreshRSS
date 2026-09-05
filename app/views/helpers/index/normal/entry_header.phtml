@@ -59,7 +59,14 @@
 
 	<?php
 	if ($topline_thumbnail !== 'none'):
-        FreshRSS_YouTubeProxy::renderThumbnail($this->entry, $topline_thumbnail, $topline_summary, $lazyload);
+	$thumbnail = $this->entry->thumbnail();
+	if ($thumbnail != null):
+	?><li class="item thumbnail <?= $topline_thumbnail ?> <?= $topline_summary ? '' : 'small' ?>"><?php
+//		$thumbnail = $this->entry->thumbnail();
+//		if ($thumbnail != null):
+			?><img src="<?= $thumbnail['url'] ?>" class="item-element "<?= $lazyload ? ' loading="lazy"' : '' ?> alt="" /><?php
+		endif;
+	?></li><?php
 	endif; ?>
 	<li class="item titleAuthorSummaryDate">
 		<a target="_blank" rel="noreferrer" href="<?= $this->entry->link() ?>" class="item-element title" dir="auto"><?= $this->entry->title() ?><?php
