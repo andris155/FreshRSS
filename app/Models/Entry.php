@@ -390,7 +390,8 @@ class FreshRSS_Entry extends Minz_Model {
 		// First, use the provided thumbnail, if any
 		if (is_string($thumbnail['url'] ?? null)) {
 			/** @var array{'url':string,'height'?:int,'width'?:int,'time'?:string} $thumbnail */
-			return FreshRSS_YouTubeProxy::proxyThumbnail($thumbnail);
+			$thumbnail['url'] = FreshRSS_YouTubeProxy::proxyUrl($thumbnail['url']);
+			return $thumbnail;
 		}
 		if ($searchEnclosures) {
 			foreach ($this->enclosures(true) as $enclosure) {
@@ -398,16 +399,19 @@ class FreshRSS_Entry extends Minz_Model {
 				if (!empty($enclosure['thumbnails'][0])) {
 					foreach ($enclosure['thumbnails'] as $src) {
 						if (is_string($src)) {
-							return FreshRSS_YouTubeProxy::proxyThumbnail([
-								'url' => $src,
+							return [
+								'url' => FreshRSS_YouTubeProxy::proxyUrl($src),
 								'medium' => 'image',
-							]);
+							];
 						}
 					}
 				}
 				// Third, check whether each enclosure itself is an appropriate image
 				if (self::enclosureIsImage($enclosure)) {
-					return FreshRSS_YouTubeProxy::proxyThumbnail($enclosure);
+					if (!empty($enclosure['url']) && is_string($enclosure['url'])) {
+						$enclosure['url'] = FreshRSS_YouTubeProxy::proxyUrl($enclosure['url']);
+					}
+					return $enclosure;
 				}
 			}
 		}
