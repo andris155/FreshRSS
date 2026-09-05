@@ -271,15 +271,13 @@ class FreshRSS_Entry extends Minz_Model {
 			foreach ($thumbnails as $thumbnail) {
 				if (is_string($thumbnail)) {
 					$thumbnail = FreshRSS_YouTubeProxy::proxyUrl($thumbnail);
-					$ytClass = FreshRSS_YouTubeProxy::ytThumbnailClass($this);
-					$content .= '<p><img class="enclosure-thumbnail' . $ytClass . '" src="' . htmlspecialchars($thumbnail, ENT_COMPAT, 'UTF-8') . '" alt="" title="' . $etitle . '" /></p>';
+					$content .= '<p><img class="enclosure-thumbnail" src="' . htmlspecialchars($thumbnail, ENT_COMPAT, 'UTF-8') . '" alt="" title="' . $etitle . '" /></p>';
 				}
 			}
 
 			if (self::enclosureIsImage(['url' => $elink, 'length' => $length, 'medium' => $medium, 'type' => $mime])) {
 				$elink = FreshRSS_YouTubeProxy::proxyUrl($elink);
-				$ytClass = FreshRSS_YouTubeProxy::ytThumbnailClass($this);
-				$content .= '<p class="enclosure-content"><img' . ($ytClass ? ' class="' . trim($ytClass) . '"' : '') . ' src="' . $elink . '" alt="" title="' . $etitle . '" /></p>';
+				$content .= '<p class="enclosure-content"><img src="' . $elink . '" alt="" title="' . $etitle . '" /></p>';
 			} elseif ($medium === 'audio' || str_starts_with($mime, 'audio')) {
 				$content .= '<p class="enclosure-content"><audio preload="none" src="' . $elink
 					. ($length == null ? '' : '" data-length="' . $length)
