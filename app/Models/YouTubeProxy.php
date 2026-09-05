@@ -30,29 +30,41 @@ class FreshRSS_YouTubeProxy {
 	public static bool $circuit_broken = false;
 	private static bool $shutdown_registered = false;
 
-	// Mod configuration array loaded from data/config-youtube.php
-	public static ?array $mod_config = null;
+	// Mod configuration loaded exclusively from config-youtube.php
+	public static ?array $config = null;
 
-	public static function loadModConfig(): array {
-		if (self::$mod_config !== null) {
-			return self::$mod_config;
+	public static function loadConfig(): array {
+		if (self::$config !== null) {
+			return self::$config;
 		}
 
-		$path = defined('DATA_PATH') ? DATA_PATH . '/config-youtube.php' : (defined('FRESHRSS_PATH') ? FRESHRSS_PATH . '/data/config-youtube.php' : './data/config-youtube.php');
-		if (is_file($path)) {
-			$loaded = include $path;
-			if (is_array($loaded)) {
-				self::$mod_config = $loaded;
-				return self::$mod_config;
+		$candidates = [
+			defined('DATA_PATH') ? DATA_PATH . '/config-youtube.php' : null,
+			defined('FRESHRSS_PATH') ? FRESHRSS_PATH . '/data/config-youtube.php' : null,
+			__DIR__ . '/../../data/config-youtube.php',
+			'./data/config-youtube.php',
+			defined('FRESHRSS_PATH') ? FRESHRSS_PATH . '/config-youtube.php' : null,
+			__DIR__ . '/../../config-youtube.php',
+			'./config-youtube.php',
+			__DIR__ . '/config-youtube.php',
+		];
+
+		foreach ($candidates as $candidate) {
+			if ($candidate !== null && is_file($candidate)) {
+				$loaded = include $candidate;
+				if (is_array($loaded)) {
+					self::$config = $loaded;
+					return self::$config;
+				}
 			}
 		}
 
-		self::$mod_config = [];
-		return self::$mod_config;
+		self::$config = [];
+		return self::$config;
 	}
 
 	public static function getApiKey(): string {
-		$cfg = self::loadModConfig();
+		$cfg = self::loadConfig();
 		if (!empty($cfg['api_key']) && is_string($cfg['api_key'])) {
 			return $cfg['api_key'];
 		}
@@ -69,7 +81,7 @@ class FreshRSS_YouTubeProxy {
 	}
 
 	public static function getProxyKey(): string {
-		$cfg = self::loadModConfig();
+		$cfg = self::loadConfig();
 		if (!empty($cfg['proxy_key']) && is_string($cfg['proxy_key'])) {
 			return $cfg['proxy_key'];
 		}
@@ -83,7 +95,7 @@ class FreshRSS_YouTubeProxy {
 	}
 
 	public static function getProxyUrl(): string {
-		$cfg = self::loadModConfig();
+		$cfg = self::loadConfig();
 		if (!empty($cfg['proxy_url']) && is_string($cfg['proxy_url'])) {
 			return rtrim($cfg['proxy_url'], '/');
 		}
@@ -97,7 +109,7 @@ class FreshRSS_YouTubeProxy {
 	}
 
 	public static function isLoggingEnabled(): bool {
-		$cfg = self::loadModConfig();
+		$cfg = self::loadConfig();
 		if (isset($cfg['logging_enabled']) && is_bool($cfg['logging_enabled'])) {
 			return $cfg['logging_enabled'];
 		}
@@ -110,8 +122,51 @@ class FreshRSS_YouTubeProxy {
 		return self::$logging_enabled;
 	}
 
+	public static function getMaxLogSize(): int {
+		$cfg = self::loadConfig();
+		if (isset($cfg['maxLogSize']) && is_int($cfg['maxLogSize']) && $cfg['maxLogSize'] > 0) {
+			return $cfg['maxLogSize'];
+		}
+		if (isset($cfg['max_log_size']) && is_int($cfg['max_log_size']) && $cfg['max_log_size'] > 0) {
+			return $cfg['max_log_size'];
+		}
+		return self::$max_log_size;
+	}
+
+	public static function getCleanupInterval(): int {
+		$cfg = self::loadConfig();
+		if (isset($cfg['cleanup_interval']) && is_int($cfg['cleanup_interval']) && $cfg['cleanup_interval'] > 0) {
+			return $cfg['cleanup_interval'];
+		}
+		return self::$cleanup_interval;
+	}
+
+	public static function getTtlNormal(): int {
+		$cfg = self::loadConfig();
+		if (isset($cfg['ttl_normal']) && is_int($cfg['ttl_normal']) && $cfg['ttl_normal'] > 0) {
+			return $cfg['ttl_normal'];
+		}
+		return self::$ttl_normal;
+	}
+
+	public static function getTtlShort(): int {
+		$cfg = self::loadConfig();
+		if (isset($cfg['ttl_short']) && is_int($cfg['ttl_short']) && $cfg['ttl_short'] > 0) {
+			return $cfg['ttl_short'];
+		}
+		return self::$ttl_short;
+	}
+
+	public static function getTtlError(): int {
+		$cfg = self::loadConfig();
+		if (isset($cfg['ttl_error']) && is_int($cfg['ttl_error']) && $cfg['ttl_error'] > 0) {
+			return $cfg['ttl_error'];
+		}
+		return self::$ttl_error;
+	}
+
 	public static function getCacheMaxItems(): int {
-		$cfg = self::loadModConfig();
+		$cfg = self::loadConfig();
 		if (isset($cfg['cache_max_items']) && is_int($cfg['cache_max_items']) && $cfg['cache_max_items'] > 0) {
 			return $cfg['cache_max_items'];
 		}
@@ -124,49 +179,6 @@ class FreshRSS_YouTubeProxy {
 		return self::$cache_max_items;
 	}
 
-	public static function getCleanupInterval(): int {
-		$cfg = self::loadModConfig();
-		if (isset($cfg['cleanup_interval']) && is_int($cfg['cleanup_interval']) && $cfg['cleanup_interval'] > 0) {
-			return $cfg['cleanup_interval'];
-		}
-		return self::$cleanup_interval;
-	}
-
-	public static function getTtlNormal(): int {
-		$cfg = self::loadModConfig();
-		if (isset($cfg['ttl_normal']) && is_int($cfg['ttl_normal']) && $cfg['ttl_normal'] > 0) {
-			return $cfg['ttl_normal'];
-		}
-		return self::$ttl_normal;
-	}
-
-	public static function getTtlShort(): int {
-		$cfg = self::loadModConfig();
-		if (isset($cfg['ttl_short']) && is_int($cfg['ttl_short']) && $cfg['ttl_short'] > 0) {
-			return $cfg['ttl_short'];
-		}
-		return self::$ttl_short;
-	}
-
-	public static function getTtlError(): int {
-		$cfg = self::loadModConfig();
-		if (isset($cfg['ttl_error']) && is_int($cfg['ttl_error']) && $cfg['ttl_error'] > 0) {
-			return $cfg['ttl_error'];
-		}
-		return self::$ttl_error;
-	}
-
-	public static function getMaxLogSize(): int {
-		$cfg = self::loadModConfig();
-		if (isset($cfg['maxLogSize']) && is_int($cfg['maxLogSize']) && $cfg['maxLogSize'] > 0) {
-			return $cfg['maxLogSize'];
-		}
-		if (isset($cfg['max_log_size']) && is_int($cfg['max_log_size']) && $cfg['max_log_size'] > 0) {
-			return $cfg['max_log_size'];
-		}
-		return self::$max_log_size;
-	}
-
 	// ==========================================
 	// CACHE MANAGEMENT (Leak-Proof & Atomic)
 	// ==========================================
@@ -174,6 +186,8 @@ class FreshRSS_YouTubeProxy {
 		if (self::$cache !== null) {
 			return;
 		}
+
+		self::loadConfig();
 
 		$file = defined('CACHE_PATH') ? CACHE_PATH . '/youtube.json' : './data/cache/youtube.json';
 		if (is_file($file)) {
@@ -237,13 +251,13 @@ class FreshRSS_YouTubeProxy {
 		}
 
 		// Enforce maximum cache capacity (LRU pruning) to prevent unbounded memory growth
-		$maxItems = self::getCacheMaxItems();
-		if (count(self::$cache) > $maxItems) {
+		$max_items = self::getCacheMaxItems();
+		if (count(self::$cache) > $max_items) {
 			$cleanups = self::$cache['__last_cleanup'] ?? null;
 			unset(self::$cache['__last_cleanup']);
 
 			uasort(self::$cache, static fn($a, $b) => ((int)($a['timestamp'] ?? 0)) <=> ((int)($b['timestamp'] ?? 0)));
-			self::$cache = array_slice(self::$cache, -$maxItems, null, true);
+			self::$cache = array_slice(self::$cache, -$max_items, null, true);
 
 			if ($cleanups !== null) {
 				self::$cache['__last_cleanup'] = $cleanups;
@@ -273,6 +287,16 @@ class FreshRSS_YouTubeProxy {
 				$onDisk = json_decode($onDiskRaw, true);
 				if (is_array($onDisk)) {
 					self::$cache = array_merge($onDisk, self::$cache);
+					$max_items = self::getCacheMaxItems();
+					if (count(self::$cache) > $max_items) {
+						$cleanups = self::$cache['__last_cleanup'] ?? null;
+						unset(self::$cache['__last_cleanup']);
+						uasort(self::$cache, static fn($a, $b) => ((int)($a['timestamp'] ?? 0)) <=> ((int)($b['timestamp'] ?? 0)));
+						self::$cache = array_slice(self::$cache, -$max_items, null, true);
+						if ($cleanups !== null) {
+							self::$cache['__last_cleanup'] = $cleanups;
+						}
+					}
 				}
 				unset($onDisk);
 			}
@@ -449,19 +473,6 @@ class FreshRSS_YouTubeProxy {
 		return "{$proxyUrl}?key={$proxyKey}&url={$target}";
 	}
 
-	/**
-	 * Helper to proxy entry/enclosure thumbnail array.
-	 *
-	 * @param array{'url'?:string,'medium'?:string,'height'?:int,'width'?:int,'time'?:string}|null $thumbnail
-	 * @return array{'url'?:string,'medium'?:string,'height'?:int,'width'?:int,'time'?:string}|null
-	 */
-	public static function proxyThumbnail(?array $thumbnail): ?array {
-		if ($thumbnail !== null && !empty($thumbnail['url']) && is_string($thumbnail['url'])) {
-			$thumbnail['url'] = self::proxyUrl($thumbnail['url']);
-		}
-		return $thumbnail;
-	}
-
 	public static function extractVideoId(string $link): ?string {
 		if ($link === '') {
 			return null;
@@ -471,51 +482,6 @@ class FreshRSS_YouTubeProxy {
 		}
 		return null;
 	}
-
-	/**
-	 * Check if a feed originates from YouTube.
-	 */
-	public static function isYouTubeFeed(?FreshRSS_Feed $feed): bool {
-		if ($feed === null) {
-			return false;
-		}
-		$url = $feed->url();
-		$website = $feed->website();
-		return str_contains($url, 'youtube.com')
-			|| str_contains($website, 'youtube.com')
-			|| str_contains($url, 'youtu.be')
-			|| str_contains($website, 'youtu.be');
-	}
-
-	/**
-	 * Check if an entry is a YouTube video.
-	 */
-	public static function isYouTubeEntry(?FreshRSS_Entry $entry): bool {
-		if ($entry === null) {
-			return false;
-		}
-		return self::extractVideoId($entry->link()) !== null;
-	}
-
-	/**
-	 * Check if either the feed or entry is from YouTube.
-	 */
-	public static function isYouTube(?FreshRSS_Feed $feed = null, ?FreshRSS_Entry $entry = null): bool {
-		return self::isYouTubeFeed($feed) || self::isYouTubeEntry($entry);
-	}
-
-	/**
-	 * Check if a YouTube feed is a playlist (contains playlist_id=).
-	 */
-	public static function isYouTubePlaylistFeed(?FreshRSS_Feed $feed): bool {
-		if ($feed === null) {
-			return false;
-		}
-		$url = $feed->url();
-		return stripos($url, 'playlist_id=') !== false
-			|| stripos($feed->website(), 'playlist_id=') !== false;
-	}
-
 
 	// ==========================================
 	// YOUTUBE VIDEO DETAILS & RENDERING
@@ -731,13 +697,10 @@ class FreshRSS_YouTubeProxy {
 	/**
 	 * Render duration badge or fallback article summary.
 	 *
-	 * @param FreshRSS_Entry|null $entry
+	 * @param FreshRSS_Entry $entry
 	 * @return bool True if a YouTube badge was rendered, false if standard summary was rendered.
 	 */
-	public static function renderSummary(?FreshRSS_Entry $entry): bool {
-		if ($entry === null) {
-			return false;
-		}
+	public static function renderSummary(FreshRSS_Entry $entry): bool {
 		if (self::renderDuration($entry)) {
 			return true;
 		}
@@ -746,71 +709,4 @@ class FreshRSS_YouTubeProxy {
 		echo '<div class="summary">' . trim(mb_substr(strip_tags($entry->content(false)), 0, 500, 'UTF-8')) . '</div>';
 		return false;
 	}
-
-	/**
-	 * Render entry header thumbnail.
-	 *
-	 * @param FreshRSS_Entry|null $entry
-	 * @param string $topline_thumbnail 'none', 'small', 'medium', 'large'
-	 * @param bool $topline_summary Whether summary is displayed
-	 * @param bool $lazyload Whether lazy loading is enabled
-	 */
-	public static function renderThumbnail(?FreshRSS_Entry $entry, string $topline_thumbnail, bool $topline_summary, bool $lazyload): void {
-		if ($entry === null || $topline_thumbnail === 'none') {
-			return;
-		}
-		$thumbnail = $entry->thumbnail();
-		if ($thumbnail === null || empty($thumbnail['url']) || !is_string($thumbnail['url'])) {
-			return;
-		}
-		$smallClass = $topline_summary ? '' : 'small';
-		$lazyAttr = $lazyload ? ' loading="lazy"' : '';
-
-		echo '<li class="item thumbnail ' . htmlspecialchars($topline_thumbnail, ENT_COMPAT, 'UTF-8') . ' ' . $smallClass . '">';
-		echo '<img src="' . htmlspecialchars($thumbnail['url'], ENT_COMPAT, 'UTF-8') . '" class="item-element"' . $lazyAttr . ' alt="" />';
-		echo '</li>';
-	}
-
-	/**
-	 * Render feed website link, channel name, and favicon under the title.
-	 * If the feed is from YouTube, the favicon is assigned the 'yt-favicon' class.
-	 *
-	 * @param FreshRSS_Feed|null $feed
-	 * @param string $topline_website 'none', 'name', 'icon', or ''
-	 * @param FreshRSS_Entry|null $entry Optional entry for additional YouTube detection
-	 */
-	public static function renderWebsite(?FreshRSS_Feed $feed, string $topline_website, ?FreshRSS_Entry $entry = null): void {
-		if ($feed === null || $topline_website === 'none') {
-			return;
-		}
-
-		$isYouTube = self::isYouTube($feed, $entry);
-		$isPlaylist = self::isYouTubePlaylistFeed($feed);
-		$useYtFavicon = $isYouTube && !$isPlaylist;
-
-		$userConf = class_exists('FreshRSS_Context', false) && FreshRSS_Context::hasUserConf()
-			? FreshRSS_Context::userConf()
-			: null;
-		$showFavicons = ($userConf === null || $userConf->show_favicons) && 'name' !== $topline_website;
-		$showName = 'icon' !== $topline_website;
-
-		$itemClass = 'item website' . ($useYtFavicon ? ' yt-feed' : '');
-		$filterTitle = function_exists('_t') ? _t('gen.action.filter') . ': ' . $feed->name() : $feed->name();
-		$feedUrl = function_exists('_url') ? _url('index', 'index', 'get', 'f_' . $feed->id()) : '#';
-
-		echo '<div class="' . $itemClass . '">';
-		echo '<a href="' . $feedUrl . '" class="item-element" title="' . htmlspecialchars($filterTitle, ENT_COMPAT, 'UTF-8') . '">';
-
-		if ($showFavicons) {
-			$extraClass = $useYtFavicon ? ' yt-favicon' : '';
-			echo '<img class="favicon' . $extraClass . '" src="' . $feed->favicon() . '" alt="✇" loading="lazy" />';
-		}
-
-		if ($showName) {
-			echo '<span class="websiteName">' . htmlspecialchars($feed->name(), ENT_COMPAT, 'UTF-8') . '</span>';
-		}
-
-		echo '</a><br /></div>';
-	}
 }
-
