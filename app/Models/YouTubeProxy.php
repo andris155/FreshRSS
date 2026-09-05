@@ -516,12 +516,6 @@ class FreshRSS_YouTubeProxy {
 			|| stripos($feed->website(), 'playlist_id=') !== false;
 	}
 
-	/**
-	 * Return ' yt-thumbnail' if the entry is a YouTube video, otherwise empty string.
-	 */
-	public static function ytThumbnailClass(?FreshRSS_Entry $entry): string {
-		return self::isYouTubeEntry($entry) ? ' yt-thumbnail' : '';
-	}
 
 	// ==========================================
 	// YOUTUBE VIDEO DETAILS & RENDERING
@@ -754,7 +748,7 @@ class FreshRSS_YouTubeProxy {
 	}
 
 	/**
-	 * Render entry header thumbnail with optional yt-thumbnail class for YouTube videos.
+	 * Render entry header thumbnail.
 	 *
 	 * @param FreshRSS_Entry|null $entry
 	 * @param string $topline_thumbnail 'none', 'small', 'medium', 'large'
@@ -769,12 +763,11 @@ class FreshRSS_YouTubeProxy {
 		if ($thumbnail === null || empty($thumbnail['url']) || !is_string($thumbnail['url'])) {
 			return;
 		}
-		$ytClass = self::ytThumbnailClass($entry);
 		$smallClass = $topline_summary ? '' : 'small';
 		$lazyAttr = $lazyload ? ' loading="lazy"' : '';
 
 		echo '<li class="item thumbnail ' . htmlspecialchars($topline_thumbnail, ENT_COMPAT, 'UTF-8') . ' ' . $smallClass . '">';
-		echo '<img src="' . htmlspecialchars($thumbnail['url'], ENT_COMPAT, 'UTF-8') . '" class="item-element' . $ytClass . '"' . $lazyAttr . ' alt="" />';
+		echo '<img src="' . htmlspecialchars($thumbnail['url'], ENT_COMPAT, 'UTF-8') . '" class="item-element"' . $lazyAttr . ' alt="" />';
 		echo '</li>';
 	}
 
