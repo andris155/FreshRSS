@@ -51,30 +51,39 @@ class FreshRSS_YouTubeProxy {
 
 	public static function getApiKey(): string {
 		$cfg = self::loadConfig();
-		return (!empty($cfg['api_key']) && is_string($cfg['api_key'])) ? $cfg['api_key'] : '';
-	}
-
-	public static function isProxyEnabled(): bool {
-		$cfg = self::loadConfig();
-		if (isset($cfg['proxy_enabled']) && !$cfg['proxy_enabled']) {
-			return false;
+		if (!empty($cfg['api_key']) && is_string($cfg['api_key'])) {
+			return $cfg['api_key'];
 		}
-		return !empty($cfg['proxy_url']) && is_string($cfg['proxy_url']) && $cfg['proxy_url'] !== 'none';
+		if (!empty($cfg['youtube_api_key']) && is_string($cfg['youtube_api_key'])) {
+			return $cfg['youtube_api_key'];
+		}
+		if (class_exists('FreshRSS_Context', false)) {
+			if (FreshRSS_Context::hasSystemConf()) {
+				$val = FreshRSS_Context::systemConf()->youtube_api_key ?? null;
+				if (is_string($val) && $val !== '') {
+					return $val;
+				}
+			}
+			if (FreshRSS_Context::hasUserConf()) {
+				$val = FreshRSS_Context::userConf()->youtube_api_key ?? null;
+				if (is_string($val) && $val !== '') {
+					return $val;
+				}
+			}
+		}
+		return 'key';
 	}
 
 	public static function getProxyKey(): string {
 		$cfg = self::loadConfig();
-		return (!empty($cfg['proxy_key']) && is_string($cfg['proxy_key'])) ? $cfg['proxy_key'] : '';
+		return (!empty($cfg['proxy_key']) && is_string($cfg['proxy_key'])) ? $cfg['proxy_key'] : 'key';
 	}
 
 	public static function getProxyUrl(): string {
-		if (!self::isProxyEnabled()) {
-			return '';
-		}
 		$cfg = self::loadConfig();
-		return !empty($cfg['proxy_url']) && is_string($cfg['proxy_url'])
+		return (!empty($cfg['proxy_url']) && is_string($cfg['proxy_url']))
 			? rtrim($cfg['proxy_url'], '/')
-			: '';
+			: 'https://freshrss.lan/proxy';
 	}
 
 	public static function isLoggingEnabled(): bool {
@@ -119,13 +128,6 @@ class FreshRSS_YouTubeProxy {
 			: 3600;
 	}
 
-	public static function getCircuitBreakerTtl(): int {
-		$cfg = self::loadConfig();
-		return (isset($cfg['circuit_breaker_ttl']) && is_int($cfg['circuit_breaker_ttl']) && $cfg['circuit_breaker_ttl'] > 0)
-			? $cfg['circuit_breaker_ttl']
-			: 3600;
-	}
-
 	public static function getCacheMaxItems(): int {
 		$cfg = self::loadConfig();
 		return (isset($cfg['cache_max_items']) && is_int($cfg['cache_max_items']) && $cfg['cache_max_items'] > 0)
@@ -134,62 +136,21 @@ class FreshRSS_YouTubeProxy {
 	}
 
 	// ==========================================
-	// CIRCUIT BREAKER (Persistent & Fast)
+	// CACHE MANAGEMENT (Leak-Proof & Atomic)
 	// ==========================================
-	public static function isCircuitBroken(): bool {
-		if (self::$circuit_broken) {
-			return true;
-		}
-		self::initCache();
-		$brokenUntil = (int)(self::$cache['__circuit_broken_until'] ?? 0);
-		if ($brokenUntil > time()) {
-			self::$circuit_broken = true;
-			return true;
-		}
-		return false;
-	}
-
-	public static function tripCircuitBreaker(?int $duration = null): void {
-		self::$circuit_broken = true;
-		self::initCache();
-		$duration = $duration ?? self::getCircuitBreakerTtl();
-		self::$cache['__circuit_broken_until'] = time() + $duration;
-		self::$cache_changed = true;
-	}
-
-	// ==========================================
-	// CACHE MANAGEMENT (Atomic flock & Safe LRU)
-	// ==========================================
-	public static function getCacheFilePath(): string {
-		return defined('CACHE_PATH') ? CACHE_PATH . '/youtube.json' : './data/cache/youtube.json';
-	}
-
 	public static function initCache(): void {
 		if (self::$cache !== null) {
 			return;
 		}
 
 		self::loadConfig();
-		$file = self::getCacheFilePath();
 
+		$file = defined('CACHE_PATH') ? CACHE_PATH . '/youtube.json' : './data/cache/youtube.json';
 		if (is_file($file)) {
-			$fp = @fopen($file, 'rb');
-			if ($fp) {
-				if (flock($fp, LOCK_SH)) {
-					$raw = stream_get_contents($fp);
-					flock($fp, LOCK_UN);
-					if (is_string($raw) && $raw !== '') {
-						$decoded = json_decode($raw, true);
-						if (is_array($decoded)) {
-							self::$cache = $decoded;
-						}
-					}
-				}
-				fclose($fp);
-			}
-		}
-
-		if (!is_array(self::$cache)) {
+			$raw = @file_get_contents($file);
+			self::$cache = (is_string($raw) && $raw !== '') ? (json_decode($raw, true) ?: []) : [];
+			unset($raw);
+		} else {
 			self::$cache = [];
 		}
 
@@ -221,7 +182,7 @@ class FreshRSS_YouTubeProxy {
 		$ttl_error = self::getTtlError();
 
 		foreach (self::$cache as $key => $row) {
-			if (str_starts_with((string)$key, '__')) {
+			if ($key === '__last_cleanup' || str_starts_with((string)$key, '__')) {
 				continue;
 			}
 			if (!is_array($row) || empty($row['timestamp'])) {
@@ -235,7 +196,7 @@ class FreshRSS_YouTubeProxy {
 			$is_not_found = isset($row['duration']) && $row['duration'] === false;
 			$is_premiere = !empty($row['premiere']);
 			$is_live = !empty($row['liveBroadcastContent']) && $row['liveBroadcastContent'] === 'upcoming';
-			$is_zero = isset($row['duration']) && in_array($row['duration'], ['0:00', '00:00', '0:0'], true);
+			$is_zero = isset($row['duration']) && ($row['duration'] === '0:00' || $row['duration'] === '00:00' || $row['duration'] === '0:0');
 
 			$ttl = $is_error ? $ttl_error : (($is_not_found || $is_premiere || $is_live || $is_zero) ? $ttl_short : $ttl_normal);
 
@@ -245,85 +206,63 @@ class FreshRSS_YouTubeProxy {
 			}
 		}
 
-		self::pruneCache();
+		// Enforce maximum cache capacity (LRU pruning) to prevent unbounded memory growth
+		$max_items = self::getCacheMaxItems();
+		if (count(self::$cache) > $max_items) {
+			$cleanups = self::$cache['__last_cleanup'] ?? null;
+			unset(self::$cache['__last_cleanup']);
+
+			uasort(self::$cache, static fn($a, $b) => ((int)($a['timestamp'] ?? 0)) <=> ((int)($b['timestamp'] ?? 0)));
+			self::$cache = array_slice(self::$cache, -$max_items, null, true);
+
+			if ($cleanups !== null) {
+				self::$cache['__last_cleanup'] = $cleanups;
+			}
+			self::$cache_changed = true;
+		}
+
 		self::$cache['__last_cleanup'] = $now;
 		self::$cache_changed = true;
 	}
 
-	/**
-	 * Enforce maximum cache capacity (LRU pruning) without data loss.
-	 */
-	private static function pruneCache(): void {
-		if (!is_array(self::$cache)) {
-			return;
-		}
-
-		$max_items = self::getCacheMaxItems();
-		if (count(self::$cache) <= $max_items) {
-			return;
-		}
-
-		// Preserve internal metadata keys during sorting
-		$meta = [];
-		foreach (self::$cache as $k => $v) {
-			if (str_starts_with((string)$k, '__')) {
-				$meta[$k] = $v;
-				unset(self::$cache[$k]);
-			}
-		}
-
-		uasort(self::$cache, static fn($a, $b) => ((int)($a['timestamp'] ?? 0)) <=> ((int)($b['timestamp'] ?? 0)));
-		self::$cache = array_slice(self::$cache, -$max_items, null, true);
-
-		foreach ($meta as $k => $v) {
-			self::$cache[$k] = $v;
-		}
-	}
-
-	/**
-	 * Thread/Process-Safe Cache Save using atomic exclusive flock.
-	 */
 	public static function saveCache(): void {
 		if (!self::$cache_changed || !is_array(self::$cache)) {
 			return;
 		}
 
-		$file = self::getCacheFilePath();
+		$file = defined('CACHE_PATH') ? CACHE_PATH . '/youtube.json' : './data/cache/youtube.json';
 		$dir = dirname($file);
 		if (!is_dir($dir)) {
 			@mkdir($dir, 0777, true);
 		}
 
-		$fp = @fopen($file, 'c+b');
-		if ($fp) {
-			if (flock($fp, LOCK_EX)) {
-				$size = @filesize($file);
-				$diskData = [];
-				if ($size > 0) {
-					rewind($fp);
-					$onDiskRaw = stream_get_contents($fp);
-					if (is_string($onDiskRaw) && $onDiskRaw !== '') {
-						$decoded = json_decode($onDiskRaw, true);
-						if (is_array($decoded)) {
-							$diskData = $decoded;
+		// Concurrency protection: merge changes with on-disk state
+		if (is_file($file)) {
+			$onDiskRaw = @file_get_contents($file);
+			if (is_string($onDiskRaw) && $onDiskRaw !== '') {
+				$onDisk = json_decode($onDiskRaw, true);
+				if (is_array($onDisk)) {
+					self::$cache = array_merge($onDisk, self::$cache);
+					$max_items = self::getCacheMaxItems();
+					if (count(self::$cache) > $max_items) {
+						$cleanups = self::$cache['__last_cleanup'] ?? null;
+						unset(self::$cache['__last_cleanup']);
+						uasort(self::$cache, static fn($a, $b) => ((int)($a['timestamp'] ?? 0)) <=> ((int)($b['timestamp'] ?? 0)));
+						self::$cache = array_slice(self::$cache, -$max_items, null, true);
+						if ($cleanups !== null) {
+							self::$cache['__last_cleanup'] = $cleanups;
 						}
 					}
 				}
-
-				// Merge: keep disk updates from other workers while applying our own
-				self::$cache = array_merge($diskData, self::$cache);
-				self::pruneCache();
-
-				$json = json_encode(self::$cache, JSON_UNESCAPED_SLASHES);
-				if (is_string($json)) {
-					ftruncate($fp, 0);
-					rewind($fp);
-					fwrite($fp, $json);
-					fflush($fp);
-				}
-				flock($fp, LOCK_UN);
+				unset($onDisk);
 			}
-			fclose($fp);
+			unset($onDiskRaw);
+		}
+
+		$json = json_encode(self::$cache, JSON_UNESCAPED_SLASHES);
+		if (is_string($json)) {
+			@file_put_contents($file, $json, LOCK_EX);
+			unset($json);
 		}
 		self::$cache_changed = false;
 	}
@@ -339,6 +278,7 @@ class FreshRSS_YouTubeProxy {
 		$logFile = defined('CACHE_PATH') ? CACHE_PATH . '/youtube_api.log' : './data/cache/youtube_api.log';
 		$maxLogSize = self::getMaxLogSize();
 
+		clearstatcache(true, $logFile);
 		if (@file_exists($logFile) && (@filesize($logFile) ?: 0) > $maxLogSize) {
 			@rename($logFile, $logFile . '.old');
 		}
@@ -348,7 +288,7 @@ class FreshRSS_YouTubeProxy {
 	}
 
 	public static function fetchApi(string $url, string $vid): ?string {
-		if (self::isCircuitBroken()) {
+		if (self::$circuit_broken) {
 			return null;
 		}
 
@@ -375,7 +315,7 @@ class FreshRSS_YouTubeProxy {
 				$status = 'OK';
 				$bytes = strlen($response);
 			} elseif ($httpCode === 403 || $httpCode === 429) {
-				self::tripCircuitBreaker();
+				self::$circuit_broken = true;
 				$status = 'FORBIDDEN_' . $httpCode;
 			} elseif ($result === false) {
 				$status = 'CURL_ERROR';
@@ -400,10 +340,6 @@ class FreshRSS_YouTubeProxy {
 
 		self::logApi($vid, $status, $url, $bytes);
 
-		if ($response === null && !self::$circuit_broken) {
-			self::tripCircuitBreaker(300); // 5-minute cooldown on general network failure
-		}
-
 		return $response;
 	}
 
@@ -415,11 +351,6 @@ class FreshRSS_YouTubeProxy {
 
 		if (!empty(self::$cache[$vid]['thumbnail']) && is_string(self::$cache[$vid]['thumbnail'])) {
 			return self::$cache[$vid]['thumbnail'];
-		}
-
-		// Fast fallback without network call if circuit is broken
-		if (self::isCircuitBroken()) {
-			return 'hqdefault';
 		}
 
 		$hq720 = "https://{$cdn}.ytimg.com/vi/{$vid}/hq720.jpg";
@@ -473,15 +404,7 @@ class FreshRSS_YouTubeProxy {
 			return $url;
 		}
 
-		if (!self::isProxyEnabled()) {
-			return $url;
-		}
-
 		$proxyUrl = self::getProxyUrl();
-		if ($proxyUrl === '') {
-			return $url;
-		}
-
 		$proxyKey = self::getProxyKey();
 
 		// Prevent double-proxying
@@ -506,278 +429,90 @@ class FreshRSS_YouTubeProxy {
 		if ($link === '') {
 			return null;
 		}
-		if (preg_match('#(?:youtu\.be/|youtube(?:-nocookie)?\.com/(?:embed/|v/|shorts/|live/|watch\?(?:.*&)?v=)|yt:video:)([a-zA-Z0-9_-]{11})#i', $link, $m)) {
+		if (preg_match('/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?(?:.*&)?v=))([a-zA-Z0-9_-]{11})/i', $link, $m)) {
+			return $m[1];
+		}
+		if (preg_match('/(?:^|:)yt:video:([a-zA-Z0-9_-]{11})/i', $link, $m)) {
 			return $m[1];
 		}
 		return null;
 	}
 
-	/**
-	 * Parse ISO-8601 duration into human-readable H:MM:SS or M:SS format.
-	 */
-	public static function parseDuration(string $isoDuration): string {
-		if ($isoDuration === '' || $isoDuration === 'P0D' || $isoDuration === 'PT0S') {
-			return '0:00';
-		}
-		try {
-			$interval = new DateInterval($isoDuration);
-			$hours = $interval->h + ($interval->d * 24) + ($interval->m * 30 * 24) + ($interval->y * 365 * 24);
-			return $hours > 0
-				? sprintf('%d:%02d:%02d', $hours, $interval->i, $interval->s)
-				: sprintf('%d:%02d', $interval->i, $interval->s);
-		} catch (\Throwable $e) {
-			return '0:00';
-		}
-	}
-
 	// ==========================================
-	// YOUTUBE VIDEO DETAILS & BATCHING
+	// YOUTUBE VIDEO DETAILS & RENDERING
 	// ==========================================
-
-	/**
-	 * Batch fetch metadata for multiple video IDs or FreshRSS_Entry objects in chunks of 50.
-	 *
-	 * @param array<FreshRSS_Entry|string> $items
-	 * @return array<string, array{duration:string,is_live:bool,premiere:bool,not_found:bool,scheduled_start:string|false,upcoming:bool}>
-	 */
-	public static function batchFetchDetails(array $items): array {
-		self::initCache();
-		$now = time();
-		$results = [];
-		$toFetch = [];
-
-		foreach ($items as $item) {
-			$vid = null;
-			if ($item instanceof FreshRSS_Entry) {
-				$vid = self::extractVideoId($item->link()) ?? self::extractVideoId($item->guid());
-			} elseif (is_string($item)) {
-				$vid = self::extractVideoId($item) ?? (strlen($item) === 11 ? $item : null);
-			}
-
-			if ($vid === null) {
-				continue;
-			}
-
-			$cached = self::getCachedDetails($vid, $now);
-			if ($cached !== null) {
-				$results[$vid] = $cached;
-			} else {
-				$toFetch[$vid] = true;
-			}
-		}
-
-		if (empty($toFetch) || self::isCircuitBroken()) {
-			return $results;
-		}
-
-		$apiKey = self::getApiKey();
-		if ($apiKey === '' || $apiKey === 'key') {
-			return $results;
-		}
-
-		$chunks = array_chunk(array_keys($toFetch), 50);
-		foreach ($chunks as $chunk) {
-			$idParam = implode(',', $chunk);
-			$apiUrl = "https://www.googleapis.com/youtube/v3/videos?id={$idParam}&part=contentDetails,liveStreamingDetails,snippet&key={$apiKey}";
-			$response = self::fetchApi($apiUrl, 'batch_' . count($chunk));
-
-			if ($response === null || $response === '') {
-				foreach ($chunk as $vid) {
-					if (!isset(self::$cache[$vid]) || !is_array(self::$cache[$vid])) {
-						self::$cache[$vid] = [];
-					}
-					self::$cache[$vid]['api_error'] = true;
-					self::$cache[$vid]['timestamp'] = $now;
-					self::$cache_changed = true;
-				}
-				continue;
-			}
-
-			$data = json_decode($response, true);
-			$returnedIds = [];
-
-			if (!empty($data['items']) && is_array($data['items'])) {
-				foreach ($data['items'] as $videoItem) {
-					$vid = $videoItem['id'] ?? null;
-					if (!is_string($vid) || $vid === '') {
-						continue;
-					}
-					$returnedIds[$vid] = true;
-					$details = self::processVideoItem($vid, $videoItem, $now);
-					$results[$vid] = $details;
-				}
-			}
-
-			// Mark IDs not returned by API as not found (deleted/private)
-			foreach ($chunk as $vid) {
-				if (!isset($returnedIds[$vid])) {
-					if (!isset(self::$cache[$vid]) || !is_array(self::$cache[$vid])) {
-						self::$cache[$vid] = [];
-					}
-					self::$cache[$vid]['duration'] = false;
-					self::$cache[$vid]['timestamp'] = $now;
-					self::$cache_changed = true;
-
-					$results[$vid] = [
-						'duration' => '',
-						'is_live' => false,
-						'premiere' => false,
-						'not_found' => true,
-						'scheduled_start' => false,
-						'upcoming' => false,
-					];
-				}
-			}
-		}
-
-		return $results;
-	}
-
-	/**
-	 * Retrieve valid cached metadata for a video ID, or null if expired/missing.
-	 */
-	private static function getCachedDetails(string $vid, int $now): ?array {
-		if (!isset(self::$cache[$vid]) || !is_array(self::$cache[$vid])) {
-			return null;
-		}
-
-		$item = self::$cache[$vid];
-		$age = $now - (int)($item['timestamp'] ?? 0);
-		$cached_dur = $item['duration'] ?? null;
-		$is_not_found = ($cached_dur === false);
-		$is_premiere = !empty($item['premiere']);
-		$is_error = !empty($item['api_error']);
-		$zero_durations = ['0:00', '00:00', '0:0'];
-		$is_zero = is_string($cached_dur) && in_array($cached_dur, $zero_durations, true);
-		$is_upcoming = !empty($item['liveBroadcastContent']) && $item['liveBroadcastContent'] === 'upcoming';
-
-		$ttl = $is_error
-			? self::getTtlError()
-			: (($is_not_found || $is_premiere || $is_zero || $is_upcoming) ? self::getTtlShort() : self::getTtlNormal());
-
-		if ($age >= $ttl) {
-			return null;
-		}
-
-		if ($is_error) {
-			return null;
-		}
-
-		$sched = false;
-		if (!empty($item['scheduledStartTime']) && is_string($item['scheduledStartTime']) && strtotime($item['scheduledStartTime']) > $now) {
-			$sched = $item['scheduledStartTime'];
-		}
-
-		return [
-			'duration' => is_string($cached_dur) ? $cached_dur : '',
-			'is_live' => $is_zero,
-			'premiere' => $is_premiere,
-			'not_found' => $is_not_found,
-			'scheduled_start' => $sched,
-			'upcoming' => $is_upcoming,
-		];
-	}
-
-	/**
-	 * Process raw YouTube API item and update in-memory cache.
-	 */
-	private static function processVideoItem(string $vid, array $videoItem, int $now): array {
-		$content = $videoItem['contentDetails'] ?? [];
-		$live = $videoItem['liveStreamingDetails'] ?? null;
-		$snippet = $videoItem['snippet'] ?? [];
-
-		$cacheRow = self::$cache[$vid] ?? [];
-		if (!is_array($cacheRow)) {
-			$cacheRow = [];
-		}
-		$cacheRow['timestamp'] = $now;
-		unset($cacheRow['api_error']);
-
-		// Auto-detect high-res thumbnail variant from API snippet to eliminate extra HEAD requests
-		if (!empty($snippet['thumbnails']['maxres'])) {
-			$cacheRow['thumbnail'] = 'maxresdefault';
-		} elseif (!empty($snippet['thumbnails']['standard'])) {
-			$cacheRow['thumbnail'] = 'sddefault';
-		} elseif (!empty($snippet['thumbnails']['high'])) {
-			$cacheRow['thumbnail'] = 'hqdefault';
-		}
-
-		$duration = '';
-		$is_premiere = false;
-		$is_live = false;
-		$zero_durations = ['0:00', '00:00', '0:0'];
-
-		if (!isset($content['duration'])) {
-			$is_premiere = true;
-			$cacheRow['premiere'] = true;
-		} else {
-			$duration = self::parseDuration((string)$content['duration']);
-			$cacheRow['duration'] = $duration;
-			if (in_array($duration, $zero_durations, true)) {
-				$is_live = true;
-			}
-		}
-
-		$sched_start = false;
-		$is_upcoming = false;
-
-		if ($is_live || $is_premiere) {
-			if ($live && !isset($live['actualStartTime']) && isset($live['scheduledStartTime'])) {
-				$sched_start = (string)$live['scheduledStartTime'];
-				$cacheRow['scheduledStartTime'] = $sched_start;
-			}
-
-			if (isset($snippet['liveBroadcastContent']) && $snippet['liveBroadcastContent'] === 'upcoming') {
-				$is_upcoming = true;
-				$cacheRow['liveBroadcastContent'] = 'upcoming';
-			}
-		}
-
-		self::$cache[$vid] = $cacheRow;
-		self::$cache_changed = true;
-
-		$active_sched = false;
-		if ($sched_start !== false && strtotime($sched_start) > $now) {
-			$active_sched = $sched_start;
-		}
-
-		return [
-			'duration' => $duration,
-			'is_live' => $is_live,
-			'premiere' => $is_premiere,
-			'not_found' => false,
-			'scheduled_start' => $active_sched,
-			'upcoming' => $is_upcoming,
-		];
-	}
 
 	/**
 	 * @return array{duration:string,is_live:bool,premiere:bool,not_found:bool,scheduled_start:string|false,upcoming:bool}|null
 	 */
 	public static function getDetails(FreshRSS_Entry $entry): ?array {
-		$vid = self::extractVideoId($entry->link()) ?? self::extractVideoId($entry->guid());
+		$vid = self::extractVideoId($entry->link());
+		if ($vid === null) {
+			$vid = self::extractVideoId($entry->guid());
+		}
 		if ($vid === null) {
 			return null;
 		}
 
 		self::initCache();
 		$now = time();
-		$cached = self::getCachedDetails($vid, $now);
-		if ($cached !== null) {
-			return $cached;
+		$zero_durations = ['0:00', '00:00', '0:0'];
+
+		$ttl_normal = self::getTtlNormal();
+		$ttl_short = self::getTtlShort();
+		$ttl_error = self::getTtlError();
+
+		$has_details = isset(self::$cache[$vid])
+			&& is_array(self::$cache[$vid])
+			&& (array_key_exists('duration', self::$cache[$vid])
+				|| !empty(self::$cache[$vid]['premiere'])
+				|| !empty(self::$cache[$vid]['api_error']));
+
+		if ($has_details) {
+			$item = self::$cache[$vid];
+			$age = $now - (int)($item['timestamp'] ?? 0);
+
+			$cached_dur = $item['duration'] ?? null;
+			$is_not_found = ($cached_dur === false);
+			$is_premiere = !empty($item['premiere']);
+			$is_error = !empty($item['api_error']);
+			$is_zero = is_string($cached_dur) && in_array($cached_dur, $zero_durations, true);
+			$is_upcoming = !empty($item['liveBroadcastContent']) && $item['liveBroadcastContent'] === 'upcoming';
+
+			$ttl = $is_error ? $ttl_error : (($is_not_found || $is_premiere || $is_zero || $is_upcoming) ? $ttl_short : $ttl_normal);
+
+			if ($age < $ttl) {
+				if ($is_error) {
+					return null;
+				}
+
+				$sched = false;
+				if (!empty($item['scheduledStartTime']) && is_string($item['scheduledStartTime']) && strtotime($item['scheduledStartTime']) > $now) {
+					$sched = $item['scheduledStartTime'];
+				}
+
+				return [
+					'duration' => is_string($cached_dur) ? $cached_dur : '',
+					'is_live' => $is_zero,
+					'premiere' => $is_premiere,
+					'not_found' => $is_not_found,
+					'scheduled_start' => $sched,
+					'upcoming' => $is_upcoming,
+				];
+			}
 		}
 
-		if (self::isCircuitBroken()) {
+		if (self::$circuit_broken) {
 			return null;
 		}
 
-		$apiKey = self::getApiKey();
+		$apiKey = static::getApiKey();
 		if ($apiKey === '' || $apiKey === 'key') {
 			return null;
 		}
 
-		$apiUrl = "https://www.googleapis.com/youtube/v3/videos?id={$vid}&part=contentDetails,liveStreamingDetails,snippet&key={$apiKey}";
-		$response = self::fetchApi($apiUrl, $vid);
+		$apiUrl = "https://www.googleapis.com/youtube/v3/videos?id={$vid}&part=contentDetails&key={$apiKey}";
+		$response = static::fetchApi($apiUrl, $vid);
 
 		if ($response === null || $response === '') {
 			if (!isset(self::$cache[$vid]) || !is_array(self::$cache[$vid])) {
@@ -810,41 +545,115 @@ class FreshRSS_YouTubeProxy {
 			];
 		}
 
-		return self::processVideoItem($vid, $data['items'][0], $now);
-	}
+		$videoItem = $data['items'][0];
+		unset($data);
 
-	/**
-	 * Generate duration or status badge HTML for a YouTube video entry.
-	 * Returns null if entry is not YouTube or duration is unavailable.
-	 */
-	public static function getDurationBadgeHtml(FreshRSS_Entry $entry): ?string {
-		$yt = self::getDetails($entry);
-		if ($yt === null || $yt['not_found']) {
-			return null;
+		$content = $videoItem['contentDetails'] ?? [];
+
+		$cacheRow = self::$cache[$vid] ?? [];
+		if (!is_array($cacheRow)) {
+			$cacheRow = [];
+		}
+		$cacheRow['timestamp'] = $now;
+		unset($cacheRow['api_error']);
+
+		$duration = '';
+		$is_premiere = false;
+		$is_live = false;
+
+		if (!isset($content['duration'])) {
+			$is_premiere = true;
+			$cacheRow['premiere'] = true;
+		} else {
+			try {
+				$interval = new DateInterval((string)$content['duration']);
+				$hours = $interval->h + ($interval->d * 24);
+				$duration = $hours > 0
+					? sprintf('%d:%02d:%02d', $hours, $interval->i, $interval->s)
+					: sprintf('%d:%02d', $interval->i, $interval->s);
+			} catch (\Throwable $e) {
+				$duration = '0:00';
+			}
+
+			$cacheRow['duration'] = $duration;
+			if (in_array($duration, $zero_durations, true)) {
+				$is_live = true;
+			}
 		}
 
-		if ($yt['scheduled_start'] && $yt['premiere']) {
-			$formatted = date('Y-m-d H:i', strtotime($yt['scheduled_start']));
-			return '<div class="duration summary">Premiere scheduled: ' . htmlspecialchars($formatted, ENT_COMPAT, 'UTF-8') . '</div>';
-		}
-		if ($yt['scheduled_start']) {
-			$formatted = date('Y-m-d H:i', strtotime($yt['scheduled_start']));
-			return '<div class="duration summary">Live scheduled: ' . htmlspecialchars($formatted, ENT_COMPAT, 'UTF-8') . '</div>';
-		}
-		if ($yt['upcoming']) {
-			return '<div class="duration summary">Live scheduled: Unknown</div>';
-		}
-		if ($yt['premiere']) {
-			return '<div class="duration summary">Premiere</div>';
-		}
-		if ($yt['is_live']) {
-			return '<div class="duration summary">Live</div>';
-		}
-		if ($yt['duration'] !== '') {
-			return '<div class="duration summary">' . htmlspecialchars($yt['duration'], ENT_COMPAT, 'UTF-8') . '</div>';
+		$sched_start = false;
+		$is_upcoming = false;
+
+		// ONLY FETCH LIVE DETAILS (If live or premiere)
+		if ($is_live || $is_premiere) {
+			if (isset(self::$cache[$vid]) && (array_key_exists('scheduledStartTime', self::$cache[$vid]) || array_key_exists('liveBroadcastContent', self::$cache[$vid]))) {
+				$sched_start = self::$cache[$vid]['scheduledStartTime'] ?? false;
+				$live_broadcast = self::$cache[$vid]['liveBroadcastContent'] ?? false;
+
+				$cacheRow['scheduledStartTime'] = $sched_start;
+				$cacheRow['liveBroadcastContent'] = $live_broadcast;
+
+				if ($live_broadcast === 'upcoming') {
+					$is_upcoming = true;
+				}
+			} else {
+				$needsSnippetCheck = false;
+				$liveUrl = "https://www.googleapis.com/youtube/v3/videos?id={$vid}&part=liveStreamingDetails&key={$apiKey}";
+				$liveResp = static::fetchApi($liveUrl, $vid);
+
+				if ($liveResp !== null && $liveResp !== '') {
+					$liveData = json_decode($liveResp, true);
+					unset($liveResp);
+					$liveDetails = $liveData['items'][0]['liveStreamingDetails'] ?? null;
+
+					if ($liveDetails && !isset($liveDetails['actualStartTime']) && isset($liveDetails['scheduledStartTime'])) {
+						$sched_start = (string)$liveDetails['scheduledStartTime'];
+					} elseif (!$liveDetails || (!isset($liveDetails['actualStartTime']) && !isset($liveDetails['scheduledStartTime']))) {
+						$needsSnippetCheck = true;
+					}
+					unset($liveData, $liveDetails);
+				} else {
+					$needsSnippetCheck = true;
+				}
+
+				// ONLY fetch snippet if liveStreamingDetails was missing the scheduled
+				if ($needsSnippetCheck) {
+					$snippetUrl = "https://www.googleapis.com/youtube/v3/videos?id={$vid}&part=snippet&key={$apiKey}";
+					$snippetResp = static::fetchApi($snippetUrl, $vid);
+
+					if ($snippetResp !== null && $snippetResp !== '') {
+						$snippetData = json_decode($snippetResp, true);
+						unset($snippetResp);
+						$snippet = $snippetData['items'][0]['snippet'] ?? null;
+
+						if ($snippet && isset($snippet['liveBroadcastContent']) && $snippet['liveBroadcastContent'] === 'upcoming') {
+							$is_upcoming = true;
+							$cacheRow['liveBroadcastContent'] = 'upcoming';
+						}
+						unset($snippetData, $snippet);
+					}
+				}
+
+				$cacheRow['scheduledStartTime'] = $sched_start;
+			}
 		}
 
-		return null;
+		self::$cache[$vid] = $cacheRow;
+		self::$cache_changed = true;
+
+		$active_sched = false;
+		if ($sched_start !== false && strtotime($sched_start) > $now) {
+			$active_sched = $sched_start;
+		}
+
+		return [
+			'duration' => $duration,
+			'is_live' => $is_live,
+			'premiere' => $is_premiere,
+			'not_found' => false,
+			'scheduled_start' => $active_sched,
+			'upcoming' => $is_upcoming,
+		];
 	}
 
 	/**
@@ -854,11 +663,42 @@ class FreshRSS_YouTubeProxy {
 	 * @return bool True if a YouTube badge was rendered, false if not a YouTube entry.
 	 */
 	public static function renderDuration(FreshRSS_Entry $entry): bool {
-		$badgeHtml = self::getDurationBadgeHtml($entry);
-		if ($badgeHtml !== null) {
-			echo $badgeHtml;
+		$yt = self::getDetails($entry);
+		if ($yt === null) {
+			return false;
+		}
+
+		if ($yt['not_found']) {
+			echo '<div class="duration summary">Duration not found</div>';
 			return true;
 		}
+		if ($yt['scheduled_start'] && $yt['premiere']) {
+			$formatted = date('Y-m-d H:i', strtotime($yt['scheduled_start']));
+			echo '<div class="duration summary">Premiere scheduled: ' . $formatted . '</div>';
+			return true;
+		}
+		if ($yt['scheduled_start']) {
+			$formatted = date('Y-m-d H:i', strtotime($yt['scheduled_start']));
+			echo '<div class="duration summary">Live scheduled: ' . $formatted . '</div>';
+			return true;
+		}
+		if ($yt['upcoming']) {
+			echo '<div class="duration summary">Live scheduled: Unknown</div>';
+			return true;
+		}
+		if ($yt['premiere']) {
+			echo '<div class="duration summary">Premiere</div>';
+			return true;
+		}
+		if ($yt['is_live']) {
+			echo '<div class="duration summary">Live</div>';
+			return true;
+		}
+		if ($yt['duration'] !== '') {
+			echo '<div class="duration summary">' . htmlspecialchars($yt['duration'], ENT_COMPAT, 'UTF-8') . '</div>';
+			return true;
+		}
+
 		return false;
 	}
 }
