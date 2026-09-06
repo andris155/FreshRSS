@@ -612,11 +612,9 @@ class FreshRSS_YouTubeProxy {
 						$needsSnippetCheck = true;
 					}
 					unset($liveData, $liveDetails);
-				} else {
-					$needsSnippetCheck = true;
 				}
 
-				// ONLY fetch snippet if liveStreamingDetails was missing the scheduled
+				// ONLY fetch snippet if liveStreamingDetails was missing the scheduled time
 				if ($needsSnippetCheck) {
 					$snippetUrl = "https://www.googleapis.com/youtube/v3/videos?id={$vid}&part=snippet&key={$apiKey}";
 					$snippetResp = static::fetchApi($snippetUrl, $vid);
@@ -628,13 +626,13 @@ class FreshRSS_YouTubeProxy {
 
 						if ($snippet && isset($snippet['liveBroadcastContent']) && $snippet['liveBroadcastContent'] === 'upcoming') {
 							$is_upcoming = true;
-							$cacheRow['liveBroadcastContent'] = 'upcoming';
 						}
 						unset($snippetData, $snippet);
 					}
 				}
 
 				$cacheRow['scheduledStartTime'] = $sched_start;
+				$cacheRow['liveBroadcastContent'] = $is_upcoming ? 'upcoming' : false;
 			}
 		}
 
