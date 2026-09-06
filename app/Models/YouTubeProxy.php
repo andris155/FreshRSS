@@ -259,7 +259,7 @@ class FreshRSS_YouTubeProxy {
 			unset($onDiskRaw);
 		}
 
-		$json = json_encode(self::$cache, JSON_UNESCAPED_SLASHES);
+		$json = json_encode(self::$cache, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 		if (is_string($json)) {
 			@file_put_contents($file, $json, LOCK_EX);
 			unset($json);
