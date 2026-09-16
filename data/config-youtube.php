@@ -22,7 +22,7 @@ return [
 	// Base URL of the image proxy service
 	'proxy_url' => 'https://freshrss.lan/proxy',
 
-	// Enable or disable YouTube thumbnail link modification (upgrading to hq720) and caching image variants in youtube.json.
+	// Enable or disable YouTube thumbnail link modification (upgrading to hq720 or falling back to mqdefault) and caching image variants in youtube.json.
 	// If false, original YouTube thumbnail links are kept and no image types are cached in youtube.json.
 	'youtube_image_modification' => true,
 
