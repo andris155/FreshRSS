@@ -51,66 +51,22 @@ class FreshRSS_YouTubeProxy {
 
 	public static function getApiKey(): string {
 		$cfg = self::loadConfig();
-		if (!empty($cfg['api_key']) && is_string($cfg['api_key'])) {
-			return $cfg['api_key'];
-		}
-		if (!empty($cfg['youtube_api_key']) && is_string($cfg['youtube_api_key'])) {
-			return $cfg['youtube_api_key'];
-		}
-		if (class_exists('FreshRSS_Context', false)) {
-			if (FreshRSS_Context::hasSystemConf()) {
-				$val = FreshRSS_Context::systemConf()->youtube_api_key ?? null;
-				if (is_string($val) && $val !== '') {
-					return $val;
-				}
-			}
-			if (FreshRSS_Context::hasUserConf()) {
-				$val = FreshRSS_Context::userConf()->youtube_api_key ?? null;
-				if (is_string($val) && $val !== '') {
-					return $val;
-				}
-			}
-		}
-		return 'key';
+		return (!empty($cfg['api_key']) && is_string($cfg['api_key'])) ? $cfg['api_key'] : 'key';
 	}
 
 	public static function isProxyEnabled(): bool {
 		$cfg = self::loadConfig();
-		if (isset($cfg['proxy_enabled'])) {
-			return (bool)$cfg['proxy_enabled'];
-		}
-		if (isset($cfg['proxy enabled'])) {
-			return (bool)$cfg['proxy enabled'];
-		}
-		return true;
+		return isset($cfg['proxy_enabled']) ? (bool)$cfg['proxy_enabled'] : true;
 	}
 
 	public static function isYoutubeImageModificationEnabled(): bool {
 		$cfg = self::loadConfig();
-		if (isset($cfg['youtube_image_modification'])) {
-			return (bool)$cfg['youtube_image_modification'];
-		}
-		if (isset($cfg['youtube image modification'])) {
-			return (bool)$cfg['youtube image modification'];
-		}
-		return true;
+		return isset($cfg['youtube_image_modification']) ? (bool)$cfg['youtube_image_modification'] : true;
 	}
 
 	public static function isYoutubeDurationEnabled(): bool {
 		$cfg = self::loadConfig();
-		if (isset($cfg['youtube_duration_enabled'])) {
-			return (bool)$cfg['youtube_duration_enabled'];
-		}
-		if (isset($cfg['youtube_duration_check'])) {
-			return (bool)$cfg['youtube_duration_check'];
-		}
-		if (isset($cfg['youtube duration check'])) {
-			return (bool)$cfg['youtube duration check'];
-		}
-		if (isset($cfg['youtube duration enabled'])) {
-			return (bool)$cfg['youtube duration enabled'];
-		}
-		return true;
+		return isset($cfg['youtube_duration_enabled']) ? (bool)$cfg['youtube_duration_enabled'] : true;
 	}
 
 	public static function getProxyKey(): string {
@@ -456,7 +412,7 @@ class FreshRSS_YouTubeProxy {
 	// ==========================================
 	public static function getThumbnailVariant(string $vid, string $cdn = 'i'): string {
 		if (!self::isYoutubeImageModificationEnabled()) {
-			return 'hqdefault';
+			return 'mqdefault';
 		}
 
 		self::initCache();
@@ -466,7 +422,7 @@ class FreshRSS_YouTubeProxy {
 		}
 
 		$hq720 = "https://{$cdn}.ytimg.com/vi/{$vid}/hq720.jpg";
-		$variant = 'hqdefault';
+		$variant = 'mqdefault';
 
 		if (function_exists('curl_init')) {
 			$ch = curl_init($hq720);
@@ -841,10 +797,6 @@ class FreshRSS_YouTubeProxy {
 		}
 		if ($yt['is_live']) {
 			echo '<div class="duration summary">Live</div>';
-			return true;
-		}
-		if ($yt['duration'] !== '') {
-			echo '<div class="duration summary">' . htmlspecialchars($yt['duration'], ENT_COMPAT, 'UTF-8') . '</div>';
 			return true;
 		}
 
