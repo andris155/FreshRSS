@@ -614,7 +614,9 @@ class FreshRSS_YouTubeProxy {
 			$is_zero = is_string($cached_dur) && in_array($cached_dur, $zero_durations, true);
 			$is_upcoming = !empty($item['liveBroadcastContent']) && $item['liveBroadcastContent'] === 'upcoming';
 
-			$ttl = $is_error ? $ttl_error : (($is_not_found || $is_premiere || $is_zero || $is_upcoming) ? $ttl_short : $ttl_normal);
+			$has_sched = !empty($item['scheduledStartTime']);
+
+			$ttl = $is_error ? $ttl_error : (($is_not_found || $is_premiere || $is_zero || $is_upcoming || $has_sched) ? $ttl_short : $ttl_normal);
 
 			if ($age < $ttl) {
 				if ($is_error) {
@@ -673,16 +675,33 @@ class FreshRSS_YouTubeProxy {
 		$cached_dur = $item['duration'] ?? null;
 		$is_not_found = ($cached_dur === false);
 		$is_premiere = !empty($item['premiere']);
-		$is_zero = is_string($cached_dur) && in_array($cached_dur, $zero_durations, true);
-		$is_upcoming = !empty($item['liveBroadcastContent']) && $item['liveBroadcastContent'] === 'upcoming';
+		$is_live = is_string($cached_dur) && in_array($cached_dur, $zero_durations, true);
+		$raw_upcoming = !empty($item['liveBroadcastContent']) && $item['liveBroadcastContent'] === 'upcoming';
+
 		$sched = false;
-		if (!empty($item['scheduledStartTime']) && is_string($item['scheduledStartTime']) && strtotime($item['scheduledStartTime']) > $now) {
-			$sched = $item['scheduledStartTime'];
+		$sched_time = (!empty($item['scheduledStartTime']) && is_string($item['scheduledStartTime']))
+			? strtotime($item['scheduledStartTime'])
+			: false;
+
+		$is_upcoming = false;
+		if ($sched_time !== false) {
+			if ($sched_time > $now) {
+				$sched = $item['scheduledStartTime'];
+				$is_upcoming = true;
+			} else {
+				// Scheduled start time has passed -> video has started (live or premiere)
+				if (!$is_premiere) {
+					$is_live = true;
+				}
+			}
+		} elseif ($raw_upcoming) {
+			// Upcoming, but scheduled start time is unknown
+			$is_upcoming = true;
 		}
 
 		return [
 			'duration' => is_string($cached_dur) ? $cached_dur : '',
-			'is_live' => $is_zero,
+			'is_live' => $is_live,
 			'premiere' => $is_premiere,
 			'not_found' => $is_not_found,
 			'scheduled_start' => $sched,
@@ -740,14 +759,22 @@ class FreshRSS_YouTubeProxy {
 			$sched_start = false;
 			if (!empty($liveDetails['scheduledStartTime']) && !isset($liveDetails['actualStartTime'])) {
 				$sched_start = (string)$liveDetails['scheduledStartTime'];
-			} elseif (!empty($cacheRow['scheduledStartTime'])) {
+			} elseif (!empty($cacheRow['scheduledStartTime']) && !isset($liveDetails['actualStartTime']) && empty($cacheRow['actualStartTime'])) {
 				$sched_start = $cacheRow['scheduledStartTime'];
 			}
-			$is_upcoming = (!empty($snippet['liveBroadcastContent']) && $snippet['liveBroadcastContent'] === 'upcoming')
-				|| (!empty($cacheRow['liveBroadcastContent']) && $cacheRow['liveBroadcastContent'] === 'upcoming');
+
+			if (!empty($liveDetails['actualStartTime'])) {
+				$cacheRow['actualStartTime'] = (string)$liveDetails['actualStartTime'];
+				$is_upcoming = false;
+			} elseif (!empty($cacheRow['actualStartTime'])) {
+				$is_upcoming = false;
+			} else {
+				$is_upcoming = (!empty($snippet['liveBroadcastContent']) && $snippet['liveBroadcastContent'] === 'upcoming')
+					|| (!empty($cacheRow['liveBroadcastContent']) && $cacheRow['liveBroadcastContent'] === 'upcoming');
+			}
 
 			$cacheRow['scheduledStartTime'] = $sched_start;
-			$cacheRow['liveBroadcastContent'] = $is_upcoming ? 'upcoming' : false;
+			$cacheRow['liveBroadcastContent'] = $is_upcoming ? 'upcoming' : ($is_live ? 'live' : false);
 		}
 
 		// 3. Zero-HTTP Thumbnail Derivation
@@ -794,6 +821,7 @@ class FreshRSS_YouTubeProxy {
 					$is_short = (isset($item['duration']) && $item['duration'] === false)
 						|| !empty($item['premiere'])
 						|| (!empty($item['liveBroadcastContent']) && $item['liveBroadcastContent'] === 'upcoming')
+						|| !empty($item['scheduledStartTime'])
 						|| (isset($item['duration']) && in_array($item['duration'], ['0:00', '00:00', '0:0'], true));
 					$ttl = $is_error ? $ttl_error : ($is_short ? $ttl_short : $ttl_normal);
 					if ($age < $ttl) {
@@ -926,7 +954,11 @@ class FreshRSS_YouTubeProxy {
 			return true;
 		}
 		if ($yt['upcoming']) {
-			echo '<div class="duration summary">Live scheduled: Unknown</div>';
+			if ($yt['premiere']) {
+				echo '<div class="duration summary">Premiere scheduled: Unknown</div>';
+			} else {
+				echo '<div class="duration summary">Live scheduled: Unknown</div>';
+			}
 			return true;
 		}
 		if ($yt['duration'] !== '' && !$yt['is_live']) {
