@@ -20,6 +20,8 @@ class FreshRSS_YouTubeProxy {
 	private static mixed $apiCurl = null;
 	private static mixed $thumbCurl = null;
 
+	public const ZERO_DURATIONS = ['0:00', '00:00', '0:0'];
+
 	// Mod configuration loaded exclusively from config-youtube.php
 	public static ?array $config = null;
 
@@ -268,9 +270,10 @@ class FreshRSS_YouTubeProxy {
 			$is_not_found = isset($row['duration']) && $row['duration'] === false;
 			$is_premiere = !empty($row['premiere']);
 			$is_live = !empty($row['liveBroadcastContent']) && $row['liveBroadcastContent'] === 'upcoming';
-			$is_zero = isset($row['duration']) && ($row['duration'] === '0:00' || $row['duration'] === '00:00' || $row['duration'] === '0:0');
+			$has_sched = !empty($row['scheduledStartTime']);
+			$is_zero = isset($row['duration']) && in_array($row['duration'], self::ZERO_DURATIONS, true);
 
-			$ttl = $is_error ? $ttl_error : (($is_not_found || $is_premiere || $is_live || $is_zero) ? $ttl_short : $ttl_normal);
+			$ttl = $is_error ? $ttl_error : (($is_not_found || $is_premiere || $is_live || $has_sched || $is_zero) ? $ttl_short : $ttl_normal);
 
 			if ($age > $ttl) {
 				unset(self::$cache[$key]);
@@ -557,6 +560,9 @@ class FreshRSS_YouTubeProxy {
 		if ($link === '') {
 			return null;
 		}
+		if (!str_contains($link, 'youtu') && !str_contains($link, 'yt:') && !str_contains($link, 'ytimg')) {
+			return (strlen($link) === 11 && preg_match('/^[a-zA-Z0-9_-]{11}$/', $link)) ? $link : null;
+		}
 		if (preg_match('/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?(?:.*&)?v=))([a-zA-Z0-9_-]{11})/i', $link, $m)) {
 			return $m[1];
 		}
@@ -591,7 +597,6 @@ class FreshRSS_YouTubeProxy {
 
 		self::initCache();
 		$now = time();
-		$zero_durations = ['0:00', '00:00', '0:0'];
 
 		$ttl_normal = self::getTtlNormal();
 		$ttl_short = self::getTtlShort();
@@ -611,7 +616,7 @@ class FreshRSS_YouTubeProxy {
 			$is_not_found = ($cached_dur === false);
 			$is_premiere = !empty($item['premiere']);
 			$is_error = !empty($item['api_error']);
-			$is_zero = is_string($cached_dur) && in_array($cached_dur, $zero_durations, true);
+			$is_zero = is_string($cached_dur) && in_array($cached_dur, self::ZERO_DURATIONS, true);
 			$is_upcoming = !empty($item['liveBroadcastContent']) && $item['liveBroadcastContent'] === 'upcoming';
 
 			$has_sched = !empty($item['scheduledStartTime']);
@@ -622,7 +627,7 @@ class FreshRSS_YouTubeProxy {
 				if ($is_error) {
 					return null;
 				}
-				return self::formatItemDetails($item, $now, $zero_durations);
+				return self::formatItemDetails($item, $now);
 			}
 		}
 
@@ -638,8 +643,15 @@ class FreshRSS_YouTubeProxy {
 					foreach ($entryDAO->listWhere('a', 0, limit: 50) as $recentEntry) {
 						if ($recentEntry instanceof FreshRSS_Entry) {
 							$cand = self::extractVideoId($recentEntry->link()) ?? self::extractVideoId($recentEntry->guid());
-							if ($cand !== null && !isset(self::$cache[$cand])) {
-								$candidates[] = $cand;
+							if ($cand !== null) {
+								$candItem = self::$cache[$cand] ?? null;
+								$hasCandDetails = is_array($candItem) && (array_key_exists('duration', $candItem) || !empty($candItem['premiere']) || !empty($candItem['api_error']));
+								if (!$hasCandDetails) {
+									$candidates[] = $cand;
+									if (count($candidates) >= 50) {
+										break;
+									}
+								}
 							}
 						}
 					}
@@ -660,7 +672,7 @@ class FreshRSS_YouTubeProxy {
 			return null;
 		}
 
-		return self::formatItemDetails($item, $now, $zero_durations);
+		return self::formatItemDetails($item, $now);
 	}
 
 	/**
@@ -668,14 +680,13 @@ class FreshRSS_YouTubeProxy {
 	 *
 	 * @param array<string,mixed> $item
 	 * @param int $now
-	 * @param list<string> $zero_durations
 	 * @return array{duration:string,is_live:bool,premiere:bool,not_found:bool,scheduled_start:string|false,upcoming:bool}
 	 */
-	private static function formatItemDetails(array $item, int $now, array $zero_durations): array {
+	private static function formatItemDetails(array $item, int $now): array {
 		$cached_dur = $item['duration'] ?? null;
 		$is_not_found = ($cached_dur === false);
 		$is_premiere = !empty($item['premiere']);
-		$is_live = is_string($cached_dur) && in_array($cached_dur, $zero_durations, true);
+		$is_live = is_string($cached_dur) && in_array($cached_dur, self::ZERO_DURATIONS, true);
 		$raw_upcoming = !empty($item['liveBroadcastContent']) && $item['liveBroadcastContent'] === 'upcoming';
 
 		$sched = false;
@@ -730,7 +741,6 @@ class FreshRSS_YouTubeProxy {
 		$duration = '';
 		$is_premiere = false;
 		$is_live = false;
-		$zero_durations = ['0:00', '00:00', '0:0'];
 
 		if (!isset($content['duration'])) {
 			$is_premiere = true;
@@ -747,7 +757,7 @@ class FreshRSS_YouTubeProxy {
 			}
 
 			$cacheRow['duration'] = $duration;
-			if (in_array($duration, $zero_durations, true)) {
+			if (in_array($duration, self::ZERO_DURATIONS, true)) {
 				$is_live = true;
 			} else {
 				unset($cacheRow['premiere'], $cacheRow['scheduledStartTime'], $cacheRow['liveBroadcastContent']);
@@ -822,7 +832,7 @@ class FreshRSS_YouTubeProxy {
 						|| !empty($item['premiere'])
 						|| (!empty($item['liveBroadcastContent']) && $item['liveBroadcastContent'] === 'upcoming')
 						|| !empty($item['scheduledStartTime'])
-						|| (isset($item['duration']) && in_array($item['duration'], ['0:00', '00:00', '0:0'], true));
+						|| (isset($item['duration']) && in_array($item['duration'], self::ZERO_DURATIONS, true));
 					$ttl = $is_error ? $ttl_error : ($is_short ? $ttl_short : $ttl_normal);
 					if ($age < $ttl) {
 						continue;
@@ -861,6 +871,18 @@ class FreshRSS_YouTubeProxy {
 
 			$data = json_decode($response, true);
 			unset($response);
+
+			if (!is_array($data) || isset($data['error'])) {
+				foreach ($chunk as $vid) {
+					if (!isset(self::$cache[$vid]) || !is_array(self::$cache[$vid])) {
+						self::$cache[$vid] = [];
+					}
+					self::$cache[$vid]['api_error'] = true;
+					self::$cache[$vid]['timestamp'] = $now;
+				}
+				self::$cache_changed = true;
+				continue;
+			}
 
 			$returnedVids = [];
 			if (!empty($data['items']) && is_array($data['items'])) {
@@ -943,22 +965,16 @@ class FreshRSS_YouTubeProxy {
 			echo '<div class="duration summary">Duration not found</div>';
 			return true;
 		}
-		if ($yt['scheduled_start'] && $yt['premiere']) {
-			$formatted = date('Y-m-d H:i', strtotime($yt['scheduled_start']));
-			echo '<div class="duration summary">Premiere scheduled: ' . $formatted . '</div>';
-			return true;
-		}
 		if ($yt['scheduled_start']) {
-			$formatted = date('Y-m-d H:i', strtotime($yt['scheduled_start']));
-			echo '<div class="duration summary">Live scheduled: ' . $formatted . '</div>';
+			$ts = strtotime($yt['scheduled_start']);
+			$formatted = ($ts !== false) ? date('Y-m-d H:i', $ts) : 'Unknown';
+			$prefix = $yt['premiere'] ? 'Premiere' : 'Live';
+			echo '<div class="duration summary">' . $prefix . ' scheduled: ' . $formatted . '</div>';
 			return true;
 		}
 		if ($yt['upcoming']) {
-			if ($yt['premiere']) {
-				echo '<div class="duration summary">Premiere scheduled: Unknown</div>';
-			} else {
-				echo '<div class="duration summary">Live scheduled: Unknown</div>';
-			}
+			$prefix = $yt['premiere'] ? 'Premiere' : 'Live';
+			echo '<div class="duration summary">' . $prefix . ' scheduled: Unknown</div>';
 			return true;
 		}
 		if ($yt['duration'] !== '' && !$yt['is_live']) {
