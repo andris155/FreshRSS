@@ -410,7 +410,7 @@ class FreshRSS_YouTubeProxy {
 			$httpCode = 0;
 			$headers = function_exists('http_get_last_response_headers')
 				? http_get_last_response_headers()
-				: ((isset(${"http_response_header"}) || isset($GLOBALS['http_response_header'])) ? ($GLOBALS['http_response_header'] ?? ${"http_response_header"} ?? null) : null);
+				: ($http_response_header ?? $GLOBALS['http_response_header'] ?? null);
 			if (is_array($headers)) {
 				foreach ($headers as $header) {
 					if (preg_match('#^HTTP/\S+\s+(\d{3})#i', $header, $hm)) {
