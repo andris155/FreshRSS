@@ -1049,7 +1049,7 @@ class FreshRSS_YouTubeProxy {
 
 	/**
 	 * Format total seconds into a compact, human-readable watch time string.
-	 * Examples: '2h 15m', '45m', '2m 30s', '35s'.
+	 * Formats as 'd h m' (days omitted if 0). Examples: '1d 2h 15m', '2h 15m', '45m', '2m 30s', '35s'.
 	 *
 	 * @param int $totalSeconds
 	 * @return string Formatted watch time or empty string if 0.
@@ -1058,16 +1058,29 @@ class FreshRSS_YouTubeProxy {
 		if ($totalSeconds <= 0) {
 			return '';
 		}
-		$hours = intdiv($totalSeconds, 3600);
+		$days = intdiv($totalSeconds, 86400);
+		$hours = intdiv($totalSeconds % 86400, 3600);
 		$minutes = intdiv($totalSeconds % 3600, 60);
 		$seconds = $totalSeconds % 60;
 
+		$parts = [];
+		if ($days > 0) {
+			$parts[] = $days . 'd';
+		}
 		if ($hours > 0) {
-			return $hours . 'h' . ($minutes > 0 ? ' ' . $minutes . 'm' : '');
+			$parts[] = $hours . 'h';
 		}
 		if ($minutes > 0) {
-			return $minutes . 'm' . ($seconds > 0 && $minutes < 5 ? ' ' . $seconds . 's' : '');
+			$parts[] = $minutes . 'm';
 		}
+
+		if (!empty($parts)) {
+			if ($days === 0 && $hours === 0 && $minutes < 5 && $seconds > 0) {
+				$parts[] = $seconds . 's';
+			}
+			return implode(' ', $parts);
+		}
+
 		return $seconds . 's';
 	}
 
