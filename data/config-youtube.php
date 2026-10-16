@@ -30,8 +30,9 @@ return [
 	// If false, YouTube duration checks are disabled, no API requests are made, and standard article summaries are shown.
 	'youtube_duration_enabled' => true,
 
-	// Enable or disable unread YouTube videos remaining watch time display next to the update button.
-	// If false, no watch time is calculated or rendered anywhere.
+	// Enable or disable unread YouTube videos remaining watch time display next to the Main stream in the sidebar.
+	// When enabled, it displays the total remaining watch time formatted as (d h m) next to the Main stream.
+	// If false, no watch time is calculated or rendered.
 	'youtube_watch_time' => true,
 
 	// Maximum number of unread entries to scan for watch time calculation (default: 2000)
