@@ -286,6 +286,7 @@
 		<div id="nav_menu_actualize" class="group">
 			<a id="actualize" class="btn" href="<?= _url('feed', 'actualize') ?>" title="<?= _t('gen.action.actualize') ?>"><?= _i('refresh') ?></a>
 		</div>
+		<?= FreshRSS_YouTubeProxy::renderWatchTime() ?>
 	<?php } ?>
 </nav>
 <?php flush(); ?>
