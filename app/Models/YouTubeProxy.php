@@ -15,6 +15,7 @@ class FreshRSS_YouTubeProxy {
 	public static bool $cache_changed = false;
 	public static bool $circuit_broken = false;
 	private static bool $shutdown_registered = false;
+	public static ?string $watchTime = null;
 
 	// Reusable cURL handles for keep-alive connection pooling
 	private static mixed $apiCurl = null;
@@ -73,6 +74,29 @@ class FreshRSS_YouTubeProxy {
 	public static function isYoutubeDurationEnabled(): bool {
 		$cfg = self::loadConfig();
 		return isset($cfg['youtube_duration_enabled']) ? (bool)$cfg['youtube_duration_enabled'] : true;
+	}
+
+	public static function isWatchTimeEnabled(): bool {
+		if (!self::isYoutubeDurationEnabled()) {
+			return false;
+		}
+		$cfg = self::loadConfig();
+		return isset($cfg['youtube_watch_time']) ? (bool)$cfg['youtube_watch_time'] : true;
+	}
+
+	public static function getWatchTimeLimit(): int {
+		$cfg = self::loadConfig();
+		$limit = $cfg['youtube_watch_time_limit'] ?? 2000;
+		return (is_int($limit) && $limit > 0) ? $limit : 2000;
+	}
+
+	public static function getWatchTimeIcon(): string {
+		$cfg = self::loadConfig();
+		$val = $cfg['youtube_watch_time_icon'] ?? '⏳';
+		if ($val === false || $val === null || $val === '') {
+			return '';
+		}
+		return is_string($val) ? $val : '⏳';
 	}
 
 	public static function getProxyKey(): string {
@@ -991,5 +1015,188 @@ class FreshRSS_YouTubeProxy {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Convert a YouTube duration string (H:MM:SS, M:SS, SS) to total seconds.
+	 *
+	 * @param string $dur
+	 * @return int Total seconds, or 0 if invalid or zero-duration.
+	 */
+	public static function durationToSeconds(string $dur): int {
+		$dur = trim($dur);
+		if ($dur === '' || in_array($dur, self::ZERO_DURATIONS, true)) {
+			return 0;
+		}
+		$parts = explode(':', $dur);
+		$count = count($parts);
+		foreach ($parts as $p) {
+			if (!ctype_digit($p)) {
+				return 0;
+			}
+		}
+		if ($count === 3) {
+			return ((int)$parts[0] * 3600) + ((int)$parts[1] * 60) + (int)$parts[2];
+		}
+		if ($count === 2) {
+			return ((int)$parts[0] * 60) + (int)$parts[1];
+		}
+		if ($count === 1) {
+			return (int)$parts[0];
+		}
+		return 0;
+	}
+
+	/**
+	 * Format total seconds into a compact, human-readable watch time string.
+	 * Examples: '2h 15m', '45m', '2m 30s', '35s'.
+	 *
+	 * @param int $totalSeconds
+	 * @return string Formatted watch time or empty string if 0.
+	 */
+	public static function formatSecondsToWatchTime(int $totalSeconds): string {
+		if ($totalSeconds <= 0) {
+			return '';
+		}
+		$hours = intdiv($totalSeconds, 3600);
+		$minutes = intdiv($totalSeconds % 3600, 60);
+		$seconds = $totalSeconds % 60;
+
+		if ($hours > 0) {
+			return $hours . 'h' . ($minutes > 0 ? ' ' . $minutes . 'm' : '');
+		}
+		if ($minutes > 0) {
+			return $minutes . 'm' . ($seconds > 0 && $minutes < 5 ? ' ' . $seconds . 's' : '');
+		}
+		return $seconds . 's';
+	}
+
+	/**
+	 * Calculate total watch time in seconds for a list of video IDs using cache and optional batch fetch.
+	 *
+	 * @param list<string> $vids
+	 * @param bool $allowFetch Whether to fetch uncached videos from YouTube API
+	 * @return int Total seconds
+	 */
+	public static function calculateWatchTimeFromVids(array $vids, bool $allowFetch = true): int {
+		self::initCache();
+		$uniqueVids = array_values(array_unique($vids));
+		$uncached = [];
+		$totalSeconds = 0;
+
+		foreach ($uniqueVids as $vid) {
+			$item = self::$cache[$vid] ?? null;
+			$hasDetails = is_array($item) && (
+				array_key_exists('duration', $item)
+				|| !empty($item['premiere'])
+				|| !empty($item['api_error'])
+			);
+
+			if ($hasDetails) {
+				$dur = $item['duration'] ?? null;
+				if (is_string($dur)) {
+					$totalSeconds += self::durationToSeconds($dur);
+				}
+			} else {
+				$uncached[] = $vid;
+			}
+		}
+
+		if ($allowFetch && !empty($uncached) && !self::$circuit_broken && self::getApiKey() !== 'key' && self::getApiKey() !== '') {
+			$batch = array_slice($uncached, 0, 50);
+			self::fetchBatch($batch);
+			foreach ($batch as $vid) {
+				$item = self::$cache[$vid] ?? null;
+				if (is_array($item)) {
+					$dur = $item['duration'] ?? null;
+					if (is_string($dur)) {
+						$totalSeconds += self::durationToSeconds($dur);
+					}
+				}
+			}
+		}
+
+		return $totalSeconds;
+	}
+
+	/**
+	 * Render the total unread YouTube watch time.
+	 *
+	 * @return string HTML span containing formatted watch time or empty string.
+	 */
+	public static function renderWatchTime(): string {
+		if (!self::isWatchTimeEnabled()) {
+			return '';
+		}
+
+		if (self::$watchTime !== null) {
+			return self::$watchTime;
+		}
+
+		if (class_exists('FreshRSS_Context', false) && isset(FreshRSS_Context::$total_unread) && FreshRSS_Context::$total_unread <= 0) {
+			self::$watchTime = '';
+			return '';
+		}
+
+		if (!class_exists('FreshRSS_Factory', false)) {
+			self::$watchTime = '';
+			return '';
+		}
+
+		self::initCache();
+
+		$totalUnread = (class_exists('FreshRSS_Context', false) && isset(FreshRSS_Context::$total_unread)) ? (int)FreshRSS_Context::$total_unread : 1000;
+		$maxLimit = self::getWatchTimeLimit();
+		$limit = min($maxLimit, max(1, $totalUnread));
+
+		$vids = [];
+		try {
+			$entryDAO = FreshRSS_Factory::createEntryDao();
+			if (method_exists($entryDAO, 'listWhere')) {
+				$stateNotRead = class_exists('FreshRSS_Entry', false) && defined('FreshRSS_Entry::STATE_NOT_READ')
+					? FreshRSS_Entry::STATE_NOT_READ
+					: 2;
+
+				foreach ($entryDAO->listWhere('a', 0, state: $stateNotRead, limit: $limit) as $entry) {
+					if ($entry instanceof FreshRSS_Entry) {
+						$vid = self::extractVideoId($entry->link()) ?? self::extractVideoId($entry->guid());
+						if ($vid !== null) {
+							$vids[$vid] = true;
+						}
+					}
+				}
+			}
+		} catch (\Throwable $e) {
+			self::$watchTime = '';
+			return '';
+		}
+
+		if (empty($vids)) {
+			self::$watchTime = '';
+			return '';
+		}
+
+		$totalSeconds = self::calculateWatchTimeFromVids(array_keys($vids));
+		$formatted = self::formatSecondsToWatchTime($totalSeconds);
+		if ($formatted === '') {
+			self::$watchTime = '';
+			return '';
+		}
+
+		$iconSetting = self::getWatchTimeIcon();
+		$iconHtml = '';
+		if ($iconSetting === 'svg') {
+			$iconHtml = '<svg class="icon yt-icon-hourglass" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zM12 11.5l-4-4V4h8v3.5l-4 4z"/></svg>';
+		} elseif ($iconSetting !== '') {
+			$iconHtml = '<span class="yt-hourglass" aria-hidden="true">' . htmlspecialchars($iconSetting, ENT_NOQUOTES, 'UTF-8') . '</span>';
+		}
+
+		$titleLabel = function_exists('_t') ? _t('index.menu.main_stream') : 'Main stream';
+		self::$watchTime = '<span class="yt-watchtime" title="' .
+			htmlspecialchars($titleLabel . ' · ' . $formatted, ENT_QUOTES, 'UTF-8') .
+			'">' .
+			$iconHtml . '<span class="yt-watchtime-text">' . htmlspecialchars($formatted, ENT_NOQUOTES, 'UTF-8') . '</span></span>';
+
+		return self::$watchTime;
 	}
 }
