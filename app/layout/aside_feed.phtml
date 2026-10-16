@@ -44,7 +44,7 @@
 			<a class="tree-folder-title" data-unread="<?= format_number(FreshRSS_Context::$total_unread) ?>"<?=
 				$hideSucGlobal ?> href="<?= _url('index', $actual_view) . $state_filter_manual ?>">
 				<?= _i('all') ?><span class="title" data-unread="<?= format_number(FreshRSS_Context::$total_unread) ?>"<?=
-					$hideSucGlobal ?>><?= _t('index.menu.main_stream') ?></span>
+					$hideSucGlobal ?>><?= _t('index.menu.main_stream') ?><?= FreshRSS_YouTubeProxy::renderWatchTime() ?></span>
 			</a>
 		</li>
 
