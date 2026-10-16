@@ -90,15 +90,6 @@ class FreshRSS_YouTubeProxy {
 		return (is_int($limit) && $limit > 0) ? $limit : 2000;
 	}
 
-	public static function getWatchTimeIcon(): string {
-		$cfg = self::loadConfig();
-		$val = $cfg['youtube_watch_time_icon'] ?? '⏳';
-		if ($val === false || $val === null || $val === '') {
-			return '';
-		}
-		return is_string($val) ? $val : '⏳';
-	}
-
 	public static function getProxyKey(): string {
 		$cfg = self::loadConfig();
 		return (!empty($cfg['proxy_key']) && is_string($cfg['proxy_key'])) ? $cfg['proxy_key'] : 'key';
@@ -1196,19 +1187,10 @@ class FreshRSS_YouTubeProxy {
 			return '';
 		}
 
-		$iconSetting = self::getWatchTimeIcon();
-		$iconHtml = '';
-		if ($iconSetting === 'svg') {
-			$iconHtml = '<svg class="icon yt-icon-hourglass" aria-hidden="true" viewBox="0 0 24 24"><path d="M6 2v6h.01L6 8.01 10 12l-4 4 .01.01H6V22h12v-5.99h-.01L18 16l-4-4 4-3.99-.01-.01H18V2H6zm10 14.5V20H8v-3.5l4-4 4 4zM12 11.5l-4-4V4h8v3.5l-4 4z"/></svg>';
-		} elseif ($iconSetting !== '') {
-			$iconHtml = '<span class="yt-hourglass" aria-hidden="true">' . htmlspecialchars($iconSetting, ENT_NOQUOTES, 'UTF-8') . '</span>';
-		}
-
 		$titleLabel = function_exists('_t') ? _t('index.menu.main_stream') : 'Main stream';
 		self::$watchTime = '<span class="yt-watchtime" title="' .
 			htmlspecialchars($titleLabel . ' · ' . $formatted, ENT_QUOTES, 'UTF-8') .
-			'">' .
-			$iconHtml . '<span class="yt-watchtime-text">' . htmlspecialchars($formatted, ENT_NOQUOTES, 'UTF-8') . '</span></span>';
+			'"> (<span class="yt-watchtime-text">' . htmlspecialchars($formatted, ENT_NOQUOTES, 'UTF-8') . '</span>)</span>';
 
 		return self::$watchTime;
 	}
