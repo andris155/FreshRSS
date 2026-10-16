@@ -37,10 +37,6 @@ return [
 	// Maximum number of unread entries to scan for watch time calculation (default: 2000)
 	'youtube_watch_time_limit' => 2000,
 
-	// Icon displayed before the remaining watch time.
-	// Options: '⏳' (default emoji), 'svg' (monochrome SVG icon), false/'' (no icon), or any custom character/emoji (e.g. '⌛', '⏱️')
-	'youtube_watch_time_icon' => '⏳',
-
 	// Enable or disable API request logging in data/cache/youtube_api.log
 	'logging_enabled' => true,
 
