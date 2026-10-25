@@ -573,8 +573,7 @@ class FreshRSS_YouTubeProxy {
 		}
 
 		// Proxy the target URL
-		$target = (strpbrk($targetUrl, "& #+?%") !== false) ? rawurlencode($targetUrl) : $targetUrl;
-		return "{$proxyUrl}?key={$proxyKey}&url={$target}";
+		return "{$proxyUrl}?key={$proxyKey}&url={$targetUrl}";
 	}
 
 	public static function extractVideoId(string $link): ?string {
