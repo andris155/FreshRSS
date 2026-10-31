@@ -18,8 +18,8 @@ class FreshRSS_YouTubeProxy {
 	public static ?string $watchTime = null;
 
 	// Reusable cURL handles for keep-alive connection pooling
-	private static mixed $apiCurl = null;
-	private static mixed $thumbCurl = null;
+	private static ?\CurlHandle $apiCurl = null;
+	private static ?\CurlHandle $thumbCurl = null;
 
 	public const ZERO_DURATIONS = ['0:00', '00:00', '0:0'];
 
@@ -218,18 +218,15 @@ class FreshRSS_YouTubeProxy {
 	}
 
 	public static function closeCurlHandles(): void {
-		if (self::$apiCurl !== null) {
-			if (is_resource(self::$apiCurl) || self::$apiCurl instanceof \CurlHandle) {
-				@curl_close(self::$apiCurl);
-			}
-			self::$apiCurl = null;
+		if (self::$apiCurl instanceof \CurlHandle) {
+			@curl_close(self::$apiCurl);
 		}
-		if (self::$thumbCurl !== null) {
-			if (is_resource(self::$thumbCurl) || self::$thumbCurl instanceof \CurlHandle) {
-				@curl_close(self::$thumbCurl);
-			}
-			self::$thumbCurl = null;
+		self::$apiCurl = null;
+
+		if (self::$thumbCurl instanceof \CurlHandle) {
+			@curl_close(self::$thumbCurl);
 		}
+		self::$thumbCurl = null;
 	}
 
 	public static function pruneCache(int $max_items = 0): void {
@@ -379,7 +376,7 @@ class FreshRSS_YouTubeProxy {
 		$bytes = 0;
 
 		if (function_exists('curl_init')) {
-			if (self::$apiCurl === null || (!is_resource(self::$apiCurl) && !(self::$apiCurl instanceof \CurlHandle))) {
+			if (!(self::$apiCurl instanceof \CurlHandle)) {
 				self::$apiCurl = curl_init();
 				curl_setopt_array(self::$apiCurl, [
 					CURLOPT_RETURNTRANSFER => true,
@@ -428,7 +425,7 @@ class FreshRSS_YouTubeProxy {
 			$httpCode = 0;
 			$headers = function_exists('http_get_last_response_headers')
 				? http_get_last_response_headers()
-				: ($http_response_header ?? $GLOBALS['http_response_header'] ?? null);
+				: ($http_response_header ?? null);
 			if (is_array($headers)) {
 				foreach ($headers as $header) {
 					if (preg_match('#^HTTP/\S+\s+(\d{3})#i', $header, $hm)) {
@@ -473,7 +470,7 @@ class FreshRSS_YouTubeProxy {
 		$variant = 'mqdefault';
 
 		if (function_exists('curl_init')) {
-			if (self::$thumbCurl === null || (!is_resource(self::$thumbCurl) && !(self::$thumbCurl instanceof \CurlHandle))) {
+			if (!(self::$thumbCurl instanceof \CurlHandle)) {
 				self::$thumbCurl = curl_init();
 				curl_setopt_array(self::$thumbCurl, [
 					CURLOPT_NOBODY => true,
