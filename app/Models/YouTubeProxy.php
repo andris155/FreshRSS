@@ -18,8 +18,8 @@ class FreshRSS_YouTubeProxy {
 	public static ?string $watchTime = null;
 
 	// Reusable cURL handles for keep-alive connection pooling
-	private static ?\CurlHandle $apiCurl = null;
-	private static ?\CurlHandle $thumbCurl = null;
+	private static mixed $apiCurl = null;
+	private static mixed $thumbCurl = null;
 
 	public const ZERO_DURATIONS = ['0:00', '00:00', '0:0'];
 
@@ -34,11 +34,9 @@ class FreshRSS_YouTubeProxy {
 		$candidates = [
 			defined('DATA_PATH') ? DATA_PATH . '/config-youtube.php' : null,
 			defined('FRESHRSS_PATH') ? FRESHRSS_PATH . '/data/config-youtube.php' : null,
-			__DIR__ . '/../../data/config-youtube.php',
-			'./data/config-youtube.php',
 			defined('FRESHRSS_PATH') ? FRESHRSS_PATH . '/config-youtube.php' : null,
-			__DIR__ . '/../../config-youtube.php',
-			'./config-youtube.php',
+			dirname(__DIR__, 2) . '/data/config-youtube.php',
+			dirname(__DIR__, 2) . '/config-youtube.php',
 			__DIR__ . '/config-youtube.php',
 		];
 
@@ -158,11 +156,7 @@ class FreshRSS_YouTubeProxy {
 		if (defined('DATA_PATH') && is_string(DATA_PATH) && DATA_PATH !== '') {
 			return DATA_PATH . '/cache/youtube.json';
 		}
-		$dir = __DIR__ . '/../../data/cache';
-		if (is_dir($dir)) {
-			return $dir . '/youtube.json';
-		}
-		return './data/cache/youtube.json';
+		return dirname(__DIR__, 2) . '/data/cache/youtube.json';
 	}
 
 	public static function getLogFile(): string {
@@ -172,11 +166,7 @@ class FreshRSS_YouTubeProxy {
 		if (defined('DATA_PATH') && is_string(DATA_PATH) && DATA_PATH !== '') {
 			return DATA_PATH . '/cache/youtube_api.log';
 		}
-		$dir = __DIR__ . '/../../data/cache';
-		if (is_dir($dir)) {
-			return $dir . '/youtube_api.log';
-		}
-		return './data/cache/youtube_api.log';
+		return dirname(__DIR__, 2) . '/data/cache/youtube_api.log';
 	}
 
 	// ==========================================
@@ -218,15 +208,18 @@ class FreshRSS_YouTubeProxy {
 	}
 
 	public static function closeCurlHandles(): void {
-		if (self::$apiCurl instanceof \CurlHandle) {
-			@curl_close(self::$apiCurl);
+		if (self::$apiCurl !== null) {
+			if (is_resource(self::$apiCurl) || self::$apiCurl instanceof \CurlHandle) {
+				@curl_close(self::$apiCurl);
+			}
+			self::$apiCurl = null;
 		}
-		self::$apiCurl = null;
-
-		if (self::$thumbCurl instanceof \CurlHandle) {
-			@curl_close(self::$thumbCurl);
+		if (self::$thumbCurl !== null) {
+			if (is_resource(self::$thumbCurl) || self::$thumbCurl instanceof \CurlHandle) {
+				@curl_close(self::$thumbCurl);
+			}
+			self::$thumbCurl = null;
 		}
-		self::$thumbCurl = null;
 	}
 
 	public static function pruneCache(int $max_items = 0): void {
@@ -321,7 +314,11 @@ class FreshRSS_YouTubeProxy {
 		if (is_string($onDiskRaw) && $onDiskRaw !== '') {
 			$onDisk = json_decode($onDiskRaw, true);
 			if (is_array($onDisk)) {
-				self::$cache = array_replace($onDisk, self::$cache);
+				foreach ($onDisk as $k => $v) {
+					if (!isset(self::$cache[$k])) {
+						self::$cache[$k] = $v;
+					}
+				}
 			}
 			unset($onDisk);
 		}
@@ -376,7 +373,7 @@ class FreshRSS_YouTubeProxy {
 		$bytes = 0;
 
 		if (function_exists('curl_init')) {
-			if (!(self::$apiCurl instanceof \CurlHandle)) {
+			if (self::$apiCurl === null || (!is_resource(self::$apiCurl) && !(self::$apiCurl instanceof \CurlHandle))) {
 				self::$apiCurl = curl_init();
 				curl_setopt_array(self::$apiCurl, [
 					CURLOPT_RETURNTRANSFER => true,
@@ -425,7 +422,7 @@ class FreshRSS_YouTubeProxy {
 			$httpCode = 0;
 			$headers = function_exists('http_get_last_response_headers')
 				? http_get_last_response_headers()
-				: ($http_response_header ?? null);
+				: ($http_response_header ?? $GLOBALS['http_response_header'] ?? null);
 			if (is_array($headers)) {
 				foreach ($headers as $header) {
 					if (preg_match('#^HTTP/\S+\s+(\d{3})#i', $header, $hm)) {
@@ -470,7 +467,7 @@ class FreshRSS_YouTubeProxy {
 		$variant = 'mqdefault';
 
 		if (function_exists('curl_init')) {
-			if (!(self::$thumbCurl instanceof \CurlHandle)) {
+			if (self::$thumbCurl === null || (!is_resource(self::$thumbCurl) && !(self::$thumbCurl instanceof \CurlHandle))) {
 				self::$thumbCurl = curl_init();
 				curl_setopt_array(self::$thumbCurl, [
 					CURLOPT_NOBODY => true,
@@ -765,7 +762,8 @@ class FreshRSS_YouTubeProxy {
 		} else {
 			try {
 				$interval = new DateInterval((string)$content['duration']);
-				$hours = $interval->h + ($interval->d * 24);
+				$days = ($interval->y * 365) + ($interval->m * 30) + $interval->d;
+				$hours = $interval->h + ($days * 24);
 				$duration = $hours > 0
 					? sprintf('%d:%02d:%02d', $hours, $interval->i, $interval->s)
 					: sprintf('%d:%02d', $interval->i, $interval->s);
@@ -890,6 +888,10 @@ class FreshRSS_YouTubeProxy {
 			unset($response);
 
 			if (!is_array($data) || isset($data['error'])) {
+				$errCode = (int)($data['error']['code'] ?? 0);
+				if ($errCode === 403 || $errCode === 429) {
+					self::$circuit_broken = true;
+				}
 				foreach ($chunk as $vid) {
 					if (!isset(self::$cache[$vid]) || !is_array(self::$cache[$vid])) {
 						self::$cache[$vid] = [];
@@ -1198,7 +1200,7 @@ class FreshRSS_YouTubeProxy {
 
 		$titleLabel = function_exists('_t') ? _t('index.menu.main_stream') : 'Main stream';
 		self::$watchTime = '<span class="yt-watchtime" title="' .
-			htmlspecialchars($titleLabel . ' · ' . $formatted, ENT_QUOTES, 'UTF-8') .
+			htmlspecialchars($titleLabel . ' Â· ' . $formatted, ENT_QUOTES, 'UTF-8') .
 			'"> (<span class="yt-watchtime-text">' . htmlspecialchars($formatted, ENT_NOQUOTES, 'UTF-8') . '</span>)</span>';
 
 		return self::$watchTime;
