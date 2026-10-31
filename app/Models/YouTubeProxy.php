@@ -1054,6 +1054,13 @@ class FreshRSS_YouTubeProxy {
 		if ($totalSeconds <= 0) {
 			return '';
 		}
+
+		if ($totalSeconds >= 300) {
+			$totalSeconds = ($totalSeconds % 60 >= 30)
+				? (intdiv($totalSeconds, 60) + 1) * 60
+				: intdiv($totalSeconds, 60) * 60;
+		}
+
 		$days = intdiv($totalSeconds, 86400);
 		$hours = intdiv($totalSeconds % 86400, 3600);
 		$minutes = intdiv($totalSeconds % 3600, 60);
