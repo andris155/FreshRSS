@@ -1198,10 +1198,9 @@ class FreshRSS_YouTubeProxy {
 			return '';
 		}
 
-		$titleLabel = function_exists('_t') ? _t('index.menu.main_stream') : 'Main stream';
-		self::$watchTime = '<span class="yt-watchtime" title="' .
-			htmlspecialchars($titleLabel . ' Â· ' . $formatted, ENT_QUOTES, 'UTF-8') .
-			'"> (<span class="yt-watchtime-text">' . htmlspecialchars($formatted, ENT_NOQUOTES, 'UTF-8') . '</span>)</span>';
+		self::$watchTime = '<span class="yt-watchtime"> (<span class="yt-watchtime-text">' .
+			htmlspecialchars($formatted, ENT_NOQUOTES, 'UTF-8') .
+			'</span>)</span>';
 
 		return self::$watchTime;
 	}
