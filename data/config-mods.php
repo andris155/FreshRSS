@@ -1,0 +1,65 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * FreshRSS YouTube & Image Proxy Mod Configuration
+ *
+ * Location: ./data/config-mods.php (or FreshRSS root ./config-mods.php)
+ * This file is persisted across FreshRSS updates and will not be overwritten.
+ * Edit your API keys, proxy settings, and options below.
+ */
+return [
+
+	// YouTube Data API v3 key (used to fetch video duration, live stream, and premiere info)
+	'api_key' => 'key',
+
+	// Enable or disable image proxy cache globally. If false, images are loaded directly without the nginx proxy cache.
+	'proxy_enabled' => true,
+
+	// Image Proxy authentication key (passed in URL query string: ?key=...)
+	'proxy_key' => 'key',
+
+	// Base URL of the image proxy service
+	'proxy_url' => 'https://freshrss.lan/proxy',
+
+	// Enable or disable YouTube thumbnail link modification (upgrading to hq720 or falling back to mqdefault) and caching image variants in youtube.json.
+	// If false, original YouTube thumbnail links are kept and no image types are cached in youtube.json.
+	'youtube_image_modification' => true,
+
+	// Enable or disable YouTube video duration check, status badges, and duration caching in youtube.json.
+	// If false, YouTube duration checks are disabled, no API requests are made, and standard article summaries are shown.
+	'youtube_duration_enabled' => true,
+
+	// Enable or disable unread YouTube videos remaining watch time display next to the Main stream in the sidebar.
+	// When enabled, it displays the total remaining watch time formatted as (d h m) next to the Main stream.
+	// If false, no watch time is calculated or rendered.
+	'youtube_watch_time' => true,
+
+	// Maximum number of unread entries to scan for watch time calculation (default: 2000)
+	'youtube_watch_time_limit' => 2000,
+
+	// Enable or disable highlighting and inline display of FreshRSS user labels on articles in feed views.
+	'highlight_labeled_articles' => true,
+
+	// Enable or disable API request logging in data/cache/youtube_api.log
+	'logging_enabled' => true,
+
+	// Maximum log file size in bytes before rotating to youtube_api.log.old (default: 1048576 = 1MB)
+	'maxLogSize' => 1024 * 1024,
+
+	// Interval in seconds between cache cleanup runs (default: 86400 = 24 hours)
+	'cleanup_interval' => 86400,
+
+	// Time-to-live in seconds for normal video metadata (default: 90 * 86400 = 90 days)
+	'ttl_normal' => 90 * 86400,
+
+	// Time-to-live in seconds for short-lived entries: premieres, upcoming live streams, not found (default: 86400 = 1 day)
+	'ttl_short' => 86400,
+
+	// Time-to-live in seconds for temporary API errors before retrying (default: 3600 = 1 hour)
+	'ttl_error' => 3600,
+
+	// Maximum items to keep in cache (data/cache/youtube.json) before automatic cleanup
+	'cache_max_items' => 5000,
+
+];
