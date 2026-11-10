@@ -24,7 +24,7 @@ class FreshRSS_FreshRSSmods {
 
 	public const ZERO_DURATIONS = ['0:00', '00:00', '0:0'];
 
-	// Mod configuration loaded exclusively from config-youtube.php
+	// Mod configuration loaded exclusively from config-mods.php
 	public static ?array $config = null;
 
 	public static function loadConfig(): array {
@@ -33,12 +33,12 @@ class FreshRSS_FreshRSSmods {
 		}
 
 		$candidates = [
-			defined('DATA_PATH') ? DATA_PATH . '/config-youtube.php' : null,
-			defined('FRESHRSS_PATH') ? FRESHRSS_PATH . '/data/config-youtube.php' : null,
-			defined('FRESHRSS_PATH') ? FRESHRSS_PATH . '/config-youtube.php' : null,
-			dirname(__DIR__, 2) . '/data/config-youtube.php',
-			dirname(__DIR__, 2) . '/config-youtube.php',
-			__DIR__ . '/config-youtube.php',
+			defined('DATA_PATH') ? DATA_PATH . '/config-mods.php' : null,
+			defined('FRESHRSS_PATH') ? FRESHRSS_PATH . '/data/config-mods.php' : null,
+			defined('FRESHRSS_PATH') ? FRESHRSS_PATH . '/config-mods.php' : null,
+			dirname(__DIR__, 2) . '/data/config-mods.php',
+			dirname(__DIR__, 2) . '/config-mods.php',
+			__DIR__ . '/config-mods.php',
 		];
 
 		foreach ($candidates as $candidate) {
