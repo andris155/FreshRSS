@@ -71,6 +71,10 @@
 		if ($topline_display_authors):
 			?> <span class="author"><?= implode(' · ', $this->entry->authors()) ?></span><?php
 		endif;
+		$entryLabels = FreshRSS_FreshRSSmods::getEntryLabels($this->entry);
+		if (!empty($entryLabels)):
+			?> <?= FreshRSS_FreshRSSmods::renderEntryLabels($entryLabels) ?><?php
+		endif;
 		?></a>
 		<?php
 		if ($topline_website !== 'none'):
@@ -82,7 +86,7 @@
 	endif; ?>
 	<?php
 	if ($topline_summary):
-		if (!FreshRSS_YouTubeProxy::renderDuration($this->entry)):
+		if (!FreshRSS_FreshRSSmods::renderDuration($this->entry)):
 			?><div class="summary"><?= trim(mb_substr(strip_tags($this->entry->content(false)), 0, 500, 'UTF-8')) ?></div><?php
 		endif;
 	endif; ?>
