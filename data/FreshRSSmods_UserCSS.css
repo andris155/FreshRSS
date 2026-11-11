@@ -1,0 +1,377 @@
+/* Increase feed thumbnail size */
+.flux .flux_header .item.thumbnail.landscape {
+    max-width: 220px;
+	width: unset;
+    height: auto;
+}
+
+@media (max-width: 1140px) {
+    /* Feed image changes for the feeds. */
+    .flux .flux_header .item.thumbnail.landscape {
+        max-width: 128px;
+    }
+}
+
+/* Disable the new mobile view */
+@media (max-width: 840px) {
+    .flux .flux_header.has-thumbnail.has-summary {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.flux .flux_header.has-thumbnail.has-summary li.thumbnail {
+    align-self: flex-start;
+}
+
+/* Remove empty space from the feeds */
+.flux .flux_header .item .item-element {
+    line-height: unset;
+}
+
+/* Set border radius for feed images. */
+.flux .flux_header .item.thumbnail .item-element {
+    border-radius: 3px;
+}
+
+.enclosure-thumbnail {
+    border-radius: 3px;
+}
+
+/* Remove title bottom padding for custom website names. */
+.flux_header .item.titleAuthorSummaryDate .title:has(~ .date) {
+    padding-bottom: 0;
+}
+
+/* Custom website mods. */
+.item.website > a {
+    padding: unset !important;
+    text-decoration: none !important;
+}
+
+/* Custom website mods. */
+.flux .item.website {
+    width: unset;
+}
+
+.item.website {
+    pointer-events: none;
+}
+
+/* Display website name on mobile. */
+@media (max-width: 840px) {
+    .item.website span {
+        display: unset !important;
+    }
+
+    /* Move the rss logo to left on mobile. */
+    .header > .item.title a {
+        padding: unset;
+    }
+}
+
+/* Disable custom website icon hover. (pointer-events already disabled this.) */
+.flux .item.website a:hover .favicon {
+    filter: unset !important;
+}
+
+img.favicon {
+    margin: 0 0.25rem 0.10rem 0;
+    border-radius: 3px;
+}
+
+/* Origine theme */
+@media screen and (prefers-color-scheme: light) {
+    .aside.aside_feed .category .tree-folder-title:hover .title:not([data-unread="0"])::after {
+        background-color: #e5e5e5;
+    }
+
+    .aside.aside_feed .category .title:not([data-unread="0"])::after,
+    .global .box.category .title:not([data-unread="0"])::after,
+    .global .feed .item-title:not([data-unread="0"])::after {
+        background-color: #e5e5e5;
+    }
+
+    .header > .item.title .logo {
+        filter: grayscale(100%) brightness(1.0) contrast(1.5);
+    }
+
+    .header > .item.title a:hover .logo {
+        filter: grayscale(100%) brightness(1.3) contrast(1.5);
+    }
+
+    :root {
+        --font-color-grey: #111111;
+        --notification-good-background-color: #fff;
+        --notification-good-font-color: #111111;
+        --notification-good-border-color: #0084cc;
+        --notification-bad-background-color: #fff;
+        --notification-bad-font-color: #111111;
+        --notification-bad-border-color: #ea4a46;
+        --frss-font-color-grey-light: #666666;
+        --contrast-background-color: #0084cc;
+        --contrast-background-color-hover: #208fcc;
+        --contrast-border-color: #208fcc;
+        --contrast-background-color-active: #0062be;
+        --attention-background-color-gradient1: #ea4a46;
+        --attention-background-color-gradient1-hover: #ea6561;
+        --attention-background-color-active: #bd362f;
+        --font-color-light-shadowed: #989898;
+        --unread-article-background-color-hover: #f7f7f7;
+        --unread-article-background-color: #f7f7f7;
+    }
+
+    .websiteName {
+        color: #232323;
+    }
+
+    .btn {
+        background: var(--background-color-light-gradient2);
+        border: 1px solid var(--border-color);
+    }
+
+    /* Fix mark as read left border */
+    @media (max-width: 840px) {
+        .nav_menu .stick .mark-read-menu .dropdown-toggle.btn {
+            border-left: 1px solid var(--border-color);
+        }
+    }
+
+    div.website, div.author, li.item, .tree-folder.active .tree-folder-title .title {
+        --font-color-link: #111111;
+        --font-color-link-hover: #111111;
+    }
+
+   .custom-entry-label {
+        background-color: #e5e5e5;
+    }
+}
+
+@media screen and (prefers-color-scheme: dark) {
+    :root.darkMode_auto {
+        --font-color: #dddddd;
+        --font-color-grey: #dddddd;
+        --notification-good-background-color: #1d1d1d;
+        --notification-good-font-color: #dddddd;
+        --notification-good-border-color: #0062b7;
+        --notification-bad-background-color: #1d1d1d;
+        --notification-bad-font-color: #dddddd;
+        --notification-bad-border-color: #ea4a46;
+        --frss-font-color-grey-light: #999999;
+        --font-color-light: #dddddd;
+        --contrast-background-color: #0062b7;
+        --contrast-background-color-hover: #0078e0;
+        --contrast-border-color: #0078e0;
+        --contrast-background-color-active: #003461;
+        --attention-background-color-gradient1: #912621;
+        --attention-background-color-gradient1-hover: #be342c;
+        --attention-background-color-active: #912621;
+        --font-color-light-shadowed: #676767;
+        --border-color-dark-custom: #2a2a2a;
+        --unread-article-background-color-hover: #1a1a1a;
+        --unread-article-background-color: #1a1a1a;
+        --alert-error-background-color: #ffffe022;
+        --alert-error-font-color: #ccc;
+        --alert-error-border-color: #ff786e;
+        --alert-info-font-color: #ccc;
+        --alert-success-font-color: #ccc;
+    }
+
+    .notification .close:hover .icon {
+        filter: brightness(1);
+    }
+
+    .aside.aside_feed .category .tree-folder-title:hover .title:not([data-unread="0"])::after {
+        background-color: #323232;
+    }
+
+    .aside.aside_feed .category .title:not([data-unread="0"])::after,
+    .global .box.category .title:not([data-unread="0"])::after,
+    .global .feed .item-title:not([data-unread="0"])::after {
+        background-color: #323232;
+    }
+
+    .websiteName {
+        color: #c0c0c0;
+    }
+
+    .flux .flux_header .item .summary {
+        color: #828282;
+    }
+
+    .box {
+        background-color: #1a1a1a;
+    }
+
+    .header > .item.title .logo {
+        filter: grayscale(100%) brightness(2.5);
+    }
+
+    .header > .item.title a:hover .logo {
+        filter: grayscale(100%) brightness(2.8);
+    }
+
+    .btn {
+        background: var(--background-color-light-gradient1);
+        border: 1px solid var(--border-color-dark-custom);
+    }
+
+    /* Fix mark as read left border */
+    @media (max-width: 840px) {
+        .nav_menu .stick .mark-read-menu .dropdown-toggle.btn {
+            border-left: 1px solid var(--border-color-dark-custom);
+        }
+    }
+
+    div.website, div.author, li.item, .tree-folder.active .tree-folder-title .title {
+        --font-color-link: #dddddd;
+        --font-color-link-hover: #dddddd;
+    }
+
+   .group > .dropdown:only-child > .btn {
+        border-left: 1px solid var(--border-color-dark-custom);
+    }
+
+    .stick input + .btn {
+        border-top: 1px solid var(--border-color-dark-custom);
+    }
+
+   .custom-entry-label {
+        background-color: #323232;
+    }
+}
+
+.btn.active,
+.btn:active,
+.dropdown-target:target ~ .btn.dropdown-toggle {
+    box-shadow: unset;
+}
+
+.btn-important {
+    background: var(--contrast-background-color);
+    border: 1px solid var(--contrast-background-color);
+}
+
+.btn-important:hover {
+    background: var(--contrast-background-color-hover);
+}
+
+.btn-attention {
+    background: var(--attention-background-color-gradient1);
+    text-shadow: unset;
+    border: 1px solid var(--attention-background-color-gradient1);
+}
+
+.btn-attention:hover {
+    background: var(--attention-background-color-gradient1-hover);
+}
+
+.day .name {
+    text-shadow: unset;
+}
+
+.btn.active,
+.btn:active {
+    filter: brightness(0.94);
+}
+
+.flux.not_read .flux_header {
+    background-color: unset;
+}
+
+input:focus, select:focus, textarea:focus, input[type="password"]:focus + .toggle-password {
+    box-shadow: unset;
+}
+
+/* Hide background line while thumbnail is loading */
+.flux .flux_header .item.thumbnail img {
+    background: unset;
+}
+
+/* Restore the old layout for the website names. */
+.flux:not(.current):hover .flux_header.has-date .item .title {
+    grid-column: unset;
+}
+
+.flux .flux_header .item.titleAuthorSummaryDate {
+    position: relative;
+    display: unset;
+    grid-template-columns: unset;
+    grid-template-areas: unset;
+    align-content: unset;
+}
+
+.flux .flux_header .item .title {
+    display: inline-block;
+    max-width: 100%;
+    min-width: calc(100% - 155px);
+    top: 0;
+    grid-area: unset;
+}
+
+.flux .flux_header.has-date .item .title {
+    padding-right: 155px;
+}
+
+.flux .flux_header .item .summary {
+    grid-area: unset;
+}
+
+.flux .flux_header.has-date .item .summary {
+    max-width: 90%;
+}
+
+.flux .flux_header .item .date {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 155px;
+    grid-area: unset;
+    z-index: 1;
+}
+
+@media (max-width: 840px) {
+    .flux .flux_header.has-date .item .title {
+        padding-right: 1rem;
+    }
+}
+
+.item.thumbnail:empty {
+    display: none;
+}
+
+/* Style the inline label pill */
+.custom-entry-label {
+	margin-left: 0.5rem;
+	padding: 0.1rem 0.4rem;
+	border-radius: 3px;
+	font-size: 0.8em;
+	font-weight: normal;
+    vertical-align: middle;
+}
+
+.custom-entry-label .icon {
+	padding-bottom: 2px;
+}
+
+a:hover .custom-entry-label .icon {
+	filter: none;
+}
+
+/*.flux.not_read:not(.current):hover .flux_header .title, .flux.not_read:not(.current):hover .flux_header, .flux.not_read.current .flux_header {
+    background-color: unset;
+}
+
+.flux .flux_header:hover {
+    background-color: unset;
+}
+*/
+
+/* Watch time container */
+.custom-watchtime {
+    font-weight: normal;
+}
+
+.flux .flux_header:not(.current):hover .flux_header, .flux:not(.current):hover .flux_header .title, .flux.current .flux_header {
+    background-color: unset;
+}
