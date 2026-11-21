@@ -89,9 +89,16 @@ class FreshRSS_FreshRSSmods {
 		return (is_int($limit) && $limit > 0) ? $limit : 2000;
 	}
 
-	public static function isHighlightLabeledEnabled(): bool {
+	public static function isShowEntryLabelsEnabled(): bool {
 		$cfg = self::loadConfig();
+		if (isset($cfg['show_entry_labels'])) {
+			return (bool)$cfg['show_entry_labels'];
+		}
 		return isset($cfg['highlight_labeled_articles']) ? (bool)$cfg['highlight_labeled_articles'] : true;
+	}
+
+	public static function isHighlightLabeledEnabled(): bool {
+		return self::isShowEntryLabelsEnabled();
 	}
 
 	public static function getProxyKey(): string {
@@ -498,7 +505,7 @@ class FreshRSS_FreshRSSmods {
 			$httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
 			$contentLength = (int)curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
-			if ($httpCode === 200 && ($contentLength > 1000 || $contentLength === -1)) {
+			if ($httpCode === 200 && ($contentLength > 2000 || $contentLength === -1)) {
 				$variant = 'hq720';
 			}
 		} else {
@@ -552,7 +559,7 @@ class FreshRSS_FreshRSSmods {
 		$targetUrl = $url;
 
 		// YouTube thumbnail replacement (upgrades to hq720 variant if available, cached in youtube.json)
-		if ($isYtMod && (str_contains($url, 'ytimg.com') || str_contains($url, 'img.youtube.com')) && preg_match('#^https?://(?:(i\d*)\.ytimg\.com|img\.youtube\.com)/vi/([a-zA-Z0-9_-]{11})/(?:hqdefault|maxresdefault|sddefault|mqdefault|default|0)\.jpg(?:\?.*)?$#i', $url, $m)) {
+		if ($isYtMod && (str_contains($url, 'ytimg.com') || str_contains($url, 'img.youtube.com')) && preg_match('#^https?://(?:(i\d*)\.ytimg\.com|img\.youtube\.com)/vi/([a-zA-Z0-9_-]{11})/(?:hqdefault|maxresdefault|sddefault|mqdefault|default|0)\.(?:jpg|webp)(?:\?.*)?$#i', $url, $m)) {
 			$cdn = (!empty($m[1])) ? $m[1] : 'i';
 			$vid = $m[2];
 			$variant = self::getThumbnailVariant($vid, $cdn);
@@ -1218,7 +1225,7 @@ class FreshRSS_FreshRSSmods {
 	 * @return list<string>
 	 */
 	public static function getEntryLabels(FreshRSS_Entry $entry): array {
-		if (!self::isHighlightLabeledEnabled()) {
+		if (!self::isShowEntryLabelsEnabled()) {
 			return [];
 		}
 
@@ -1249,16 +1256,21 @@ class FreshRSS_FreshRSSmods {
 
 	/**
 	 * Render inline label badges for an article's attached labels.
+	 * Accepts either a FreshRSS_Entry instance or a pre-fetched array of labels.
 	 *
-	 * @param list<string> $labels
+	 * @param FreshRSS_Entry|array<string> $entryOrLabels
 	 * @return string HTML spans or empty string
 	 */
-	public static function renderEntryLabels(array $labels): string {
+	public static function renderEntryLabels(FreshRSS_Entry|array $entryOrLabels): string {
+		$labels = ($entryOrLabels instanceof FreshRSS_Entry)
+			? self::getEntryLabels($entryOrLabels)
+			: $entryOrLabels;
+
 		if (empty($labels)) {
 			return '';
 		}
 		$icon = function_exists('_i') ? _i('label') : '';
-		$html = '<span class="custom-entry-labels">';
+		$html = ' <span class="custom-entry-labels">';
 		foreach ($labels as $label) {
 			$escaped = htmlspecialchars((string)$label, ENT_QUOTES, 'UTF-8');
 			$html .= '<span class="custom-entry-label" data-label="' . $escaped . '">' . $icon . ' ' . $escaped . '</span>';
