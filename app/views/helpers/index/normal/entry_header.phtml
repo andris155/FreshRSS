@@ -71,11 +71,7 @@
 		if ($topline_display_authors):
 			?> <span class="author"><?= implode(' · ', $this->entry->authors()) ?></span><?php
 		endif;
-		$entryLabels = FreshRSS_FreshRSSmods::getEntryLabels($this->entry);
-		if (!empty($entryLabels)):
-			?> <?= FreshRSS_FreshRSSmods::renderEntryLabels($entryLabels) ?><?php
-		endif;
-		?></a>
+		?><?= FreshRSS_FreshRSSmods::renderEntryLabels($this->entry) ?></a>
 		<?php
 		if ($topline_website !== 'none'):
 			?><div class="item website">
