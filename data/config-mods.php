@@ -38,8 +38,8 @@ return [
 	// Maximum number of unread entries to scan for watch time calculation (default: 2000)
 	'youtube_watch_time_limit' => 2000,
 
-	// Enable or disable highlighting and inline display of FreshRSS user labels on articles in feed views.
-	'highlight_labeled_articles' => true,
+	// Enable or disable inline display of FreshRSS user labels on articles in feed views.
+	'show_entry_labels' => true,
 
 	// Enable or disable API request logging in data/cache/youtube_api.log
 	'logging_enabled' => true,
