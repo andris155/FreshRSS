@@ -91,14 +91,7 @@ class FreshRSS_FreshRSSmods {
 
 	public static function isShowEntryLabelsEnabled(): bool {
 		$cfg = self::loadConfig();
-		if (isset($cfg['show_entry_labels'])) {
-			return (bool)$cfg['show_entry_labels'];
-		}
-		return isset($cfg['highlight_labeled_articles']) ? (bool)$cfg['highlight_labeled_articles'] : true;
-	}
-
-	public static function isHighlightLabeledEnabled(): bool {
-		return self::isShowEntryLabelsEnabled();
+		return isset($cfg['show_entry_labels']) ? (bool)$cfg['show_entry_labels'] : true;
 	}
 
 	public static function getProxyKey(): string {
