@@ -273,7 +273,7 @@ class FreshRSS_Entry extends Minz_Model {
 			foreach ($thumbnails as $thumbnail) {
 				if (is_string($thumbnail) && \SimplePie\Misc::is_remote_uri($thumbnail)) {
 					$thumbnail = FreshRSS_FreshRSSmods::proxyUrl($thumbnail);
-					$content .= '<p><img class="enclosure-thumbnail" src="' . htmlspecialchars($thumbnail, ENT_COMPAT, 'UTF-8') . '" alt="" title="' . $etitle . '" /></p>';
+					$content .= '<p><img class="enclosure-thumbnail" src="' . $thumbnail . '" alt="" title="' . $etitle . '" /></p>';
 				}
 			}
 
