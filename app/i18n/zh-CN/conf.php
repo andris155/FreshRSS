@@ -203,7 +203,7 @@ return array(
 			'feeds' => '按订阅源显示',
 			'include_article_tags_label' => 'Include article tags from feeds',	// TODO
 			'include_user_labels_label' => 'Include user labels, with prefix:',	// TODO
-			'order' => '按日期排序',
+			'order' => 'Sort by',	// TODO
 			'search' => '表达式',
 			'shareOpml' => '启用相应类别和 feed 的 OPML 分享',
 			'shareRss' => '启用 HTML 和 RSS 分享',
@@ -238,7 +238,7 @@ return array(
 				'_' => '已禁用',
 				'title' => '分享',
 			),
-			'greader' => 'GReader JSON 的分享链接',	// DIRTY
+			'greader' => 'GReader JSON 的分享链接',	// DIRTY - Shareable link to the GReader JSON
 			'help' => '获取此自定义查询的分享链接',
 			'html' => 'HTML 页面的分享链接',
 			'opml' => '订阅源 OPML 的分享链接',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => '导航时保持手动排序',
 		'sticky_sort_help' => '决定保持最近一次手动排序，还是让每个分类或订阅源始终使用各自的默认或全局设置。',
 		'title' => '阅读',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// TODO
 		'view' => array(
 			'default' => '默认视图',
 			'global' => '全屏视图',

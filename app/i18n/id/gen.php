@@ -43,6 +43,7 @@ return array(
 		'open_url' => 'Buka URL',
 		'promote' => 'Promosi',
 		'purge' => 'Hapus',
+		'read_in_freshrss' => 'Read in FreshRSS',	// TODO
 		'refresh_opml' => 'Segarkan OPML',
 		'remove' => 'Hapus',
 		'rename' => 'Ubah nama',
@@ -182,6 +183,7 @@ return array(
 		'unsafe_csp_header' => 'Header CSP yang digunakan tidak aman dan FreshRSS mungkin rentan terhadap serangan XSS. <a target="_blank" href="https://freshrss.github.io/FreshRSS/en/admins/10_ServerConfig.html#security">Lihat dokumentasi</a>',
 	),
 	'lang' => array(
+		'ar' => 'العربية',	// IGNORE
 		'az' => 'Azərbaycanca',	// IGNORE
 		'be' => 'Беларуская',	// IGNORE
 		'cs' => 'Čeština',	// IGNORE

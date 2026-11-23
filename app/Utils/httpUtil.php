@@ -4,23 +4,8 @@ declare(strict_types=1);
 final class FreshRSS_http_Util {
 
 	private const RETRY_AFTER_PATH = DATA_PATH . '/Retry-After/';
-	private const PRIVATE_SUBNETS = [
-		'127.0.0.0/8',    // RFC1700 (Loopback)
-		'10.0.0.0/8',     // RFC1918
-		'192.168.0.0/16', // RFC1918
-		'172.16.0.0/12',  // RFC1918
-		'169.254.0.0/16', // RFC3927
-		'0.0.0.0/8',      // RFC5735
-		'240.0.0.0/4',    // RFC1112
-		'100.64.0.0/10',  // RFC6598 (Shared Address Space of Carrier-Grade NAT)
-		'::1/128',        // Loopback
-		'fc00::/7',       // Unique Local Address
-		'fe80::/10',      // Link Local Address
-		'::ffff:0:0/96',  // IPv4 translations
-		'64:ff9b::/96',   // RFC6052 (IPv6 Addressing of IPv4/IPv6 Translators, NAT64)
-		'64:ff9b:1::/48', // RFC8215 (Local-Use IPv4/IPv6 Translation Prefix)
-		'::/128',         // Unspecified address
-	];
+	private const NAT64_PREFIX_RFC6052 = '64:ff9b::/96';
+	private const NAT64_PREFIX_RFC8215 = '64:ff9b:1::/48';
 	/** @var array<string, string[]> $resolve_ok */
 	private static array $resolve_ok = [];
 	/** @var array<string, bool> $retry_after_domain_wide */
@@ -140,6 +125,11 @@ final class FreshRSS_http_Util {
 				$curl_params[$k] = array_filter($curl_params[$k],
 					fn($header) => is_string($header) && !preg_match('/^(Remote[-_\s]*User|X[-_\s]*WebAuth[-_\s]*User)\\s*:/i', $header));
 			}
+			// Forbid '/' in CURLOPT_PROXY [user[:pass]@]host[:port] (the scheme comes from CURLOPT_PROXYTYPE),
+			// to reject e.g. 'http://example.net/://decoy' and 'localhost:9050/path/to.sock'
+			if ($k === CURLOPT_PROXY && (!is_string($curl_params[$k]) || str_contains($curl_params[$k], '/'))) {
+				unset($curl_params[$k], $curl_params[CURLOPT_PROXYTYPE]);
+			}
 		}
 		return $curl_params;
 	}
@@ -150,7 +140,7 @@ final class FreshRSS_http_Util {
 			if (is_string($idn) && $idn != '') {
 				$puny = idn_to_ascii($idn);
 				$pos = strpos($url, $idn);
-				if ($puny != false && $pos !== false) {
+				if ($pos !== false && is_string($puny) && preg_match('/^[a-z0-9._-]+$/iD', $puny) === 1) {
 					$url = substr_replace($url, $puny, $pos, strlen($idn));
 				}
 			}
@@ -190,7 +180,7 @@ final class FreshRSS_http_Util {
 	 * Set an XML preamble to enforce the HTML content type charset received by HTTP.
 	 * @param string $html the raw downloaded HTML content
 	 * @param string $contentType an HTTP Content-Type such as 'text/html; charset=utf-8'
-	 * @return string an HTML string with XML encoding information for DOMDocument::loadHTML()
+	 * @return string an HTML string with Unicode BOM encoding information
 	 */
 	private static function enforceHttpEncoding(string $html, string $contentType = ''): string {
 		$httpCharset = preg_match('/\bcharset=([0-9a-z_-]{2,12})$/i', $contentType, $matches) === 1 ? $matches[1] : '';
@@ -244,43 +234,28 @@ final class FreshRSS_http_Util {
 	 * @return string an HTML string
 	 */
 	private static function enforceHtmlBase(string $html, string $href): string {
-		$doc = new DOMDocument();
-		$doc->loadHTML($html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
-		if ($doc->documentElement === null) {
+		$doc = Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
+		$documentElement = $doc->documentElement;
+		if ($documentElement === null) {
 			return '';
 		}
-		$xpath = new DOMXPath($doc);
-		$bases = $xpath->evaluate('//base');
-		if (!($bases instanceof DOMNodeList) || $bases->length === 0) {
+		if ($doc->querySelector('base') === null) {
 			$base = $doc->createElement('base');
-			if ($base === false) {
-				return $html;
-			}
 			$base->setAttribute('href', $href);
-			$head = null;
-			$heads = $xpath->evaluate('//head');
-			if ($heads instanceof DOMNodeList && $heads->length > 0) {
-				$head = $heads->item(0);
-			}
-			if ($head instanceof DOMElement) {
+			$head = $doc->querySelector('head');
+			if ($head instanceof Dom\Element) {
 				$head->insertBefore($base, $head->firstChild);
 			} else {
-				$doc->documentElement->insertBefore($base, $doc->documentElement->firstChild);
+				$documentElement->insertBefore($base, $documentElement->firstChild);
 			}
 		}
 
-		// Save the start of HTML because libxml2 saveHTML() risks scrambling it
-		$htmlPos = stripos($html, '<html');
-		$htmlStart = $htmlPos === false || $htmlPos > 512 ? '' : substr($html, 0, $htmlPos);
-
-		$html = $doc->saveHTML() ?: $html;
-		if ($htmlStart !== '' && !str_starts_with($html, $htmlStart)) {
-			// libxml2 saveHTML() risks removing Unicode BOM and XML declaration,
-			// which affects future detection of charset encoding, so manually restore it
-			$htmlPos = stripos($html, '<html');
-			$html = $htmlPos === false || $htmlPos > 512 ? $html : $htmlStart . substr($html, $htmlPos);
+		$saved = $doc->saveHTML();
+		if ($saved === '') {
+			return $html;
 		}
-		return $html;
+		// Re-add the Unicode byte order mark, for downstream charset detection
+		return (str_starts_with($html, "\xEF\xBB\xBF") ? "\xEF\xBB\xBF" : '') . $saved;
 	}
 
 	public static function compareURLOrigins(string $url1, string $url2): bool {
@@ -352,6 +327,13 @@ final class FreshRSS_http_Util {
 		if (in_array('*', $internal_host_allowlist, true)) {
 			return [];	// Disables SSRF checks entirely (unsafe)
 		}
+		if (filter_var($host, FILTER_VALIDATE_IP) === false) {
+			// cURL percent-decodes the host, converts non-ASCII to Punycode, and reads a host ending in a number as IPv4 (e.g. 0x7f.1).
+			// Refuse such hosts, as cURL would contact another name or address than the one checked and pinned here.
+			if (preg_match('/^[a-z0-9._-]+$/D', $host) !== 1 || preg_match('/(^|\.)(\d+|0x[0-9a-f]*)\.?$/D', $host) === 1) {
+				return false;
+			}
+		}
 
 		$resolve_str = "$host:$port:";
 		$ips_ok = [];
@@ -398,7 +380,7 @@ final class FreshRSS_http_Util {
 			// NAT64 addresses use the RFC 6052 well-known prefix.
 			// Validate the embedded IPv4 address because the NAT64 IPv6 address itself
 			// is globally routable even when it maps to a private/reserved IPv4 address.
-			if (self::checkCIDR($ip, '64:ff9b::/96')) {
+			if (self::checkCIDR($ip, self::NAT64_PREFIX_RFC6052)) {
 				$packed = @inet_pton($ip);
 				if ($packed === false || strlen($packed) !== 16) {
 					continue;
@@ -409,30 +391,18 @@ final class FreshRSS_http_Util {
 					continue;
 				}
 
-				if (filter_var($embedded_ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+				if (filter_var($embedded_ipv4, FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE) === false) {
 					continue;
-				}
-
-				// Extra check because the above one might not be enough: https://github.com/php/php-src/issues/16944
-				foreach (self::PRIVATE_SUBNETS as $cidr) {
-					if (self::checkCIDR($embedded_ipv4, $cidr)) {
-						continue 2;
-					}
 				}
 
 				$ips_ok[] = $add_ip;
 				continue;
 			}
 
-			if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+			// `FILTER_FLAG_GLOBAL_RANGE` does not reject the NAT64 prefixes
+			if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE) === false ||
+				self::checkCIDR($ip, self::NAT64_PREFIX_RFC8215)) {
 				continue;
-			}
-			// Extra check because the above one might not be enough: https://github.com/php/php-src/issues/16944
-			// Workaround is available by using `FILTER_FLAG_GLOBAL_RANGE` instead, but that was only added in PHP 8.2, and we need to support PHP 8.1+
-			foreach (self::PRIVATE_SUBNETS as $cidr) {
-				if (self::checkCIDR($ip, $cidr)) {
-					continue 2;
-				}
 			}
 
 			$ips_ok[] = $add_ip;
@@ -526,8 +496,8 @@ final class FreshRSS_http_Util {
 			}
 		}
 		$proxy_type = is_int($curl_options[CURLOPT_PROXYTYPE] ?? null) ? $curl_options[CURLOPT_PROXYTYPE] : $proxy_type;
+		// CURLOPT_PROXY is already scheme-less by the time it reaches here:
 		$proxy = is_string($curl_options[CURLOPT_PROXY] ?? null) ? $curl_options[CURLOPT_PROXY] : $proxy;
-		$proxy = preg_replace('#^.*://#', '', $proxy) ?? $proxy;	// Strip scheme, as it is provided by CURLOPT_PROXYTYPE
 
 		if (($retryAfter = FreshRSS_http_Util::getRetryAfter($url, $proxy)) > 0) {
 			Minz_Log::warning('For that domain, will first retry after ' . date('c', $retryAfter) . '. ' . \SimplePie\Misc::url_remove_credentials($url));

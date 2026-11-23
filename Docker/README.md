@@ -105,6 +105,10 @@ and with newer packages in general (Apache, PHP).
 
 ## How to update
 
+Your data and extensions are kept in the `freshrss_data` and `freshrss_extensions` volumes,
+so updating FreshRSS only means running a newer image with the same volumes.
+Back up these volumes (and your database, if not using SQLite) first; see [Backup](../docs/en/admins/05_Backup.md).
+
 ```sh
 # Rebuild an image (see build section below) or get a new online version:
 docker pull freshrss/freshrss:edge
@@ -112,10 +116,21 @@ docker pull freshrss/freshrss:edge
 docker stop freshrss
 docker rename freshrss freshrss_old
 # See the run section above for the full command
-docker run ... --name freshrss freshrss/freshrss:edge
+docker run ... -d --name freshrss freshrss/freshrss:edge
 # If everything is working, delete the old container
 docker rm freshrss_old
 ```
+
+With [Docker Compose](#docker-compose), run `pull` and then `up` again, with the same `-f` files as when you started, e.g.:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose-db.yml pull
+docker compose -f docker-compose.yml -f docker-compose-db.yml -f docker-compose-local.yml up -d --remove-orphans
+```
+
+> ⚠️ Keep the same major version of your database image (e.g. `postgres:19`) when updating FreshRSS, even if our example Compose files use a newer one:
+> a new major version of PostgreSQL refuses to start with the data of a previous one. To change it, see [Migrate database](#migrate-database).
+> If you replace your Compose files with newer copies of ours, also check that your `.env` file still uses the same variable names.
 
 ## Build custom Docker image
 
@@ -139,7 +154,7 @@ while reading the source code from your local (git) directory, like the followin
 
 ```sh
 cd ./FreshRSS/
-docker run --rm \
+docker run --rm --sig-proxy=false \
   -p 8080:80 \
   -e FRESHRSS_ENV=development \
   -e TZ=Europe/Paris \
@@ -151,7 +166,7 @@ docker run --rm \
 ```
 
 This will start a server on port 8080, based on your local PHP code, which will show the logs directly in your terminal.
-Press <kbd>Control</kbd>+<kbd>C</kbd> to exit.
+Press <kbd>Control</kbd>+<kbd>C</kbd> 3 times to exit.
 
 ### Special development images
 
@@ -198,6 +213,10 @@ docker run -d --restart unless-stopped --log-opt max-size=10m \
   --name freshrss-db postgres
 ```
 
+> ⚠️ `postgres` without a version tag is `postgres:latest`, which moves to each new major version of PostgreSQL.
+> New major versions of PostgreSQL refuse to start with the data of a different PostgreSQL version:
+> see update guidance on [docker-library/postgres#37](https://github.com/docker-library/postgres/issues/37) or with FreshRSS own [database migration](#migrate-database).
+
 In the FreshRSS setup, you will then specify the name of the container (`freshrss-db`) as the host for the database.
 
 See also the section [Docker Compose with PostgreSQL](#docker-compose-with-postgresql) below.
@@ -240,7 +259,7 @@ Changes in [Apache `.htaccess` files](https://httpd.apache.org/docs/trunk/howto/
 In particular, if you want FreshRSS to use HTTP-based login (instead of the easier Web form login), you can mount your own `./FreshRSS/p/i/.htaccess`:
 
 ```sh
-docker run ...
+docker run -d ...
   -v /your/.htaccess:/var/www/FreshRSS/p/i/.htaccess \
   -v /your/.htpasswd:/var/www/FreshRSS/data/.htpasswd \
   ...
@@ -431,7 +450,7 @@ docker compose down --remove-orphans --volumes
 ## Run in production
 
 For production, it is a good idea to use a reverse proxy on your host server, providing HTTPS.
-A dedicated solution such as [Træfik](https://traefik.io/traefik/) is recommended
+A dedicated solution such as [Træfik](https://traefik.io/traefik) is recommended
 (or see [alternative options below](#alternative-reverse-proxy-configurations)).
 
 You must first chose a domain (DNS) or sub-domain, e.g. `freshrss.example.net`, and set it in your `.env` file:
@@ -613,7 +632,7 @@ containing a valid cron minute definition such as `13,43` (recommended) or `*/20
 Not passing the `CRON_MIN` environment variable – or setting it to empty string – will disable the cron daemon.
 
 ```sh
-docker run ... \
+docker run -d ... \
   -e CRON_MIN=13,43 \
   --name freshrss freshrss/freshrss:edge
 ```
@@ -627,7 +646,7 @@ Remember not pass the `CRON_MIN` environment variable to your Docker run, to avo
 Example on Debian / Ubuntu: Create `/etc/cron.d/FreshRSS` with:
 
 ```text
-7,37 * * * * root docker exec --user www-data freshrss php ./app/actualize_script.php > /tmp/FreshRSS.log 2>&1
+7,37 * * * * root docker exec --user www-data freshrss php ./app/actualize_script.php >> /tmp/FreshRSS.log 2>&1
 ```
 
 ### Option 3) Cron as another instance of the same FreshRSS Docker image

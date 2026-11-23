@@ -43,6 +43,7 @@ return array(
 		'open_url' => 'Atverti URL',
 		'promote' => 'Paaukštinti',
 		'purge' => 'Išvalyti',
+		'read_in_freshrss' => 'Read in FreshRSS',	// TODO
 		'refresh_opml' => 'Atnaujinti OPML',
 		'remove' => 'Pašalinti',
 		'rename' => 'Pervadinti',
@@ -198,6 +199,7 @@ return array(
 		'unsafe_csp_header' => 'Naudojama CSP antraštė yra nesaugi, ir FreshRSS gali būti pažeidžiama XSS atakų. <a target="_blank" href="https://freshrss.github.io/FreshRSS/en/admins/10_ServerConfig.html#security">Žr. dokumentaciją</a>',
 	),
 	'lang' => array(
+		'ar' => 'العربية',	// IGNORE
 		'az' => 'Azərbaycanca',	// IGNORE
 		'be' => 'Беларуская',	// IGNORE
 		'cs' => 'Čeština',	// IGNORE

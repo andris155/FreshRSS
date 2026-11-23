@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Display by feed',	// IGNORE
 			'include_article_tags_label' => 'Include article tags from feeds',	// IGNORE
 			'include_user_labels_label' => 'Include user labels, with prefix:',	// IGNORE
-			'order' => 'Sort by date',	// IGNORE
+			'order' => 'Sort by',	// IGNORE
 			'search' => 'Expression',	// IGNORE
 			'shareOpml' => 'Enable sharing by OPML of corresponding categories and feeds',	// IGNORE
 			'shareRss' => 'Enable sharing by HTML &amp; RSS',	// IGNORE
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Keep custom sort order during navigation',	// IGNORE
 		'sticky_sort_help' => 'Determines whether the last custom sort order is kept active or whether each category or feed always uses its own default or global setting.',	// IGNORE
 		'title' => 'Reading',	// IGNORE
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// IGNORE
 		'view' => array(
 			'default' => 'Default view',	// IGNORE
 			'global' => 'Global view',	// IGNORE

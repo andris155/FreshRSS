@@ -41,6 +41,7 @@ return array(
 	),
 	'password' => array(
 		'invalid' => 'Palavra-passe incorreta',
+		'provided_password_too_long' => 'A palavra-passe inserida é demasiado longa.',
 	),
 	'tos' => array(
 		'feedback' => array(

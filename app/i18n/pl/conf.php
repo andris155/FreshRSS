@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Według kanału',
 			'include_article_tags_label' => 'Uwzględnij tagi wiadomości z kanałów',
 			'include_user_labels_label' => 'Uwzględnij etykiety użytkownika z prefiksem:',
-			'order' => 'Sortowanie wg daty',
+			'order' => 'Sort by',	// TODO
 			'search' => 'Wyrażenie',
 			'shareOpml' => 'Włącz udostępnianie OPML-ów zawierających kategorie i kanały',
 			'shareRss' => 'Włącz udostępnianie przez HTML i RSS',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Zachowaj niestandardową kolejność sortowania podczas nawigacji',
 		'sticky_sort_help' => 'Określa, czy ostatnia niestandardowa kolejność sortowania ma pozostać aktywna, czy każda kategoria lub kanał ma zawsze używać własnego ustawienia domyślnego albo globalnego.',
 		'title' => 'Czytanie',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// TODO
 		'view' => array(
 			'default' => 'Domyślny widok',
 			'global' => 'Widok globalny',

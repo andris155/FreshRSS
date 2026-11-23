@@ -1402,6 +1402,17 @@ function init_shortcuts() {
 		if (k === s.toggle_media) { toggle_media(); ev.preventDefault(); }
 		if (k === s.toggle_aside) { toggle_aside_click(); ev.preventDefault(); }
 	});
+
+	// Unfocus the search input if user presses Esc
+	const searchBox = document.getElementById('search');
+	if (searchBox) {
+		searchBox.addEventListener('keydown', ev => {
+			if (ev.key === 'Escape') {
+				searchBox.blur();
+				ev.preventDefault();
+			}
+		});
+	}
 }
 
 function init_stream(stream) {
@@ -1419,8 +1430,8 @@ function init_stream(stream) {
 		}
 
 		el = ev.target.closest('.item a.title');
-		if (el) {	// Allow default control/command-click behaviour such as open in background-tab
-			return ev.ctrlKey || ev.metaKey;
+		if (el) {	// Allow default control/command-click behaviour such as open in background-tab, or opening the original website
+			return context.title_opens_website || ev.ctrlKey || ev.metaKey;
 		}
 
 		el = ev.target.closest('.flux .content .text a');
@@ -1577,7 +1588,7 @@ function init_stream(stream) {
 
 		el = ev.target.closest('.flux_header, .flux_content');
 		if (el) {	// flux_toggle
-			if (ev.target.closest('.reader, .content, .item.website, .item.link, .dropdown')) {
+			if (ev.target.closest('.reader, .content, .item.website, .item.link > a, .dropdown')) {
 				return true;
 			}
 			if ((!context.sides_close_article && ev.target.matches('.flux_content')) || ev.target.closest('footer')) {
@@ -1604,7 +1615,7 @@ function init_stream(stream) {
 
 		let el = ev.target.closest('.item a.title');
 		if (el) {
-			if (ev.ctrlKey) {	// Control+click
+			if (ev.ctrlKey || context.title_opens_website) {	// Control+click, or normal click opening the original website
 				if (context.auto_mark_site) {
 					mark_read(el.closest('.flux'), true, false);
 				}
@@ -1807,8 +1818,10 @@ async function loadDynamicTags(div) {
 		div.querySelector('.dropdown-menu-scrollable').appendChild(li_item0);
 	}
 
-	let html = '';
-	let datalist = '';
+	const dropdown = div.querySelector('.dropdown-menu-scrollable');
+	const datalistLabels = document.getElementById('datalist-labels');
+	datalistLabels.innerHTML = ''; // clear before add the (updated) labels list
+
 	if (json && json.length) {
 		let nbLabelsChecked = 0;
 		for (let i = 0; i < json.length; i++) {
@@ -1820,21 +1833,37 @@ async function loadDynamicTags(div) {
 			if (tag.checked) {
 				nbLabelsChecked++;
 			}
-			html += '<li class="item"><label><input ' +
-				(context.anonymous ? '' : 'class="checkboxTag" ') +
-				'name="t_' + tag.id + '"type="checkbox" ' +
-				(context.anonymous ? 'disabled="disabled" ' : '') +
-				(tag.checked ? 'checked="checked" ' : '') + '/>' + tag.name + '</label></li>';
-			datalist += '<option value="' + tag.name + '"></option>';
+
+			const liItem = document.createElement('li');
+			liItem.className = 'item';
+			const labelItem = document.createElement('label');
+			const inputCheckbox = document.createElement('input');
+			if (!context.anonymous) {
+				inputCheckbox.className = 'checkboxTag';
+			}
+			inputCheckbox.name = 't_' + tag.id;
+			inputCheckbox.type = 'checkbox';
+			inputCheckbox.disabled = context.anonymous;
+			inputCheckbox.checked = !!tag.checked;
+			labelItem.appendChild(inputCheckbox);
+			labelItem.appendChild(document.createTextNode(tag.name));
+			liItem.appendChild(labelItem);
+			dropdown.appendChild(liItem);
+
+			const optionLabel = document.createElement('option');
+			optionLabel.value = tag.name;
+			datalistLabels.appendChild(optionLabel);
 		}
 		if (context.anonymous && nbLabelsChecked === 0) {
-			html += '<li class="item"><span class="emptyLabels">' + context.i18n.labels_empty + '</span></li>';
+			const emptyItem = document.createElement('li');
+			emptyItem.className = 'item';
+			const spanEmpty = document.createElement('span');
+			spanEmpty.className = 'emptyLabels';
+			spanEmpty.textContent = context.i18n.labels_empty;
+			emptyItem.appendChild(spanEmpty);
+			dropdown.appendChild(emptyItem);
 		}
 	}
-	div.querySelector('.dropdown-menu-scrollable').insertAdjacentHTML('beforeend', html);
-	const datalistLabels = document.getElementById('datalist-labels');
-	datalistLabels.innerHTML = ''; // clear before add the (updated) labels list
-	datalistLabels.insertAdjacentHTML('beforeend', datalist);
 }
 
 // <actualize>
@@ -2408,16 +2437,14 @@ function enforce_referrer_allowlist(stream) {
 	for (const iframe of stream.querySelectorAll('div.content iframe[src], div.content iframe[data-original]')) {
 		let hostname;
 		try {
-			hostname = new URL(context.does_lazyload ? iframe.getAttribute('data-original') : iframe.src).hostname;
+			hostname = new URL(iframe.src).hostname;
 		} catch (_) {
 			continue;
 		}
 		if (context.send_referrer_allowlist.includes(hostname) && !iframe.hasAttribute('referrerpolicy')) {
 			iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-			if (!context.does_lazyload) {
-				// iframe must be reloaded to apply the `referrerpolicy` change
-				iframe.src = iframe.src; // eslint-disable-line no-self-assign
-			}
+			// iframe must be reloaded to apply the `referrerpolicy` change
+			iframe.src = iframe.src; // eslint-disable-line no-self-assign
 		}
 	}
 }

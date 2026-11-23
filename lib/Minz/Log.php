@@ -23,6 +23,8 @@ class Minz_Log {
 		'debug' => LOG_DEBUG,
 	];
 
+	private static string $lastLog = '';
+
 	/**
 	 * Records a message in a specific log file
 	 * The message is not logged if
@@ -56,6 +58,8 @@ class Minz_Log {
 			};
 		}
 
+		self::$lastLog = $information;
+
 		if (! ($env === 'silent' || $level > self::LOG_LEVELS[$log_level])) {
 			$username = Minz_User::name() ?? Minz_User::INTERNAL_USER;
 			if ($file_name == null) {
@@ -83,10 +87,24 @@ class Minz_Log {
 	}
 
 	/**
+	 * Returns the most recently logged message as a string value, and clears it.
+	 * Mainly for use in PHPUnit tests.
+	 *
+	 * @phpstan-impure The return value might change, even though input arguments are the same between calls.
+	 */
+	public static function getLastLog(bool $clear_last_log = true): string {
+		$lastLog = self::$lastLog;
+		if ($clear_last_log) {
+			self::$lastLog = '';
+		}
+		return $lastLog;
+	}
+
+	/**
 	 * Make sure we do not waste a huge amount of disk space with old log messages.
 	 *
 	 * This method can be called multiple times for one script execution, but its result will not change unless
-	 * you call clearstatcache() in between. We won’t do do that for performance reasons.
+	 * you call clearstatcache() in between. We won’t do that for performance reasons.
 	 *
 	 * @throws Minz_PermissionDeniedException
 	 */

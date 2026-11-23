@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Nach Feed filtern',
 			'include_article_tags_label' => 'Artikel-Tags aus den Feeds berücksichtigen',
 			'include_user_labels_label' => 'Eigene Labels berücksichtigen, mit Präfix:',
-			'order' => 'Nach Datum sortieren',
+			'order' => 'Sort by',	// TODO
 			'search' => 'Suchbegriff',
 			'shareOpml' => 'Teilen via OPML mit zugehörigen Kategorien und Feeds aktivieren',
 			'shareRss' => 'Teilen via HTML &amp; RSS aktivieren',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Manuelle Sortierung bei der Navigation beibehalten',
 		'sticky_sort_help' => 'Legt fest, ob die letzte manuelle Sortierung aktiv bleibt oder ob jede Kategorie bzw. jeder Feed immer die eigene Standard- oder globale Einstellung verwendet.',
 		'title' => 'Lesen',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// TODO
 		'view' => array(
 			'default' => 'Standard-Ansicht',
 			'global' => 'Globale Ansicht',

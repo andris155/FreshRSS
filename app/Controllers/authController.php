@@ -72,6 +72,7 @@ class FreshRSS_auth_Controller extends FreshRSS_ActionController {
 	public function loginAction(): void {
 		if (FreshRSS_Auth::hasAccess()) {
 			Minz_Request::forward(['c' => 'index', 'a' => 'index'], true);
+			return;
 		}
 
 		$auth_type = FreshRSS_Context::systemConf()->auth_type;
@@ -91,81 +92,97 @@ class FreshRSS_auth_Controller extends FreshRSS_ActionController {
 	}
 
 	/**
+	 * Redirect back to the login form, while replying to the login request with an HTTP error status code (403, 500),
+	 * e.g. for fail2ban, which a normal HTTP redirection (3xx) cannot do.
+	 * The HTML redirection (POST->GET) also prevents browsers from offering to resubmit the password when reloading the page.
+	 */
+	private static function loginFailed(int $httpCode, string $notification): void {
+		$redirect = [
+			'c' => 'auth',
+			'a' => 'login',
+			'params' => ['original_request' => Minz_Request::paramString('original_request')],
+		];
+		if (Minz_Request::is('auth', 'reauth')) {
+			$redirect = [
+				'c' => 'auth',
+				'a' => 'reauth',
+				'params' => ['r' => Minz_Request::paramString('original_request')],
+			];
+		}
+		Minz_Request::setBadNotification($notification);
+		Minz_Request::forward($redirect, redirect: true, httpCode: $httpCode);
+	}
+
+	/**
 	 * This action handles form login page.
 	 *
 	 * If this action is reached through a POST request, username and password
-	 * are compared to login the current user.
+	 * are compared against the bcrypt password hash stored in the user configuration file
+	 * to authenticate the current user.
 	 *
 	 * Parameters are:
-	 *   - nonce (default: false)
 	 *   - username (default: '')
-	 *   - challenge (default: '')
+	 *   - passwordPlain (default: '')
 	 *   - keep_logged_in (default: false)
 	 *
 	 * @throws Exception
 	 */
 	public function formLoginAction(): void {
+		if (FreshRSS_Auth::hasAccess()) {
+			Minz_Request::forward(['c' => 'index', 'a' => 'index'], true);
+			return;
+		}
+
 		invalidateHttpCache();
 
 		FreshRSS_View::prependTitle(_t('gen.auth.login') . ' · ');
-		FreshRSS_View::appendScript(Minz_Url::display('/scripts/vendor/bcrypt.js?' . @filemtime(PUBLIC_PATH . '/scripts/vendor/bcrypt.js')));
 		$this->view->auth_autofills = FreshRSS_FormAuth::getAutofilledFields();
 
 		$limits = FreshRSS_Context::systemConf()->limits;
 		$this->view->cookie_days = (int)round($limits['cookie_duration'] / 86400, 1);
 
-		$isPOST = Minz_Request::isPost() && !Minz_Session::paramBoolean('POST_to_GET');
-		Minz_Session::_param('POST_to_GET');
-
-		if ($isPOST) {
-			$nonce = Minz_Session::paramString('nonce');
-			Minz_Session::_param('nonce', false);	// One-time: consume the challenge so it cannot be replayed.
+		if (Minz_Request::isPost()) {
 			$username = Minz_Request::paramString('username');
-			$challenge = Minz_Request::paramString('challenge');
+			$passwordPlain = Minz_Request::paramString('passwordPlain', plaintext: true, trim: false);
 			$ip_address = Minz_Request::connectionRemoteAddress();
 
-			if ($nonce === '') {
-				Minz_Log::warning("Invalid session during login for user={$username}, nonce={$nonce}, ip_address={$ip_address}");
-				header('HTTP/1.1 403 Forbidden');
-				Minz_Session::_param('POST_to_GET', true);	//Prevent infinite internal redirect
-				Minz_Request::setBadNotification(_t('install.session.nok'));
-				Minz_Request::forward(['c' => 'auth', 'a' => 'login'], false);
+			if (!Minz_Session::paramBoolean('sessionOk')) {
+				Minz_Log::warning("Invalid session during login for user={$username}, ip_address={$ip_address}");
+				self::loginFailed(403, _t('install.session.nok'));
 				return;
 			}
 
-			usleep(random_int(100, 10000));	//Primitive mitigation of timing attacks, in μs
+			usleep(random_int(100, 10000));	// Primitive mitigation of timing attacks, in μs
 
-			FreshRSS_Context::initUser($username);
-			if (!FreshRSS_Context::hasUserConf()) {
-				// Initialise the default user to be able to display the error page
-				FreshRSS_Context::initUser(FreshRSS_Context::systemConf()->default_user);
-				Minz_Error::error(403, _t('feedback.auth.login.invalid'), false);
+			// Do not use `FreshRSS_Context::initUser()` before the password is verified
+			$userConf = FreshRSS_user_Controller::checkUsername($username) && FreshRSS_user_Controller::userExists($username) ?
+				FreshRSS_UserConfiguration::getForUser($username) : null;
+			if ($userConf === null) {
+				self::loginFailed(403, _t('feedback.auth.login.invalid'));
 				return;
 			}
 
-			if (!FreshRSS_Context::userConf()->enabled || FreshRSS_Context::userConf()->passwordHash == '') {
-				usleep(random_int(100, 5000));	//Primitive mitigation of timing attacks, in μs
-				Minz_Error::error(403, _t('feedback.auth.login.invalid'), false);
+			if (!$userConf->enabled || $userConf->passwordHash == '') {
+				usleep(random_int(100, 5000));	// Primitive mitigation of timing attacks, in μs
+				self::loginFailed(403, _t('feedback.auth.login.invalid'));
 				return;
 			}
 
 			$ok = FreshRSS_FormAuth::checkCredentials(
-				$username, FreshRSS_Context::userConf()->passwordHash, $nonce, $challenge
+				$username, $userConf->passwordHash, $passwordPlain
 			);
 			if ($ok) {
-				// Set session parameter to give access to the user.
 				try {
 					Minz_Session::regenerateID('FreshRSS');
 				} catch (RuntimeException $e) {
 					Minz_Log::error("Session could not be regenerated during login for user={$username}, ip_address={$ip_address}: {$e->getMessage()}");
-					header('HTTP/1.1 500 Internal Server Error');
-					Minz_Request::setBadNotification(_t('install.session.nok'));
-					Minz_Request::forward(['c' => 'auth', 'a' => 'login'], false);
+					self::loginFailed(500, _t('install.session.nok'));
 					return;
 				}
+				// Set session parameters to give access to the user.
 				Minz_Session::_params([
 					Minz_User::CURRENT_USER => $username,
-					'passwordHash' => FreshRSS_Context::userConf()->passwordHash,
+					'passwordHash' => $userConf->passwordHash,
 					'csrf' => false,
 				]);
 				FreshRSS_Auth::giveAccess();
@@ -192,14 +209,13 @@ class FreshRSS_auth_Controller extends FreshRSS_ActionController {
 					showNotification: FreshRSS_Context::userConf()->good_notification_timeout > 0
 				);
 			} else {
-				Minz_Log::warning("Password mismatch for user={$username}, nonce={$nonce}, c={$challenge}, ip_address={$ip_address}");
-				header('HTTP/1.1 403 Forbidden');
-				Minz_Session::_param('POST_to_GET', true);	//Prevent infinite internal redirect
-				Minz_Request::setBadNotification(_t('feedback.auth.login.invalid'));
-				Minz_Request::forward(['c' => 'auth', 'a' => 'login'], false);
+				Minz_Log::warning("Password mismatch for user={$username}, ip_address={$ip_address}");
+				self::loginFailed(403, _t('feedback.auth.login.invalid'));
+				return;
 			}
 		} else {
 			Minz_Session::deleteLegacyCookie('FreshRSS');	// Delete legacy cookie (before 1.29.0)
+			Minz_Session::_param('sessionOk', true);	// To be checked in the POST login request.
 		}
 	}
 
@@ -216,29 +232,27 @@ class FreshRSS_auth_Controller extends FreshRSS_ActionController {
 		}
 		if (Minz_Request::isPost()) {
 			$username = Minz_User::name() ?? '';
-			$nonce = Minz_Session::paramString('nonce');
-			Minz_Session::_param('nonce', false);	// One-time: consume the challenge so it cannot be replayed.
-			$challenge = Minz_Request::paramString('challenge');
+			$passwordPlain = Minz_Request::paramString('passwordPlain', plaintext: true, trim: false);
 			if (!FreshRSS_FormAuth::checkCredentials(
-				$username, FreshRSS_Context::userConf()->passwordHash, $nonce, $challenge
-				)) {
-				Minz_Request::setBadNotification(_t('feedback.auth.login.invalid'));
+				$username, FreshRSS_Context::userConf()->passwordHash, $passwordPlain
+			)) {
+				self::loginFailed(403, _t('feedback.auth.login.invalid'));
+				return;
 			} else {
 				try {
 					Minz_Session::regenerateID('FreshRSS');
 					Minz_Session::_param('lastReauth', time());
-					Minz_Request::forward($redirect, true);
+					Minz_Request::forward($redirect, redirect: true);
 					return;
 				} catch (RuntimeException $e) {
 					Minz_Log::error("Session could not be regenerated during reauthentication! {$e->getMessage()}");
 					Minz_Session::_param('lastReauth', 0);
-					header('HTTP/1.1 500 Internal Server Error');
-					Minz_Request::setBadNotification(_t('install.session.nok'));
+					self::loginFailed(500, _t('install.session.nok'));
+					return;
 				}
 			}
 		}
 		FreshRSS_View::prependTitle(_t('gen.auth.reauth.title') . ' · ');
-		FreshRSS_View::appendScript(Minz_Url::display('/scripts/vendor/bcrypt.js?' . @filemtime(PUBLIC_PATH . '/scripts/vendor/bcrypt.js')));
 		$this->view->auth_autofills = FreshRSS_FormAuth::getAutofilledFields();
 	}
 

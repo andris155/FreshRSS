@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Rendezés hírforrás szerint',
 			'include_article_tags_label' => 'Include article tags from feeds',	// TODO
 			'include_user_labels_label' => 'Include user labels, with prefix:',	// TODO
-			'order' => 'Rendezés dátum szerint',
+			'order' => 'Sort by',	// TODO
 			'search' => 'Kifejezés',
 			'shareOpml' => 'Engedélyezze a megfelelő kategóriák és hírcsatornák OPML-alapú megosztását',
 			'shareRss' => 'Engedélyezze a HTML &amp; RSS megosztást',
@@ -308,9 +308,10 @@ return array(
 			'when' => 'Cikk megjelölése kedvencnek…',
 		),
 		'sticky_post' => 'A cikk gördüljön felülre, amikor megnyitásra kerül',
-		'sticky_sort' => 'Kézi rendezés megtartása navigáció közben',	// DIRTY
-		'sticky_sort_help' => 'Meghatározza, hogy az utolsó kézi rendezés aktív marad-e, vagy minden kategória, illetve hírcsatorna mindig a saját alapértelmezett vagy globális beállítását használja.',	// DIRTY
+		'sticky_sort' => 'Kézi rendezés megtartása navigáció közben',	// DIRTY - Keep custom sort order during navigation
+		'sticky_sort_help' => 'Meghatározza, hogy az utolsó kézi rendezés aktív marad-e, vagy minden kategória, illetve hírcsatorna mindig a saját alapértelmezett vagy globális beállítását használja.',	// DIRTY - Determines whether the last custom sort order is kept active or whether each category or feed always uses its own default or global setting.
 		'title' => 'Olvasás',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// TODO
 		'view' => array(
 			'default' => 'Alapértelmezett nézet',
 			'global' => 'Globális nézet',

@@ -143,7 +143,10 @@ class FreshRSS_configure_Controller extends FreshRSS_ActionController {
 	public function readingAction(): void {
 		if (Minz_Request::isPost()) {
 			FreshRSS_Context::userConf()->posts_per_page = Minz_Request::paramInt('posts_per_page') ?: 10;
-			FreshRSS_Context::userConf()->view_mode = Minz_Request::paramStringNull('view_mode', true) ?? 'normal';
+			$viewMode = Minz_Request::paramString('view_mode') ?: FreshRSS_ViewMode::DEFAULT_VIEW_MODE;
+			if (FreshRSS_ViewMode::exists($viewMode)) {
+				FreshRSS_Context::userConf()->view_mode = $viewMode;
+			}
 			FreshRSS_Context::userConf()->default_view = Minz_Request::paramStringNull('default_view') ?? 'adaptive';
 			FreshRSS_Context::userConf()->show_fav_unread = Minz_Request::paramBoolean('show_fav_unread');
 			FreshRSS_Context::userConf()->auto_load_more = Minz_Request::paramBoolean('auto_load_more');
@@ -153,6 +156,7 @@ class FreshRSS_configure_Controller extends FreshRSS_ActionController {
 			FreshRSS_Context::userConf()->onread_jump_next = Minz_Request::paramBoolean('onread_jump_next');
 			FreshRSS_Context::userConf()->lazyload = Minz_Request::paramBoolean('lazyload');
 			FreshRSS_Context::userConf()->sides_close_article = Minz_Request::paramBoolean('sides_close_article');
+			FreshRSS_Context::userConf()->title_opens_website = Minz_Request::paramBoolean('title_opens_website');
 			FreshRSS_Context::userConf()->sticky_post = Minz_Request::paramBoolean('sticky_post');
 			FreshRSS_Context::userConf()->sticky_sort = Minz_Request::paramBoolean('sticky_sort');
 			$markReadButton = Minz_Request::paramStringNull('mark_read_button', plaintext: true);
@@ -429,7 +433,7 @@ class FreshRSS_configure_Controller extends FreshRSS_ActionController {
 		FreshRSS_View::appendScript(Minz_Url::display('/scripts/draggable.js?' . @filemtime(PUBLIC_PATH . '/scripts/draggable.js')));
 
 		if (Minz_Request::isPost()) {
-			/** @var array<int,array{get?:string,name?:string,order?:string,search?:string,state?:int,url?:string,token?:string,
+			/** @var array<int,array{get?:string,name?:string,order?:string,sort?:string,search?:string,state?:int,url?:string,token?:string,
 			 * 		shareRss?:bool|numeric-string,shareOpml?:bool|numeric-string,description?:string,imageUrl?:string}> $params */
 			$params = Minz_Request::paramArray('queries');
 
@@ -512,8 +516,28 @@ class FreshRSS_configure_Controller extends FreshRSS_ActionController {
 			if (!empty($params['get']) && is_string($params['get'])) {
 				$queryParams['get'] = $params['get'];
 			}
-			if (!empty($params['order']) && is_string($params['order'])) {
+			// Order direction may arrive on its own when bookmarking the current view.
+			if (is_string($params['order'] ?? null) && in_array($params['order'], ['ASC', 'DESC'], true)) {
 				$queryParams['order'] = $params['order'];
+			}
+			// The query form submits a combined sort value (e.g. 'date_desc' or 'rand');
+			// bookmarking the current view passes the sort field on its own instead.
+			$sorting = $params['sort'] ?? '';
+			if (is_string($sorting) && $sorting !== '') {
+				if ($sorting === 'rand') {
+					$sortField = 'rand';
+				} elseif (str_ends_with($sorting, '_asc')) {
+					$queryParams['order'] = 'ASC';
+					$sortField = substr($sorting, 0, -strlen('_asc'));
+				} elseif (str_ends_with($sorting, '_desc')) {
+					$queryParams['order'] = 'DESC';
+					$sortField = substr($sorting, 0, -strlen('_desc'));
+				} else {
+					$sortField = $sorting;
+				}
+				if (in_array($sortField, ['id', 'c.name', 'date', 'f.name', 'length', 'link', 'title', 'rand'], true)) {
+					$queryParams['sort'] = $sortField;
+				}
 			}
 			if (!empty($params['search']) && is_string($params['search'])) {
 				// Search must be as plain text to be XML-encoded or URL-encoded depending on the situation
@@ -608,16 +632,37 @@ class FreshRSS_configure_Controller extends FreshRSS_ActionController {
 		$queries = FreshRSS_Context::userConf()->queries;
 		$id = empty($queries) ? 0 : (max(array_keys($queries)) + 1);
 
-		/** @var array{get?:string,name?:string,order?:string,search?:string,state?:int,shareRss?:bool,shareOpml?:bool,description?:string,imageUrl?:string} $params */
-		$params = Minz_Request::paramArray('query') ?: array_filter($_GET, 'is_string', ARRAY_FILTER_USE_KEY);
+		/** @var array{get?:string,name?:string,order?:string,sort?:string,search?:string,state?:int,shareRss?:bool,shareOpml?:bool,description?:string,imageUrl?:string} $params */
+		$params = Minz_Request::paramArray('query') ?:
+			Minz_Helper::htmlspecialchars_utf8(array_intersect_key($_GET, array_flip(['get', 'order', 'sort', 'search', 'state'])));
 		$name = ($params['name'] ?? '') ?: _t('conf.query.number', $id + 1);
 		$queryParams = [];
 
 		if (is_string($params['get'] ?? null)) {
 			$queryParams['get'] = $params['get'];
 		}
-		if (is_string($params['order'] ?? null)) {
+		// Order direction may arrive on its own when bookmarking the current view.
+		if (is_string($params['order'] ?? null) && in_array($params['order'], ['ASC', 'DESC'], true)) {
 			$queryParams['order'] = $params['order'];
+		}
+		// The query form submits a combined sort value (e.g. 'date_desc' or 'rand');
+		// bookmarking the current view passes the sort field on its own instead.
+		$sorting = $params['sort'] ?? '';
+		if (is_string($sorting) && $sorting !== '') {
+			if ($sorting === 'rand') {
+				$sortField = 'rand';
+			} elseif (str_ends_with($sorting, '_asc')) {
+				$queryParams['order'] = 'ASC';
+				$sortField = substr($sorting, 0, -strlen('_asc'));
+			} elseif (str_ends_with($sorting, '_desc')) {
+				$queryParams['order'] = 'DESC';
+				$sortField = substr($sorting, 0, -strlen('_desc'));
+			} else {
+				$sortField = $sorting;
+			}
+			if (in_array($sortField, ['id', 'c.name', 'date', 'f.name', 'length', 'link', 'title', 'rand'], true)) {
+				$queryParams['sort'] = $sortField;
+			}
 		}
 		if (is_string($params['search'] ?? null)) {
 			// Search must be as plain text to be XML-encoded or URL-encoded depending on the situation

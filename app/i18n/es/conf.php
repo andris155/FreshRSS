@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Mostrar por fuente',
 			'include_article_tags_label' => 'Incluir etiquetas de artículos de los feeds',
 			'include_user_labels_label' => 'Incluir etiquetas del usuario, con el prefijo:',
-			'order' => 'Ordenar por fecha',
+			'order' => 'Sort by',	// TODO
 			'search' => 'Expresión',
 			'shareOpml' => 'Permitir que OPML comparta las categorías y fuentes correspondientes',
 			'shareRss' => 'Permite compartir por HTML &amp; RSS',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Mantener el orden de clasificación personalizado durante la navegación',
 		'sticky_sort_help' => 'Determina si el último orden de clasificación personalizado permanece activo o si cada categoría o feed utiliza siempre su propia configuración predeterminada o global.',
 		'title' => 'Lectura',
+		'title_opens_website' => 'Hacer clic en el título del artículo lo abrirá en su página original',
 		'view' => array(
 			'default' => 'Vista por defecto',
 			'global' => 'Vista global',

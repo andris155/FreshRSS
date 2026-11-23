@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Exibir por feed',
 			'include_article_tags_label' => 'Incluir tags dos artigos dos feeds',
 			'include_user_labels_label' => 'Incluir rótulos do usuário, com prefixo:',
-			'order' => 'Ordenar por data',
+			'order' => 'Sort by',	// TODO
 			'search' => 'Expressão',
 			'shareOpml' => 'Habilita o compartilhamento por OPML de categorias e feeds correspondentes',
 			'shareRss' => 'Habilita o compartilhamento por HTML &amp; RSS',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Manter a ordem de classificação manual durante a navegação',
 		'sticky_sort_help' => 'Determina se a última ordem de classificação manual é mantida ativa ou se cada categoria ou feed sempre usa sua própria configuração padrão ou global.',
 		'title' => 'Lendo',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// TODO
 		'view' => array(
 			'default' => 'Visualização padrão',
 			'global' => 'Visualização global',

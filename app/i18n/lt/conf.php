@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Rodyti pagal kanalą',
 			'include_article_tags_label' => 'Include article tags from feeds',	// TODO
 			'include_user_labels_label' => 'Include user labels, with prefix:',	// TODO
-			'order' => 'Rikiuoti pagal datą',
+			'order' => 'Sort by',	// TODO
 			'search' => 'Išraiška',
 			'shareOpml' => 'Įjungti atitinkamų kategorijų ir kanalų bendrinimą per OPML',
 			'shareRss' => 'Įjungti bendrinimą per HTML ir RSS',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Naršant išlaikyti pasirinktinę rikiavimo tvarką',
 		'sticky_sort_help' => 'Nustato, ar išlaikoma paskutinė pasirinktinė rikiavimo tvarka, ar kiekviena kategorija ar kanalas visada naudoja savo numatytąjį ar bendrą nustatymą.',
 		'title' => 'Skaitymas',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// TODO
 		'view' => array(
 			'default' => 'Numatytasis vaizdas',
 			'global' => 'Bendras vaizdas',

@@ -145,12 +145,15 @@ class Minz_Request {
 
 	/**
 	 * @param bool $plaintext `true` to return special characters without any escaping (unsafe), `false` (default) to XML-encode them
+	 * @param bool $trim `false` to skip trimming whitespace surrounding the parameter, `true` (default) to trim whitespace
 	 */
-	public static function paramStringNull(string $key, bool $plaintext = false): ?string {
+	public static function paramStringNull(string $key, bool $plaintext = false, bool $trim = true): ?string {
 		if (isset(self::$params[$key])) {
 			$s = self::$params[$key];
 			if (is_string($s)) {
-				$s = trim($s);
+				if ($trim) {
+					$s = trim($s);
+				}
 				return $plaintext ? $s : htmlspecialchars($s, ENT_COMPAT, 'UTF-8');
 			}
 			if (is_int($s) || is_bool($s)) {
@@ -162,9 +165,10 @@ class Minz_Request {
 
 	/**
 	 * @param bool $plaintext `true` to return special characters without any escaping (unsafe), `false` (default) to XML-encode them
+	 * @param bool $trim `false` to skip trimming whitespace surrounding the parameter, `true` (default) to trim whitespace
 	 */
-	public static function paramString(string $key, bool $plaintext = false): string {
-		return self::paramStringNull($key, $plaintext) ?? '';
+	public static function paramString(string $key, bool $plaintext = false, bool $trim = true): string {
+		return self::paramStringNull($key, $plaintext, $trim) ?? '';
 	}
 
 	/**
@@ -514,9 +518,11 @@ class Minz_Request {
 	 * Restart a request
 	 * @param array{c?:string,a?:string,params?:array<string,mixed>} $url an array presentation of the URL to route to
 	 * @param bool $redirect If true, uses an HTTP redirection, and if false (default), performs an internal dispatcher redirection.
+	 * @param int $httpCode Only for a redirection: an HTTP error status code (4xx, 5xx) to send instead of a 3xx redirection.
+	 * 	Since browsers do not follow the `Location` header of such a response, an HTML redirection (with JS or `<meta http-equiv="refresh">`) is used instead.
 	 * @throws Minz_ConfigurationException
 	 */
-	public static function forward(array $url = [], bool $redirect = false): void {
+	public static function forward(array $url = [], bool $redirect = false, int $httpCode = 0): void {
 		if (empty(Minz_Request::originalRequest())) {
 			self::$originalRequest = $url;
 		}
@@ -525,7 +531,39 @@ class Minz_Request {
 		$url['params']['rid'] = self::requestId();
 
 		if ($redirect) {
-			header('Location: ' . Minz_Url::display($url, 'php', 'root'));
+			$location = Minz_Url::display($url, 'php', 'root'); // `/i/...`
+			if ($httpCode >= 400 && $httpCode <= 599) {
+				$nonce = bin2hex(random_bytes(16));
+
+				http_response_code($httpCode);
+				header('Content-Type: text/html; charset=UTF-8');
+				header("Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; script-src 'nonce-$nonce'");
+				header('X-Content-Type-Options: nosniff');
+				$location = htmlspecialchars($location, ENT_QUOTES, 'UTF-8');
+
+				// JavaScript helps prevent the redirect page from flashing.
+				// See: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/script#blocking
+				echo <<<HTML
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<meta charset="UTF-8">
+					<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+					<meta name="color-scheme" content="light dark">
+					<meta http-equiv="refresh" content="0; url=$location">
+					<script nonce="$nonce" blocking="render" data-target="$location">
+						location.replace(document.currentScript.dataset.target);
+					</script>
+					<title>$httpCode</title>
+				</head>
+				<body>
+					<p>Redirecting.</p>
+				</body>
+				</html>
+				HTML;
+			} else {
+				header('Location: ' . $location);
+			}
 			exit();
 		} else {
 			self::_controllerName($url['c']);

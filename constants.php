@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 //<Not customisable>
 /** @var string */
-const FRESHRSS_MIN_PHP_VERSION = '8.1.0';
+const FRESHRSS_MIN_PHP_VERSION = '8.2.0';
 /** @var string */
-const FRESHRSS_VERSION = '1.30.4';
+const FRESHRSS_VERSION = '1.31.0';
 /** @var string */
 const FRESHRSS_WEBSITE = 'https://freshrss.org';
 /** @var string */

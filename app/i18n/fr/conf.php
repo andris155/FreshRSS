@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Afficher par flux',
 			'include_article_tags_label' => 'Inclure les tags des articles provenant des flux',
 			'include_user_labels_label' => 'Inclure les étiquettes utilisateur, avec le préfixe :',
-			'order' => 'Tri par date',
+			'order' => 'Trier par',
 			'search' => 'Expression',	// IGNORE
 			'shareOpml' => 'Active le partage par OPML des catégories et flux correspondants',
 			'shareRss' => 'Active le partage par HTML &amp; RSS',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Conserver l’ordre de tri manuel lors de la navigation',
 		'sticky_sort_help' => 'Détermine si le dernier ordre de tri manuel est conservé ou si chaque catégorie ou flux utilise toujours son propre paramètre par défaut ou global.',
 		'title' => 'Lecture',
+		'title_opens_website' => 'Cliquer sur le titre de l’article l’ouvre sur son site d’origine',
 		'view' => array(
 			'default' => 'Vue par défaut',
 			'global' => 'Vue globale',

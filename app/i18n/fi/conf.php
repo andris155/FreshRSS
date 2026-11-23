@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Näytä syötteen mukaan',
 			'include_article_tags_label' => 'Include article tags from feeds',	// TODO
 			'include_user_labels_label' => 'Include user labels, with prefix:',	// TODO
-			'order' => 'Lajittele päivämäärän mukaan',
+			'order' => 'Sort by',	// TODO
 			'search' => 'Lauseke',
 			'shareOpml' => 'Jaa kyselyä vastaavat luokat ja syötteet OPML-muodossa',
 			'shareRss' => 'Jaa HTML &amp; RSS -muodossa',
@@ -308,9 +308,10 @@ return array(
 			'when' => 'Merkitse artikkeli suosikiksi…',
 		),
 		'sticky_post' => 'Kiinnitä artikkeli ylimmäksi avattaessa',
-		'sticky_sort' => 'Säilytä manuaalinen lajittelujärjestys navigoinnin aikana',	// DIRTY
-		'sticky_sort_help' => 'Määrittää, pysyykö viimeisin manuaalinen lajittelu käytössä vai käyttääkö jokainen luokka tai syöte aina omaa oletus- tai yleisasetustaan.',	// DIRTY
+		'sticky_sort' => 'Säilytä manuaalinen lajittelujärjestys navigoinnin aikana',	// DIRTY - Keep custom sort order during navigation
+		'sticky_sort_help' => 'Määrittää, pysyykö viimeisin manuaalinen lajittelu käytössä vai käyttääkö jokainen luokka tai syöte aina omaa oletus- tai yleisasetustaan.',	// DIRTY - Determines whether the last custom sort order is kept active or whether each category or feed always uses its own default or global setting.
 		'title' => 'Lukeminen',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// TODO
 		'view' => array(
 			'default' => 'Oletusnäkymä',
 			'global' => 'Yleinen näkymä',

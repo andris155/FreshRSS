@@ -13,6 +13,58 @@ final class httpUtilTest extends \PHPUnit\Framework\TestCase {
 		self::assertEquals($expected, FreshRSS_http_Util::compareUrlIgnoringHttps($url1, $url2) === 0);
 	}
 
+	#[DataProvider('provideCurlProxyValues')]
+	public function test_sanitizeCurlParamsRejectsMalformedProxy(string $proxy, bool $shouldSurvive): void {
+		$sanitized = FreshRSS_http_Util::sanitizeCurlParams([CURLOPT_PROXY => $proxy, CURLOPT_PROXYTYPE => CURLPROXY_HTTP]);
+		if ($shouldSurvive) {
+			self::assertSame($proxy, $sanitized[CURLOPT_PROXY] ?? null);
+		} else {
+			self::assertArrayNotHasKey(CURLOPT_PROXY, $sanitized);
+		}
+	}
+
+	/** @return array<string,array{string,bool}> */
+	public static function provideCurlProxyValues(): array {
+		return [
+			// A second `://` would otherwise be reduced by a greedy scheme-strip to this
+			// trailing "decoy" host for the allowlist/DNS-pinning check, while cURL still
+			// received the original, unstripped value as CURLOPT_PROXY.
+			'rejects scheme-prefixed decoy host' => ['http://127.0.0.1:8080/://8.8.8.8', false],
+			'rejects scheme-less decoy host' => ['127.0.0.1:8080/://198.51.100.10', false],
+			// The scheme comes from CURLOPT_PROXYTYPE, not the value itself -- a scheme-containing
+			// value is rejected outright rather than normalised.
+			'rejects a value carrying its own scheme' => ['http://proxy.example.com:3128', false],
+			// cURL treats "host:port/path" as a Unix domain socket for SOCKS proxies and ignores the
+			// port, so an allowlisted host:port could otherwise be smuggled into connecting to an
+			// arbitrary local socket.
+			'rejects a SOCKS Unix-domain-socket path' => ['localhost:9050/path/to.sock', false],
+			'accepts bare host:port' => ['127.0.0.1:8080', true],
+			'accepts hostname:port' => ['proxy.example.com:3128', true],
+			'accepts host:port with credentials' => ['user:pass@203.0.113.5:1080', true],
+			'accepts an IPv6 proxy' => ['[::1]:8080', true],
+		];
+	}
+
+	#[DataProvider('provideUrlsForCheckUrl')]
+	public function test_checkUrl(string $url, string|false $expected): void {
+		self::assertSame($expected, FreshRSS_http_Util::checkUrl($url));
+	}
+
+	/** @return Traversable<string,array{string,string|false}> */
+	public static function provideUrlsForCheckUrl(): Traversable {
+		yield 'plain' => ['https://example.net/feed?a=1&amp;b=2', 'https://example.net/feed?a=1&amp;b=2'];
+		yield 'underscore' => ['https://ex_ample.net/', 'https://ex_ample.net/'];
+		yield 'IPv6' => ['https://[2001:db8::1]/feed', 'https://[2001:db8::1]/feed'];
+		if (function_exists('idn_to_ascii')) {
+			yield 'IDN' => ['https://bücher.example/feed', 'https://xn--bcher-kva.example/feed'];
+			yield 'IDN with ideographic full stop' => ['https://日本語。example/', 'https://xn--wgv71a119e.example/'];
+		}
+		// IDNA (UTS #46) maps fullwidth punctuation to ASCII: must not produce characters absent from the (possibly HTML-encoded) input
+		yield 'fullwidth markup in host' => ['https://example.net／＂＞＜b＞', false];
+		yield 'fullwidth path and query in host' => ['https://example.net／path？a＝1＆b＝2', false];
+		yield 'fullwidth userinfo in host' => ['https://example.net＠example.org/', false];
+	}
+
 	#[\Override]
 	protected function tearDown(): void {
 		FreshRSS_Context::initSystem(reload: true);	// Restore the default internal host allowlist
@@ -37,6 +89,28 @@ final class httpUtilTest extends \PHPUnit\Framework\TestCase {
 			'local domain' => ['http://rss-bridge.lan/?bridge=A', 'http://rss-bridge.lan/?bridge=B', false],
 			'local, same URL' => ['http://192.168.1.2/feed', 'http://192.168.1.2/feed', true],
 		];
+	}
+
+	#[DataProvider('provideUtf8Html')]
+	public function test_enforceHtmlBase_keepsUtf8InScripts(string $html): void {
+		$enforceHtmlBase = new ReflectionMethod(FreshRSS_http_Util::class, 'enforceHtmlBase');
+		$result = $enforceHtmlBase->invoke(null, $html, 'https://example.net/page');
+		self::assertIsString($result);
+		self::assertStringContainsString('<base href="https://example.net/page">', $result);
+		self::assertStringContainsString('<script type="application/json">{"title":"Café’s menu — 日本"}</script>', $result);
+		if (str_starts_with($html, "\xEF\xBB\xBF")) {
+			self::assertStringStartsWith("\xEF\xBB\xBF", $result);
+		}
+	}
+
+	/** @return Traversable<string,array{string}> */
+	public static function provideUtf8Html(): Traversable {
+		$head = '<html><head><title>T</title></head>';
+		$body = '<body><p>Café’s menu — 日本</p><script type="application/json">{"title":"Café’s menu — 日本"}</script></body></html>';
+		yield 'meta charset' => ['<!DOCTYPE html><html><head><meta charset="utf-8"><title>T</title></head>' . $body];
+		yield 'byte order mark' => ["\xEF\xBB\xBF" . '<!DOCTYPE html>' . $head . $body];
+		yield 'byte order mark, late <html>' => ["\xEF\xBB\xBF" . '<!DOCTYPE html>' . str_repeat('<!-- padding -->', 40) . $head . $body];
+		yield 'meta http-equiv' => ['<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>T</title></head>' . $body];
 	}
 
 	#[DataProvider('provideCidrRanges')]
@@ -114,33 +188,67 @@ final class httpUtilTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function test_getCurlResolveInfoRejectsPrivateNat64Address(): void {
+	#[DataProvider('providePrivateSubnets')]
+	public function test_getCurlResolveInfoRejectsPrivateSubnets(string $ip): void {
 		FreshRSS_Context::initSystem();
 		$resolveOk = new ReflectionProperty(FreshRSS_http_Util::class, 'resolve_ok');
-		$resolveOk->setValue(null, [
-			'example.test' => [
-				'64:ff9b::a9fe:a9fe',
-			],
-		]);
-
-		self::assertNull(
-			FreshRSS_http_Util::getCurlResolveInfo('https://example.test/feed')
-		);
+		$resolveOk->setValue(null, ['example.test' => [$ip]]);
+		self::assertNull(FreshRSS_http_Util::getCurlResolveInfo('https://example.test/feed'));
 	}
 
-	public function test_getCurlResolveInfoRejectsLocalUseNat64Address(): void {
+	/** @return array<string,array{string}> */
+	public static function providePrivateSubnets(): array {
+		return [
+			// One example per range, ensuring FILTER_FLAG_GLOBAL_RANGE and custom checks are sufficient
+			'127.0.0.0/8' => ['127.0.0.1'],	// RFC1700 (Loopback)
+			'10.0.0.0/8' => ['10.0.0.5'],	// RFC1918
+			'192.168.0.0/16' => ['192.168.1.5'],	// RFC1918
+			'172.16.0.0/12' => ['172.16.5.5'],	// RFC1918
+			'169.254.0.0/16' => ['169.254.5.5'],	// RFC3927
+			'0.0.0.0/8' => ['0.0.0.5'],	// RFC5735
+			'240.0.0.0/4' => ['240.0.0.5'],	// RFC1112
+			'100.64.0.0/10' => ['100.64.5.5'],	// RFC6598 (Shared Address Space of Carrier-Grade NAT)
+			'::1/128' => ['::1'],	// Loopback
+			'fc00::/7' => ['fc00::5'],	// Unique Local Address
+			'fe80::/10' => ['fe80::5'],	// Link Local Address
+			'::ffff:0:0/96' => ['::ffff:10.0.0.5'],	// IPv4 translations
+			'64:ff9b::/96' => ['64:ff9b::a9fe:a9fe'],	// RFC6052 (IPv4/IPv6 Translator, NAT64)
+			'64:ff9b:1::/48' => ['64:ff9b:1::c000:4260'],	// RFC8215 (Local-Use IPv4/IPv6 Translation Prefix)
+			'::/128' => ['::'],	// Unspecified address
+		];
+	}
+
+	/** cURL would rewrite these hosts, and contact another name or address than the one checked and pinned */
+	#[DataProvider('provideHostsRewrittenByCurl')]
+	public function test_getCurlResolveInfoRejectsHostsRewrittenByCurl(string $host): void {
 		FreshRSS_Context::initSystem();
 		$resolveOk = new ReflectionProperty(FreshRSS_http_Util::class, 'resolve_ok');
-		$resolveOk->setValue(null, [
-			'example.test' => [
-				'64:ff9b:1::c000:4260',
-				'64:ff9b:1::a9fe:a9fe',
-			],
-		]);
+		$resolveOk->setValue(null, [strtolower($host) => ['192.0.66.96']]);
+		self::assertFalse(FreshRSS_http_Util::getCurlResolveInfo("http://$host/feed"));
+		self::assertFalse(FreshRSS_http_Util::getCurlResolveInfo("socks5h://$host:1080"));
+	}
 
-		self::assertNull(
-			FreshRSS_http_Util::getCurlResolveInfo('https://example.test/feed')
-		);
+	/** @return array<string,array{string}> */
+	public static function provideHostsRewrittenByCurl(): array {
+		return [
+			'percent-encoded underscore' => ['a%5F.example.test'],	// cURL resolves a_.example.test
+			'percent-encoded UTF-8' => ['%C3%A9.example.test'],	// cURL resolves xn--9ca.example.test
+			'non-ASCII' => ['é.example.test'],	// cURL resolves xn--9ca.example.test
+			'IPv4 as one number' => ['2130706433'],	// cURL connects to 127.0.0.1
+			'IPv4 as hexadecimal' => ['0x7f.1'],	// cURL connects to 127.0.0.1
+			'IPv4 as octal' => ['0177.0.0.1'],	// cURL connects to 127.0.0.1
+			'IPv4 with fewer parts' => ['127.1'],	// cURL connects to 127.0.0.1
+		];
+	}
+
+	/** Ordinary host names are still resolved and pinned as written */
+	public function test_getCurlResolveInfoAcceptsHostsUsedAsWrittenByCurl(): void {
+		FreshRSS_Context::initSystem();
+		$resolveOk = new ReflectionProperty(FreshRSS_http_Util::class, 'resolve_ok');
+		foreach (['a_b-c.example.test', 'xn--9ca.example.test', '1.example.test', 'example.7z', 'example.test.'] as $host) {
+			$resolveOk->setValue(null, [$host => ['192.0.66.96']]);
+			self::assertSame(["$host:80:192.0.66.96"], FreshRSS_http_Util::getCurlResolveInfo("http://$host/feed"));
+		}
 	}
 
 	/** Socks schemes default to port 1080, and an IP address proxy produces no resolve entry */
@@ -171,11 +279,16 @@ final class httpUtilTest extends \PHPUnit\Framework\TestCase {
 			FreshRSS_http_Util::getCurlResolveInfo('socks5h://proxy.example.test:1080')
 		);
 
-		// An entry is still produced without allowlisting, because the address is public
+		// Applications must not emit resolve entries for an address that is not guaranteed public.
+		// TEST-NET-2 is a reserved range, so without an allowlist entry, no entry is produced.
 		FreshRSS_Context::systemConf()->internal_host_allowlist = [];
+		self::assertNull(FreshRSS_http_Util::getCurlResolveInfo('socks5h://proxy.example.test:1080'));
+
+		// A genuinely public address produces an entry without allowlisting
+		$resolveOk->setValue(null, ['public-proxy.example.test' => ['8.8.8.8']]);
 		self::assertSame(
-			['proxy.example.test:1080:198.51.100.7'],
-			FreshRSS_http_Util::getCurlResolveInfo('socks5h://proxy.example.test:1080')
+			['public-proxy.example.test:1080:8.8.8.8'],
+			FreshRSS_http_Util::getCurlResolveInfo('socks5h://public-proxy.example.test:1080')
 		);
 
 		// A proxy resolving to a private address is rejected unless allowlisted

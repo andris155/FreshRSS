@@ -43,6 +43,7 @@ return array(
 		'open_url' => 'Abrir URL',
 		'promote' => 'Promover',
 		'purge' => 'Eliminar',
+		'read_in_freshrss' => 'Leer en FreshRSS',
 		'refresh_opml' => 'Actualizar OPML',
 		'remove' => 'Borrar',
 		'rename' => 'Cambiar el nombre a',
@@ -190,6 +191,7 @@ return array(
 		'unsafe_csp_header' => 'La cabecera CSP en uso no es segura y FreshRSS puede ser vulnerable a ataques XSS. <a target="_blank" href="https://freshrss.github.io/FreshRSS/en/admins/10_ServerConfig.html#security">Ver documentación</a>',
 	),
 	'lang' => array(
+		'ar' => 'العربية',	// IGNORE
 		'az' => 'Azərbaycanca',	// IGNORE
 		'be' => 'Беларуская',	// IGNORE
 		'cs' => 'Čeština',	// IGNORE

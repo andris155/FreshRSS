@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Display by feed',
 			'include_article_tags_label' => 'Include article tags from feeds',
 			'include_user_labels_label' => 'Include user labels, with prefix:',
-			'order' => 'Sort by date',
+			'order' => 'Sort by',
 			'search' => 'Expression',
 			'shareOpml' => 'Enable sharing by OPML of corresponding categories and feeds',
 			'shareRss' => 'Enable sharing by HTML &amp; RSS',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Keep custom sort order during navigation',
 		'sticky_sort_help' => 'Determines whether the last custom sort order is kept active or whether each category or feed always uses its own default or global setting.',
 		'title' => 'Reading',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',
 		'view' => array(
 			'default' => 'Default view',
 			'global' => 'Global view',

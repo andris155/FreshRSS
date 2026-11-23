@@ -80,19 +80,11 @@ class FreshRSS_importExport_Controller extends FreshRSS_ActionController {
 		$this->listSqliteArchives();
 	}
 
-	private static function megabytes(string $size_str): float|int|string {
-		return match (substr($size_str, -1)) {
-			'M', 'm' => (int)$size_str,
-			'K', 'k' => (int)$size_str / 1024,
-			'G', 'g' => (int)$size_str * 1024,
-			default => $size_str,
-		};
-	}
-
 	private static function minimumMemory(int|string $mb): void {
 		$mb = (int)$mb;
-		$ini = self::megabytes(ini_get('memory_limit') ?: '0');
-		if ($ini < $mb) {
+		// `ini_get('memory_limit')` returns e.g. `128M`, or `-1` for unlimited
+		$ini = (int)(ini_parse_quantity(ini_get('memory_limit') ?: '0') / 1048576);
+		if ($ini >= 0 && $ini < $mb) {
 			ini_set('memory_limit', $mb . 'M');
 		}
 	}
@@ -355,46 +347,59 @@ class FreshRSS_importExport_Controller extends FreshRSS_ActionController {
 			. '</body></opml>' . "\n";
 	}
 
+	/**
+	 * @return string|false JSON, or false if the file is invalid XML
+	 */
 	private function ttrssXmlToJson(string $xml): string|false {
-		$table = (array)simplexml_load_string($xml, options: LIBXML_NOBLANKS | LIBXML_NOCDATA);
-		$table['items'] = $table['article'] ?? [];
-		if (!is_array($table['items'])) {
-			$table['items'] = [];
+		try {
+			$dom = @Dom\XMLDocument::createFromString($xml, LIBXML_NOERROR);
+		} catch (Throwable $ex) { // @phpstan-ignore catch.neverThrown (Dom\XMLDocument::createFromString() does throw)
+			Minz_Log::warning('Error during TT-RSS articles import: ' . $ex->getMessage());
+			return false;
 		}
-		unset($table['article']);
-		for ($i = count($table['items']) - 1; $i >= 0; $i--) {
-			$item = (array)($table['items'][$i]);
-			$item = array_filter($item, static fn($v) =>
-				// Filter out empty properties, potentially reported as empty objects
-				(is_string($v) && trim($v) !== '') || !empty($v));
-			$item['updated'] = is_string($item['updated'] ?? null) ? strtotime($item['updated']) : '';
-			$item['published'] = $item['updated'];
-			$item['content'] = ['content' => $item['content'] ?? ''];
-			$item['categories'] = is_string($item['tag_cache'] ?? null) ? [$item['tag_cache']] : [];
-			if (!empty($item['marked'])) {
-				$item['categories'][] = 'user/-/state/com.google/starred';
-			}
-			if (!empty($item['published'])) {
-				$item['categories'][] = 'user/-/state/com.google/broadcast';
-			}
-			if (is_string($item['label_cache'] ?? null)) {
-				$labels_cache = json_decode($item['label_cache'], true);
-				if (is_array($labels_cache)) {
-					foreach ($labels_cache as $label_cache) {
-						if (is_array($label_cache) && !empty($label_cache[1]) && is_string($label_cache[1])) {
-							$item['categories'][] = 'user/-/label/' . trim($label_cache[1]);
+		$domElement = $dom->documentElement;
+		$table = ['items' => []];
+		if ($domElement !== null) {
+			foreach ($domElement->childNodes as $article) {
+				if (!$article instanceof Dom\Element || $article->nodeName !== 'article') {
+					continue;
+				}
+				$item = [];
+				foreach ($article->childNodes as $child) {
+					if ($child instanceof Dom\Element) {
+						$item[$child->nodeName] = $child->textContent;
+					}
+				}
+				$item = array_filter($item, static fn($v) => trim($v) !== '');
+				$item['updated'] = isset($item['updated']) ? strtotime($item['updated']) : '';
+				$item['published'] = $item['updated'];
+				$item['content'] = ['content' => $item['content'] ?? ''];
+				$item['categories'] = isset($item['tag_cache']) ? [$item['tag_cache']] : [];
+				if (!empty($item['marked'])) {
+					$item['categories'][] = 'user/-/state/com.google/starred';
+				}
+				if (!empty($item['published'])) {
+					$item['categories'][] = 'user/-/state/com.google/broadcast';
+				}
+				if (is_string($item['label_cache'] ?? null)) {
+					$labels_cache = json_decode($item['label_cache'], true);
+					if (is_array($labels_cache)) {
+						foreach ($labels_cache as $label_cache) {
+							if (is_array($label_cache) && !empty($label_cache[1]) && is_string($label_cache[1])) {
+								$item['categories'][] = 'user/-/label/' . trim($label_cache[1]);
+							}
 						}
 					}
 				}
+				$item['alternate'] = [['href' => $item['link'] ?? '']];
+				$item['origin'] = [
+					'title' => $item['feed_title'] ?? '',
+					'feedUrl' => $item['feed_url'] ?? '',
+				];
+				$item['id'] = $item['guid'] ?? ($item['feed_url'] ?? $item['published']);
+				$item['guid'] = $item['id'];
+				$table['items'][] = $item;
 			}
-			$item['alternate'] = [['href' => $item['link'] ?? '']];
-			$item['origin'] = [
-				'title' => $item['feed_title'] ?? '',
-				'feedUrl' => $item['feed_url'] ?? '',
-			];
-			$item['id'] = $item['guid'] ?? ($item['feed_url'] ?? $item['published']);
-			$item['guid'] = $item['id'];
-			$table['items'][$i] = $item;
 		}
 		return json_encode($table);
 	}
@@ -524,7 +529,7 @@ class FreshRSS_importExport_Controller extends FreshRSS_ActionController {
 			}
 
 			$feed_id = $article_to_feed[$item['guid']];
-			$author = is_string($item['author'] ?? null) ? Minz_Helper::htmlspecialchars_utf8($item['author']) : '';
+			$author = is_string($item['author'] ?? null) ? Minz_Helper::htmlspecialchars_utf8(htmlspecialchars_decode($item['author'], ENT_QUOTES)) : '';
 			$is_starred = null; // null is used to preserve the current state if that item exists and is already starred
 			$is_read = null;
 			$tags = is_array($item['categories'] ?? null) ? $item['categories'] : [];
@@ -544,7 +549,7 @@ class FreshRSS_importExport_Controller extends FreshRSS_ActionController {
 					} elseif (preg_match('%^user/[A-Za-z0-9_-]+/state/com.google/unread$%', $tag)) {
 						$is_read = false;
 					} elseif (preg_match('%^user/[A-Za-z0-9_-]+/label/\s*(?P<tag>.+?)\s*$%', $tag, $matches)) {
-						$labels[] = $matches['tag'];
+						$labels[] = Minz_Helper::htmlspecialchars_utf8($matches['tag']);
 					}
 					unset($tags[$i]);
 				}
@@ -568,7 +573,7 @@ class FreshRSS_importExport_Controller extends FreshRSS_ActionController {
 			$url = Minz_Helper::htmlspecialchars_utf8(FreshRSS_http_Util::checkUrl($url) ?: '');
 
 			$title = is_string($item['title'] ?? null) ? $item['title'] : $url;
-			$title = Minz_Helper::htmlspecialchars_utf8($title);
+			$title = Minz_Helper::htmlspecialchars_utf8(htmlspecialchars_decode($title, ENT_QUOTES));
 
 			if (is_array($item['content'] ?? null) && is_string($item['content']['content'] ?? null)) {
 				$content = $item['content']['content'];

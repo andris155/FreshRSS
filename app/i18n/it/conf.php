@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Mostra per feed',
 			'include_article_tags_label' => 'Includi i tag degli articoli provenienti dai feed',
 			'include_user_labels_label' => 'Includi le etichette dell’utente, con prefisso:',
-			'order' => 'Ordina per data',
+			'order' => 'Sort by',	// TODO
 			'search' => 'Espressione',
 			'shareOpml' => 'Abilita la condivisione di OPML di categorie e feed corrispondenti',
 			'shareRss' => 'Abilita la condivisione di HTML &amp; RSS',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Mantieni l’ordinamento manuale durante la navigazione',
 		'sticky_sort_help' => 'Determina se l’ultimo ordinamento manuale rimane attivo oppure se ogni categoria o feed usa sempre la propria impostazione predefinita o globale.',
 		'title' => 'Lettura',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// TODO
 		'view' => array(
 			'default' => 'Visualizzazione predefinita',
 			'global' => 'Vista globale per categorie',

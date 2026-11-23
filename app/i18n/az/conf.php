@@ -203,7 +203,7 @@ return array(
 			'feeds' => 'Lentə görə göstər',
 			'include_article_tags_label' => 'Lentlərdən gələn məqalə etiketlərini daxil et',
 			'include_user_labels_label' => 'İstifadəçi etiketlərini daxil et, prefiks ilə:',
-			'order' => 'Tarixə görə sırala',
+			'order' => 'Sort by',	// TODO
 			'search' => 'İfadə',
 			'shareOpml' => 'Uyğun kateqoriya və lentlərin OPML ilə paylaşılmasını aktivləşdir',
 			'shareRss' => 'HTML &amp; RSS ilə paylaşmanı aktivləşdir',
@@ -311,6 +311,7 @@ return array(
 		'sticky_sort' => 'Naviqasiya zamanı fərdi sıralamanı saxla',
 		'sticky_sort_help' => 'Sonuncu fərdi sıralamanın aktiv qalacağını, yoxsa hər kateqoriya və ya lentin həmişə öz standart və ya qlobal parametrindən istifadə edəcəyini müəyyən edir.',
 		'title' => 'Oxuma',
+		'title_opens_website' => 'Clicking on the article title opens it on its original website',	// TODO
 		'view' => array(
 			'default' => 'Standart görünüş',
 			'global' => 'Qlobal görünüş',
