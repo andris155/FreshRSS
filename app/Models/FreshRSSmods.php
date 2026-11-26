@@ -9,24 +9,27 @@ declare(strict_types=1);
  * remain 100% untouched for effortless upstream updates.
  */
 class FreshRSS_FreshRSSmods {
-
 	// In-memory cache & runtime state
+	/** @var array<string, mixed>|null */
 	public static ?array $cache = null;
 	public static bool $cache_changed = false;
 	public static bool $circuit_broken = false;
 	private static bool $shutdown_registered = false;
 	public static ?string $watchTime = null;
+	/** @var array<string, array<int, string>>|null */
 	public static ?array $entryLabels = null;
 
 	// Reusable cURL handles for keep-alive connection pooling
-	private static mixed $apiCurl = null;
-	private static mixed $thumbCurl = null;
+	private static ?\CurlHandle $apiCurl = null;
+	private static ?\CurlHandle $thumbCurl = null;
 
 	public const ZERO_DURATIONS = ['0:00', '00:00', '0:0'];
 
 	// Mod configuration loaded exclusively from config-mods.php
+	/** @var array<string, mixed>|null */
 	public static ?array $config = null;
 
+	/** @return array<string, mixed> */
 	public static function loadConfig(): array {
 		if (self::$config !== null) {
 			return self::$config;
@@ -45,7 +48,13 @@ class FreshRSS_FreshRSSmods {
 			if ($candidate !== null && is_file($candidate)) {
 				$loaded = include $candidate;
 				if (is_array($loaded)) {
-					self::$config = $loaded;
+					$config = [];
+					foreach ($loaded as $k => $v) {
+						if (is_string($k)) {
+							$config[$k] = $v;
+						}
+					}
+					self::$config = $config;
 					return self::$config;
 				}
 			}
@@ -214,18 +223,22 @@ class FreshRSS_FreshRSSmods {
 	}
 
 	public static function closeCurlHandles(): void {
-		if (self::$apiCurl !== null) {
-			if (is_resource(self::$apiCurl) || self::$apiCurl instanceof \CurlHandle) {
-				@curl_close(self::$apiCurl);
-			}
+		if (self::$apiCurl instanceof \CurlHandle) {
+			@curl_close(self::$apiCurl);
 			self::$apiCurl = null;
 		}
-		if (self::$thumbCurl !== null) {
-			if (is_resource(self::$thumbCurl) || self::$thumbCurl instanceof \CurlHandle) {
-				@curl_close(self::$thumbCurl);
-			}
+		if (self::$thumbCurl instanceof \CurlHandle) {
+			@curl_close(self::$thumbCurl);
 			self::$thumbCurl = null;
 		}
+	}
+
+	private static function toInt(mixed $val, int $default = 0): int {
+		return (is_int($val) || is_float($val) || is_numeric($val)) ? (int)$val : $default;
+	}
+
+	private static function toStr(mixed $val, string $default = ''): string {
+		return (is_string($val) || is_int($val) || is_float($val)) ? (string)$val : $default;
 	}
 
 	public static function pruneCache(int $max_items = 0): void {
@@ -239,7 +252,7 @@ class FreshRSS_FreshRSSmods {
 			$cleanups = self::$cache['__last_cleanup'] ?? null;
 			unset(self::$cache['__last_cleanup']);
 
-			uasort(self::$cache, static fn($a, $b) => ((int)(is_array($a) ? ($a['timestamp'] ?? 0) : 0)) <=> ((int)(is_array($b) ? ($b['timestamp'] ?? 0) : 0)));
+			uasort(self::$cache, static fn($a, $b) => self::toInt(is_array($a) ? ($a['timestamp'] ?? 0) : 0) <=> self::toInt(is_array($b) ? ($b['timestamp'] ?? 0) : 0));
 			self::$cache = array_slice(self::$cache, -$max_items, null, true);
 
 			if ($cleanups !== null) {
@@ -255,7 +268,7 @@ class FreshRSS_FreshRSSmods {
 		}
 
 		$now = time();
-		$last_cleanup = (int)(self::$cache['__last_cleanup'] ?? 0);
+		$last_cleanup = self::toInt(self::$cache['__last_cleanup'] ?? 0);
 		$cleanup_interval = self::getCleanupInterval();
 
 		if (!$force && ($now - $last_cleanup) < $cleanup_interval) {
@@ -276,7 +289,7 @@ class FreshRSS_FreshRSSmods {
 				continue;
 			}
 
-			$age = $now - (int)$row['timestamp'];
+			$age = $now - self::toInt($row['timestamp']);
 			$is_error = !empty($row['api_error']);
 			$is_not_found = isset($row['duration']) && $row['duration'] === false;
 			$is_premiere = !empty($row['premiere']);
@@ -370,7 +383,7 @@ class FreshRSS_FreshRSSmods {
 	}
 
 	public static function fetchApi(string $url, string $vid): ?string {
-		if (self::$circuit_broken) {
+		if ($url === '' || self::$circuit_broken) {
 			return null;
 		}
 
@@ -379,42 +392,49 @@ class FreshRSS_FreshRSSmods {
 		$bytes = 0;
 
 		if (function_exists('curl_init')) {
-			if (self::$apiCurl === null || (!is_resource(self::$apiCurl) && !(self::$apiCurl instanceof \CurlHandle))) {
-				self::$apiCurl = curl_init();
-				curl_setopt_array(self::$apiCurl, [
-					CURLOPT_RETURNTRANSFER => true,
-					CURLOPT_CONNECTTIMEOUT => 2,
-					CURLOPT_TIMEOUT => 4,
-					CURLOPT_FOLLOWLOCATION => true,
-					CURLOPT_MAXREDIRS => 2,
-					CURLOPT_SSL_VERIFYPEER => true,
-					CURLOPT_SSL_VERIFYHOST => 2,
-					CURLOPT_USERAGENT => 'FreshRSS/YouTubeFetcher',
-					CURLOPT_HTTP_VERSION => defined('CURL_HTTP_VERSION_2TLS')
-						? CURL_HTTP_VERSION_2TLS
-						: (defined('CURL_HTTP_VERSION_2_0') ? CURL_HTTP_VERSION_2_0 : 0),
-					CURLOPT_TCP_KEEPALIVE => 1,
-					CURLOPT_TCP_KEEPIDLE => 60,
-					CURLOPT_TCP_KEEPINTVL => 30,
-					CURLOPT_IPRESOLVE => defined('CURL_IPRESOLVE_V4') ? CURL_IPRESOLVE_V4 : 1,
-				]);
+			if (!(self::$apiCurl instanceof \CurlHandle)) {
+				$ch = curl_init();
+				if ($ch !== false) {
+					curl_setopt_array($ch, [
+						CURLOPT_RETURNTRANSFER => true,
+						CURLOPT_CONNECTTIMEOUT => 2,
+						CURLOPT_TIMEOUT => 4,
+						CURLOPT_FOLLOWLOCATION => true,
+						CURLOPT_MAXREDIRS => 2,
+						CURLOPT_SSL_VERIFYPEER => true,
+						CURLOPT_SSL_VERIFYHOST => 2,
+						CURLOPT_USERAGENT => 'FreshRSS/YouTubeFetcher',
+						CURLOPT_HTTP_VERSION => defined('CURL_HTTP_VERSION_2TLS')
+							? CURL_HTTP_VERSION_2TLS
+							: (defined('CURL_HTTP_VERSION_2_0') ? CURL_HTTP_VERSION_2_0 : 0),
+						CURLOPT_TCP_KEEPALIVE => 1,
+						CURLOPT_TCP_KEEPIDLE => 60,
+						CURLOPT_TCP_KEEPINTVL => 30,
+						CURLOPT_IPRESOLVE => defined('CURL_IPRESOLVE_V4') ? CURL_IPRESOLVE_V4 : 1,
+					]);
+					self::$apiCurl = $ch;
+				}
 			}
 			$ch = self::$apiCurl;
-			curl_setopt($ch, CURLOPT_URL, $url);
-			$result = curl_exec($ch);
-			$httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			if ($ch instanceof \CurlHandle) {
+				curl_setopt($ch, CURLOPT_URL, $url);
+				$result = curl_exec($ch);
+				$httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-			if ($result !== false && $httpCode === 200) {
-				$response = (string)$result;
-				$status = 'OK';
-				$bytes = strlen($response);
-			} elseif ($httpCode === 403 || $httpCode === 429) {
-				self::$circuit_broken = true;
-				$status = 'FORBIDDEN_' . $httpCode;
-			} elseif ($result === false) {
-				$status = 'CURL_ERROR';
+				if ($result !== false && $httpCode === 200) {
+					$response = (string)$result;
+					$status = 'OK';
+					$bytes = strlen($response);
+				} elseif ($httpCode === 403 || $httpCode === 429) {
+					self::$circuit_broken = true;
+					$status = 'FORBIDDEN_' . $httpCode;
+				} elseif ($result === false) {
+					$status = 'CURL_ERROR';
+				} else {
+					$status = 'HTTP_' . $httpCode;
+				}
 			} else {
-				$status = 'HTTP_' . $httpCode;
+				$status = 'CURL_ERROR';
 			}
 		} else {
 			$context = stream_context_create([
@@ -465,7 +485,7 @@ class FreshRSS_FreshRSSmods {
 
 		self::initCache();
 
-		if (!empty(self::$cache[$vid]['thumbnail']) && is_string(self::$cache[$vid]['thumbnail'])) {
+		if (isset(self::$cache[$vid]) && is_array(self::$cache[$vid]) && !empty(self::$cache[$vid]['thumbnail']) && is_string(self::$cache[$vid]['thumbnail'])) {
 			return self::$cache[$vid]['thumbnail'];
 		}
 
@@ -473,33 +493,38 @@ class FreshRSS_FreshRSSmods {
 		$variant = 'mqdefault';
 
 		if (function_exists('curl_init')) {
-			if (self::$thumbCurl === null || (!is_resource(self::$thumbCurl) && !(self::$thumbCurl instanceof \CurlHandle))) {
-				self::$thumbCurl = curl_init();
-				curl_setopt_array(self::$thumbCurl, [
-					CURLOPT_NOBODY => true,
-					CURLOPT_RETURNTRANSFER => true,
-					CURLOPT_CONNECTTIMEOUT => 1,
-					CURLOPT_TIMEOUT => 2,
-					CURLOPT_FOLLOWLOCATION => true,
-					CURLOPT_MAXREDIRS => 2,
-					CURLOPT_USERAGENT => 'FreshRSS/ThumbCheck',
-					CURLOPT_HTTP_VERSION => defined('CURL_HTTP_VERSION_2TLS')
-						? CURL_HTTP_VERSION_2TLS
-						: (defined('CURL_HTTP_VERSION_2_0') ? CURL_HTTP_VERSION_2_0 : 0),
-					CURLOPT_TCP_KEEPALIVE => 1,
-					CURLOPT_TCP_KEEPIDLE => 60,
-					CURLOPT_TCP_KEEPINTVL => 30,
-					CURLOPT_IPRESOLVE => defined('CURL_IPRESOLVE_V4') ? CURL_IPRESOLVE_V4 : 1,
-				]);
+			if (!(self::$thumbCurl instanceof \CurlHandle)) {
+				$ch = curl_init();
+				if ($ch !== false) {
+					curl_setopt_array($ch, [
+						CURLOPT_NOBODY => true,
+						CURLOPT_RETURNTRANSFER => true,
+						CURLOPT_CONNECTTIMEOUT => 1,
+						CURLOPT_TIMEOUT => 2,
+						CURLOPT_FOLLOWLOCATION => true,
+						CURLOPT_MAXREDIRS => 2,
+						CURLOPT_USERAGENT => 'FreshRSS/ThumbCheck',
+						CURLOPT_HTTP_VERSION => defined('CURL_HTTP_VERSION_2TLS')
+							? CURL_HTTP_VERSION_2TLS
+							: (defined('CURL_HTTP_VERSION_2_0') ? CURL_HTTP_VERSION_2_0 : 0),
+						CURLOPT_TCP_KEEPALIVE => 1,
+						CURLOPT_TCP_KEEPIDLE => 60,
+						CURLOPT_TCP_KEEPINTVL => 30,
+						CURLOPT_IPRESOLVE => defined('CURL_IPRESOLVE_V4') ? CURL_IPRESOLVE_V4 : 1,
+					]);
+					self::$thumbCurl = $ch;
+				}
 			}
 			$ch = self::$thumbCurl;
-			curl_setopt($ch, CURLOPT_URL, $hq720);
-			curl_exec($ch);
-			$httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-			$contentLength = (int)curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+			if ($ch instanceof \CurlHandle) {
+				curl_setopt($ch, CURLOPT_URL, $hq720);
+				curl_exec($ch);
+				$httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+				$contentLength = (int)curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
 
-			if ($httpCode === 200 && ($contentLength > 2000 || $contentLength === -1)) {
-				$variant = 'hq720';
+				if ($httpCode === 200 && ($contentLength > 2000 || $contentLength === -1)) {
+					$variant = 'hq720';
+				}
 			}
 		} else {
 			$context = stream_context_create([
@@ -630,7 +655,7 @@ class FreshRSS_FreshRSSmods {
 
 		if ($has_details) {
 			$item = self::$cache[$vid];
-			$age = $now - (int)($item['timestamp'] ?? 0);
+			$age = $now - self::toInt($item['timestamp'] ?? 0);
 
 			$cached_dur = $item['duration'] ?? null;
 			$is_not_found = ($cached_dur === false);
@@ -698,7 +723,7 @@ class FreshRSS_FreshRSSmods {
 	/**
 	 * Format cached video metadata into standard return array.
 	 *
-	 * @param array<string,mixed> $item
+	 * @param array<mixed,mixed> $item
 	 * @param int $now
 	 * @return array{duration:string,is_live:bool,premiere:bool,not_found:bool,scheduled_start:string|false,upcoming:bool}
 	 */
@@ -743,12 +768,12 @@ class FreshRSS_FreshRSSmods {
 	/**
 	 * Parse a single YouTube API video item and update in-memory cache row.
 	 *
-	 * @param array<string,mixed> $videoItem
+	 * @param array<mixed,mixed> $videoItem
 	 * @param int $now
 	 * @return array<string,mixed> Cache row
 	 */
 	public static function parseVideoItem(array $videoItem, int $now): array {
-		$vid = (string)($videoItem['id'] ?? '');
+		$vid = self::toStr($videoItem['id'] ?? '');
 		$content = (array)($videoItem['contentDetails'] ?? []);
 		$snippet = (array)($videoItem['snippet'] ?? []);
 		$liveDetails = (array)($videoItem['liveStreamingDetails'] ?? []);
@@ -767,7 +792,7 @@ class FreshRSS_FreshRSSmods {
 			$cacheRow['premiere'] = true;
 		} else {
 			try {
-				$interval = new DateInterval((string)$content['duration']);
+				$interval = new DateInterval(self::toStr($content['duration']));
 				$days = ($interval->y * 365) + ($interval->m * 30) + $interval->d;
 				$hours = $interval->h + ($days * 24);
 				$duration = $hours > 0
@@ -789,13 +814,13 @@ class FreshRSS_FreshRSSmods {
 		if ($is_live || $is_premiere) {
 			$sched_start = false;
 			if (!empty($liveDetails['scheduledStartTime']) && !isset($liveDetails['actualStartTime'])) {
-				$sched_start = (string)$liveDetails['scheduledStartTime'];
+				$sched_start = self::toStr($liveDetails['scheduledStartTime']);
 			} elseif (!empty($cacheRow['scheduledStartTime']) && !isset($liveDetails['actualStartTime']) && empty($cacheRow['actualStartTime'])) {
 				$sched_start = $cacheRow['scheduledStartTime'];
 			}
 
 			if (!empty($liveDetails['actualStartTime'])) {
-				$cacheRow['actualStartTime'] = (string)$liveDetails['actualStartTime'];
+				$cacheRow['actualStartTime'] = self::toStr($liveDetails['actualStartTime']);
 				$is_upcoming = false;
 			} elseif (!empty($cacheRow['actualStartTime'])) {
 				$is_upcoming = false;
@@ -893,8 +918,16 @@ class FreshRSS_FreshRSSmods {
 			$data = json_decode($response, true);
 			unset($response);
 
-			if (!is_array($data) || isset($data['error'])) {
-				$errCode = (int)($data['error']['code'] ?? 0);
+			$errCode = 0;
+			$isApiError = !is_array($data);
+			if (!$isApiError && isset($data['error'])) {
+				$isApiError = true;
+				if (is_array($data['error'])) {
+					$errCode = self::toInt($data['error']['code'] ?? 0);
+				}
+			}
+
+			if ($isApiError) {
 				if ($errCode === 403 || $errCode === 429) {
 					self::$circuit_broken = true;
 				}
@@ -915,7 +948,7 @@ class FreshRSS_FreshRSSmods {
 					if (!is_array($videoItem) || empty($videoItem['id'])) {
 						continue;
 					}
-					$vid = (string)$videoItem['id'];
+					$vid = self::toStr($videoItem['id']);
 					$returnedVids[$vid] = true;
 					self::$cache[$vid] = self::parseVideoItem($videoItem, $now);
 				}
@@ -936,7 +969,7 @@ class FreshRSS_FreshRSSmods {
 			self::$cache_changed = true;
 		}
 
-		if (count(self::$cache) > self::getCacheMaxItems()) {
+		if (is_array(self::$cache) && count(self::$cache) > self::getCacheMaxItems()) {
 			self::pruneCache();
 		}
 	}
