@@ -23,7 +23,7 @@ class FreshRSS_FreshRSSmods {
 	private static ?\CurlHandle $apiCurl = null;
 	private static ?\CurlHandle $thumbCurl = null;
 
-	public const ZERO_DURATIONS = ['0:00', '00:00', '0:0'];
+	public const array ZERO_DURATIONS = ['0:00', '00:00', '0:0'];
 
 	// Mod configuration loaded exclusively from config-mods.php
 	/** @var array<string, mixed>|null */
@@ -223,14 +223,8 @@ class FreshRSS_FreshRSSmods {
 	}
 
 	public static function closeCurlHandles(): void {
-		if (self::$apiCurl instanceof \CurlHandle) {
-			@curl_close(self::$apiCurl);
-			self::$apiCurl = null;
-		}
-		if (self::$thumbCurl instanceof \CurlHandle) {
-			@curl_close(self::$thumbCurl);
-			self::$thumbCurl = null;
-		}
+		self::$apiCurl = null;
+		self::$thumbCurl = null;
 	}
 
 	private static function toInt(mixed $val, int $default = 0): int {
@@ -446,9 +440,7 @@ class FreshRSS_FreshRSSmods {
 			]);
 			$result = @file_get_contents($url, false, $context);
 			$httpCode = 0;
-			$headers = function_exists('http_get_last_response_headers')
-				? http_get_last_response_headers()
-				: ($http_response_header ?? $GLOBALS['http_response_header'] ?? null);
+			$headers = http_get_last_response_headers();
 			if (is_array($headers)) {
 				foreach ($headers as $header) {
 					if (preg_match('#^HTTP/\S+\s+(\d{3})#i', $header, $hm)) {
