@@ -364,6 +364,10 @@ class FreshRSS_FreshRSSmods {
 		}
 
 		$logFile = self::getLogFile();
+		$logDir = dirname($logFile);
+		if (!is_dir($logDir)) {
+			@mkdir($logDir, 0777, true);
+		}
 		$maxLogSize = self::getMaxLogSize();
 
 		clearstatcache(true, $logFile);
@@ -569,7 +573,7 @@ class FreshRSS_FreshRSSmods {
 		$targetUrl = $url;
 
 		// YouTube thumbnail replacement (upgrades to hq720 variant if available, cached in youtube.json)
-		if ($isYtMod && (str_contains($url, 'ytimg.com') || str_contains($url, 'img.youtube.com')) && preg_match('#^https?://(?:(i\d*)\.ytimg\.com|img\.youtube\.com)/vi/([a-zA-Z0-9_-]{11})/(?:hqdefault|maxresdefault|sddefault|mqdefault|default|0)\.(?:jpg|webp)(?:\?.*)?$#i', $url, $m)) {
+		if ($isYtMod && (str_contains($url, 'ytimg.com') || str_contains($url, 'img.youtube.com')) && preg_match('#^https?://(?:(i\d*)\.ytimg\.com|img\.youtube\.com)/vi(?:_webp)?/([a-zA-Z0-9_-]{11})/(?:hqdefault|maxresdefault|sddefault|mqdefault|default|0)\.(?:jpg|webp)(?:\?.*)?$#i', $url, $m)) {
 			$cdn = (!empty($m[1])) ? $m[1] : 'i';
 			$vid = $m[2];
 			$variant = self::getThumbnailVariant($vid, $cdn);
@@ -600,13 +604,13 @@ class FreshRSS_FreshRSSmods {
 		if (!str_contains($link, 'youtu') && !str_contains($link, 'yt:') && !str_contains($link, 'ytimg')) {
 			return (strlen($link) === 11 && preg_match('/^[a-zA-Z0-9_-]{11}$/', $link)) ? $link : null;
 		}
-		if (preg_match('/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?(?:.*&)?v=))([a-zA-Z0-9_-]{11})/i', $link, $m)) {
+		if (preg_match('/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?(?:.*(?:&|&amp;))?v=))([a-zA-Z0-9_-]{11})/i', $link, $m)) {
 			return $m[1];
 		}
 		if (preg_match('/(?:^|:)yt:video:([a-zA-Z0-9_-]{11})/i', $link, $m)) {
 			return $m[1];
 		}
-		if (preg_match('/(?:ytimg\.com|img\.youtube\.com)\/vi\/([a-zA-Z0-9_-]{11})/i', $link, $m)) {
+		if (preg_match('/(?:ytimg\.com|img\.youtube\.com)\/vi(?:_webp)?\/([a-zA-Z0-9_-]{11})/i', $link, $m)) {
 			return $m[1];
 		}
 		return null;
