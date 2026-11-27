@@ -165,20 +165,20 @@ class FreshRSS_FreshRSSmods {
 	}
 
 	public static function getCacheFile(): string {
-		if (defined('CACHE_PATH') && is_string(CACHE_PATH) && CACHE_PATH !== '') {
+		if (defined('CACHE_PATH')) {
 			return CACHE_PATH . '/youtube.json';
 		}
-		if (defined('DATA_PATH') && is_string(DATA_PATH) && DATA_PATH !== '') {
+		if (defined('DATA_PATH')) {
 			return DATA_PATH . '/cache/youtube.json';
 		}
 		return dirname(__DIR__, 2) . '/data/cache/youtube.json';
 	}
 
 	public static function getLogFile(): string {
-		if (defined('CACHE_PATH') && is_string(CACHE_PATH) && CACHE_PATH !== '') {
+		if (defined('CACHE_PATH')) {
 			return CACHE_PATH . '/youtube_api.log';
 		}
-		if (defined('DATA_PATH') && is_string(DATA_PATH) && DATA_PATH !== '') {
+		if (defined('DATA_PATH')) {
 			return DATA_PATH . '/cache/youtube_api.log';
 		}
 		return dirname(__DIR__, 2) . '/data/cache/youtube_api.log';
@@ -402,13 +402,11 @@ class FreshRSS_FreshRSSmods {
 						CURLOPT_SSL_VERIFYPEER => true,
 						CURLOPT_SSL_VERIFYHOST => 2,
 						CURLOPT_USERAGENT => 'FreshRSS/YouTubeFetcher',
-						CURLOPT_HTTP_VERSION => defined('CURL_HTTP_VERSION_2TLS')
-							? CURL_HTTP_VERSION_2TLS
-							: (defined('CURL_HTTP_VERSION_2_0') ? CURL_HTTP_VERSION_2_0 : 0),
+						CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2TLS,
 						CURLOPT_TCP_KEEPALIVE => 1,
 						CURLOPT_TCP_KEEPIDLE => 60,
 						CURLOPT_TCP_KEEPINTVL => 30,
-						CURLOPT_IPRESOLVE => defined('CURL_IPRESOLVE_V4') ? CURL_IPRESOLVE_V4 : 1,
+						CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
 					]);
 					self::$apiCurl = $ch;
 				}
@@ -500,13 +498,11 @@ class FreshRSS_FreshRSSmods {
 						CURLOPT_FOLLOWLOCATION => true,
 						CURLOPT_MAXREDIRS => 2,
 						CURLOPT_USERAGENT => 'FreshRSS/ThumbCheck',
-						CURLOPT_HTTP_VERSION => defined('CURL_HTTP_VERSION_2TLS')
-							? CURL_HTTP_VERSION_2TLS
-							: (defined('CURL_HTTP_VERSION_2_0') ? CURL_HTTP_VERSION_2_0 : 0),
+						CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2TLS,
 						CURLOPT_TCP_KEEPALIVE => 1,
 						CURLOPT_TCP_KEEPIDLE => 60,
 						CURLOPT_TCP_KEEPINTVL => 30,
-						CURLOPT_IPRESOLVE => defined('CURL_IPRESOLVE_V4') ? CURL_IPRESOLVE_V4 : 1,
+						CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
 					]);
 					self::$thumbCurl = $ch;
 				}
@@ -680,18 +676,16 @@ class FreshRSS_FreshRSSmods {
 		if (class_exists('FreshRSS_Factory', false)) {
 			try {
 				$entryDAO = FreshRSS_Factory::createEntryDao();
-				if (method_exists($entryDAO, 'listWhere')) {
-					foreach ($entryDAO->listWhere('a', 0, limit: 50) as $recentEntry) {
-						if ($recentEntry instanceof FreshRSS_Entry) {
-							$cand = self::extractVideoId($recentEntry->link()) ?? self::extractVideoId($recentEntry->guid());
-							if ($cand !== null) {
-								$candItem = self::$cache[$cand] ?? null;
-								$hasCandDetails = is_array($candItem) && (array_key_exists('duration', $candItem) || !empty($candItem['premiere']) || !empty($candItem['api_error']));
-								if (!$hasCandDetails) {
-									$candidates[] = $cand;
-									if (count($candidates) >= 50) {
-										break;
-									}
+				foreach ($entryDAO->listWhere('a', 0, limit: 50) as $recentEntry) {
+					if ($recentEntry instanceof FreshRSS_Entry) {
+						$cand = self::extractVideoId($recentEntry->link()) ?? self::extractVideoId($recentEntry->guid());
+						if ($cand !== null) {
+							$candItem = self::$cache[$cand] ?? null;
+							$hasCandDetails = is_array($candItem) && (array_key_exists('duration', $candItem) || !empty($candItem['premiere']) || !empty($candItem['api_error']));
+							if (!$hasCandDetails) {
+								$candidates[] = $cand;
+								if (count($candidates) >= 50) {
+									break;
 								}
 							}
 						}
@@ -984,13 +978,11 @@ class FreshRSS_FreshRSSmods {
 		$vids = [];
 		try {
 			$entryDAO = FreshRSS_Factory::createEntryDao();
-			if (method_exists($entryDAO, 'listWhere')) {
-				foreach ($entryDAO->listWhere('a', 0, limit: $limit) as $entry) {
-					if ($entry instanceof FreshRSS_Entry) {
-						$vid = self::extractVideoId($entry->link()) ?? self::extractVideoId($entry->guid());
-						if ($vid !== null) {
-							$vids[] = $vid;
-						}
+			foreach ($entryDAO->listWhere('a', 0, limit: $limit) as $entry) {
+				if ($entry instanceof FreshRSS_Entry) {
+					$vid = self::extractVideoId($entry->link()) ?? self::extractVideoId($entry->guid());
+					if ($vid !== null) {
+						$vids[] = $vid;
 					}
 				}
 			}
@@ -1183,7 +1175,7 @@ class FreshRSS_FreshRSSmods {
 			return self::$watchTime;
 		}
 
-		if (class_exists('FreshRSS_Context', false) && isset(FreshRSS_Context::$total_unread) && FreshRSS_Context::$total_unread <= 0) {
+		if (class_exists('FreshRSS_Context', false) && FreshRSS_Context::$total_unread <= 0) {
 			self::$watchTime = '';
 			return '';
 		}
@@ -1195,24 +1187,19 @@ class FreshRSS_FreshRSSmods {
 
 		self::initCache();
 
-		$totalUnread = (class_exists('FreshRSS_Context', false) && isset(FreshRSS_Context::$total_unread)) ? (int)FreshRSS_Context::$total_unread : 1000;
+		$totalUnread = class_exists('FreshRSS_Context', false) ? FreshRSS_Context::$total_unread : 1000;
 		$maxLimit = self::getWatchTimeLimit();
 		$limit = min($maxLimit, max(1, $totalUnread));
 
 		$vids = [];
 		try {
 			$entryDAO = FreshRSS_Factory::createEntryDao();
-			if (method_exists($entryDAO, 'listWhere')) {
-				$stateNotRead = class_exists('FreshRSS_Entry', false) && defined('FreshRSS_Entry::STATE_NOT_READ')
-					? FreshRSS_Entry::STATE_NOT_READ
-					: 2;
-
-				foreach ($entryDAO->listWhere('a', 0, state: $stateNotRead, limit: $limit) as $entry) {
-					if ($entry instanceof FreshRSS_Entry) {
-						$vid = self::extractVideoId($entry->link()) ?? self::extractVideoId($entry->guid());
-						if ($vid !== null) {
-							$vids[$vid] = true;
-						}
+			$stateNotRead = class_exists('FreshRSS_Entry', false) ? FreshRSS_Entry::STATE_NOT_READ : 2;
+			foreach ($entryDAO->listWhere('a', 0, state: $stateNotRead, limit: $limit) as $entry) {
+				if ($entry instanceof FreshRSS_Entry) {
+					$vid = self::extractVideoId($entry->link()) ?? self::extractVideoId($entry->guid());
+					if ($vid !== null) {
+						$vids[$vid] = true;
 					}
 				}
 			}
@@ -1255,15 +1242,10 @@ class FreshRSS_FreshRSSmods {
 			self::$entryLabels = [];
 			if (class_exists('FreshRSS_Context', false) && class_exists('FreshRSS_Factory', false)) {
 				try {
-					$labels = method_exists('FreshRSS_Context', 'labels') ? FreshRSS_Context::labels() : [];
-					if (!empty($labels) && method_exists('FreshRSS_Factory', 'createTagDao')) {
+					$labels = FreshRSS_Context::labels();
+					if (!empty($labels)) {
 						$tagDao = FreshRSS_Factory::createTagDao();
-						if (is_object($tagDao) && method_exists($tagDao, 'getEntryIdsTagNames')) {
-							$loaded = $tagDao->getEntryIdsTagNames([]);
-							if (is_array($loaded)) {
-								self::$entryLabels = $loaded;
-							}
-						}
+						self::$entryLabels = $tagDao->getEntryIdsTagNames([]);
 					}
 				} catch (\Throwable) {
 					self::$entryLabels = [];
